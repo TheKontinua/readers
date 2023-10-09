@@ -16,7 +16,7 @@ written in Python using the Django web framework.
 We will be using PostgreSQL as the backend database.
 
 The questions and answers will be stored as LaTeX segments. The complete quiz will
-need to be typeset using TeX.
+need to be typeset using TeX. Preview will be done with MathJAX or KaTeX.
 
 We will deploy the system on Google Cloud Services.
 
@@ -35,7 +35,7 @@ Things a Newbie needs to be able to do:
 - Change password
 - Request endorsements from existing mentors
 
-Things a mentor needs to be able to do:
+Things a Mentor needs to be able to do:
 
 - Everything a Newbie can do
 - Download a PDF of a quiz for a particular chapter in a particular language
@@ -46,16 +46,16 @@ Things a mentor needs to be able to do:
 - Give feedback on a chapter
 - See mentor feedback
 
-Things a quizmaker needs to be able to do:
+Things a QuizMaker needs to be able to do:
 
-- Everything a mentor can do
+- Everything a Mentor can do
 - Browse submitted questions, edit them, and approve them
 - Assemble approved questions into a quiz
 - Make previously approved questions not visible
 
-Things an admin needs to be able to do:
+Things an Admin needs to be able to do:
 
-- Everything a quizmaker can do
+- Everything a Quizmaker can do
 - See a list of Newbies waiting to be Mentors (with any endorsements)
 - Promote, demote, or disable a user
 - Delete quizzes
@@ -91,8 +91,9 @@ Things an admin needs to be able to do:
 - Pending authentications? List of people who requested your authentication
 - Request for question translation? List of questions to be translated
 - Request for quiz feedback?
-- Admin? List of questions needing approval (just admin's languages)
-- Admin? List of new feedback on quizzes
+- Quizmaker? List of questions needing approval (just admin's languages)
+- Quizmaker? List of new feedback on quizzes
+- Admin? Notification of new Newbies 
 
 #### Main page
 
