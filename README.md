@@ -18,15 +18,15 @@ We will be using PostgreSQL as the backend database.
 The questions and answers will be stored as LaTeX segments. The complete quiz will
 need to be typeset using TeX. Preview will be done with MathJAX or KaTeX.
 
-We will deploy the system on Google Cloud Services.
+We will deploy the system on Amazon Services.
 
 ## Requirements
 
 There are four kinds of users:
 
+- Newbie: new users who have not been promoted to a mentor
 - Mentor: those who proctor and grade the quizzes
 - QuizMaker: those who assemble the quizzes
-- Newbie: new users who have not been promoted to a mentor
 - Admin: those who can promote and disable other users
 
 Things a Newbie needs to be able to do:
@@ -39,10 +39,9 @@ Things a Mentor needs to be able to do:
 
 - Everything a Newbie can do
 - Download a PDF of a quiz for a particular chapter in a particular language
-- Suggest a question and an answer for a particular chapter in a particular language in LaTeX
+- Suggest a question/answer/rubric for a particular chapter in a particular language in LaTeX
 - Translate a question and answer from one language into another
-- Give feedback on a question
-- Give feedback on an entire quiz
+- Give feedback on a quiz
 - Give feedback on a chapter
 - See mentor feedback
 
@@ -50,7 +49,8 @@ Things a QuizMaker needs to be able to do:
 
 - Everything a Mentor can do
 - Browse submitted questions, edit them, and approve them
-- Assemble approved questions into a quiz
+- Create supports
+- Assemble approved questions/supports into a quiz
 - Make previously approved questions not visible
 
 Things an Admin needs to be able to do:
@@ -166,4 +166,4 @@ Things an Admin needs to be able to do:
 
 ## Entity-Relationship Diagram
 
-<img src="er.png" alt="Entity-Relationship Diagram" style="width:1080px;"/>
+<img src="docs/Database/er.png" alt="Entity-Relationship Diagram" style="width:1080px;"/>
