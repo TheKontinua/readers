@@ -7,36 +7,53 @@
 \usepackage{mdframed}
 \usepackage{graphicx}
 
-
-\newcommand{\examnum}{Kontinua 26 (3/5)}
-\newcommand{\content}{The Physics of Gases}
-\newcommand{\quizid}{8A23B1CC5}
-\newcommand{\timelimit}{25 minutes}
-\renewcommand{\labelenumi}{\alph{enumi})}
-
 \pagestyle{headandfoot}
 \firstpageheader{}{}{}
-\firstpagefooter{}{\thepage\ of \numpages}{\quizid}
-\runningfooter{\examnum}{\thepage\ of \numpages}{\quizid}
+\firstpagefooter{}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}
+\runningfooter{\fontfamily{phv}\selectfont Kontinua 26 (3/5)}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}
+
 
 \begin{document}
+
+{\fontfamily{phv}\selectfont
 \noindent \parbox{0.65\textwidth}{
-\textbf{Name}:\ \hrulefill \\
+Name:\ \hrulefill \\
 
 \vspace{0.2cm}
 
-\textbf{Date}:\ \hrulefill
+Date:\ \hrulefill
 
 \vspace{1.0cm}
 
-\noindent \Large \textbf{\examnum :}
 
-\Large \textbf{\content}
+
+\textbf{Kontinua 26 (3/5)}
+
+\Large \textbf{The Physics of Gases}
 
 } 
 \parbox{0.35\textwidth}{
-\begin{flushright}\gradetable[v][questions]
 
+\begin{flushright}
+\bgroup
+\def\arraystretch{1.8}
+\begin{tabular}{c|c|c}
+\hline
+Question & Points & Score \\
+\hline
+1 &  3  & \\
+\hline
+2 & 4 & \\
+\hline
+3 & 4 & \\
+\hline
+4 & 6 & \\
+\hline
+\hline
+Total & 17 & \\ 
+\hline
+\end{tabular}
+\egroup
 \medskip
 
 Duration: 25 minutes
@@ -45,6 +62,7 @@ Calculator allowed
 
 \end{flushright}
 }
+} %Ends helvetica
 
 \begin{mdframed}[frametitle={Ideal Gas Law}]
 
@@ -52,11 +70,11 @@ $$PV = nRT$$
 
 where:
 \begin{itemize}
-\item[] $P$ is the pressure in pascals
-\item[] $V$ is the volume in cubic meters
-\item[] $n$ is the number of molecules in moles
-\item[] $R$ is the molar gas constant: 8.31446
-\item[] $T$ is the temperature in Kelvin
+\item[] $P =$ pressure in pascals
+\item[] $V =$ volume in cubic meters
+\item[] $n =$ number of molecules in moles
+\item[] $R =$ the molar gas constant: 8.31446
+\item[] $T =$ temperature in Kelvin
 \end{itemize}
 \end{mdframed}
 
@@ -67,9 +85,10 @@ $$\mu=E(x)=np$$
 $$\sigma^2_x=np(1-p)$$
 \end{mdframed}
 
+\begin{enumerate}
+
 \clearpage
-\begin{questions}
-\question [3] In a particular game, a fair die is tossed.  If the number of spots showing is either 4 or 5 you win \$1, if the number of spots showing is 6 you win \$4, and if the number of spots showing is 1, 2, or 3 you win nothing.  Let X be the amount that you win. 
+\item (3 points) In a particular game, a fair die is tossed.  If the number of spots showing is either 4 or 5 you win \$1, if the number of spots showing is 6 you win \$4, and if the number of spots showing is 1, 2, or 3 you win nothing.  Let X be the amount that you win. 
 What is the expected value of X?
 
 \vspace{0.2cm}
@@ -77,12 +96,9 @@ What is the expected value of X?
 \includegraphics[width=2cm]{dice_simple.png}
 \end{center}
 
-
 \vspace{2.7in}
 
-
-\question[4]
- The weight of written reports produced in a certain department has a Normal distribution with mean 60 g and standard deviation 12 g. The probability that the next report will weigh less than 45 g is
+\item (4 points) The weight of written reports produced in a certain department has a Normal distribution with mean 60 g and standard deviation 12 g. The probability that the next report will weigh less than 45 g is
 
 \begin{enumerate}
 \item 0.1056
@@ -93,24 +109,32 @@ What is the expected value of X?
 
 
 \clearpage
-\question [4] Complete these equations: (2 points per equation)
+\item (4 points) Complete these equations: (2 points per equation)
 
+\begin{enumerate}
+\item (2 points) 
 \begin{equation*}
 \frac{2}{5} + \frac{3}{7} = 
 \end{equation*}
 
+\vspace{7cm}
 
+\item (2 points)
 \begin{equation*}
 \frac{2}{5} + \frac{3}{7} = 
 \end{equation*}
+
+\end{enumerate}
 
 \clearpage
-\question A reservation service employs five information operators who receive requests for information independently of one another, each according to a Poisson process with rate $\mu=2$ per minute.
-\begin{parts}
-\part[3] What is the probability that during a given 1-min period, the first operator receives no requests?
+\item A reservation service employs five information operators who receive requests for information independently of one another, each according to a Poisson process with rate $\mu=2$ per minute.
+\begin{enumerate}
+\item (3 points) What is the probability that during a given 1-min period, the first operator receives no requests?
 
-\part[3] What is the probability that during a given 1-min period, exactly four of the five operators receive no requests?(\textit{Hint}: treat either as a binomial process of 5 trials with 4 successes or consider 5 combinations of Poisson processes, e.g. only 1st operation receives a request  or only 2nd operation receives a request and so on)
-\end{parts}
+\vspace{6cm}
 
-\end{questions}
+\item (3 points) What is the probability that during a given 1-min period, exactly four of the five operators receive no requests?(\textit{Hint}: treat either as a binomial process of 5 trials with 4 successes or consider 5 combinations of Poisson processes, e.g. only 1st operation receives a request  or only 2nd operation receives a request and so on)
+\end{enumerate}
+
+\end{enumerate}
 \end{document}
