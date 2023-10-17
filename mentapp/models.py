@@ -73,5 +73,14 @@ class Quiz_Feedback(models.Model):
     dialect_code = models.CharField(max_length=5)
     feedback = models.TextField()
 
-
+class User(models.Model):
+    password_hash = models.CharField(max_length=100)
+    display_name = models.CharField(max_length=50)
+    country_code = models.CharField(max_length=3)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longetude = models.DecimalField(max_digits=9, decimal_places=6)
+    is_verified = models.BooleanField()
+    is_admin = models.BooleanField()
+    is_quizmaker = models.BooleanField()
+    is_active = models.BooleanField()
     
