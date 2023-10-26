@@ -55,7 +55,7 @@ ROOT_URLCONF = 'mentoris.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['mentoris/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
