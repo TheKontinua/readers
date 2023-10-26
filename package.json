@@ -3,5 +3,8 @@
     "add": "^2.0.6",
     "eslint": "^8.7.0",
     "prettier": "^2.8.8"
+  },
+  "dependencies": {
+    "bootstrap-select": "^1.13.18"
   }
 }
