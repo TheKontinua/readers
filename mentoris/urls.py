@@ -26,7 +26,7 @@ urlpatterns = [
     re_path(r".*/footer.html/", views.footer, name="footer"),
     path("", views.default, name="default"),
     path("admin/", admin.site.urls),
-        path("fetch_attachments/question/<int:question_id>/", views.fetch_attachments_question, name="fetch_attachments_question"),
+    path("fetch_attachments/question/<int:question_id>/", views.fetch_attachments_question, name="fetch_attachments_question"),
     path("fetch_attachments/support/<int:support_id>/", views.fetch_attachments_support, name="fetch_attachment_support"),
     path("fetch_attachments_inputs/support/<int:support_id>/", views.fetch_attachments_inputs_support, name="fetch_attachments_inputs_support"),
     path("fetch_attachments_inputs/question/<int:question_id>/<str:part>/", views.fetch_attachments_inputs_question, name="fetch_attachments_inputs_question"),
