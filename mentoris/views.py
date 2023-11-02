@@ -78,6 +78,50 @@ def login(request):
         return render(request, "mentapp/login.html")
 
 
+def main(request, volume_id=1):
+    template = loader.get_template("mentapp/main.html")
+
+    volumes = (
+        Volume.objects.values_list("volume_id", flat=True)
+        .distinct()
+        .order_by("volume_id")
+    )
+
+    if volume_id:
+        chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
+    else:
+        chapters = []
+
+    chapter_locs = Chapter_Loc.objects.filter(
+        chapter__chapter_id__in=chapters
+    ).distinct()
+
+    context = {
+        "volumes": volumes,
+        "chapters": chapters,
+        "volume_id": volume_id,
+        "chapter_locs": chapter_locs,
+    }
+
+    return HttpResponse(template.render(context, request))
+
+
+def chapter(request, volume_id, chapter_id):
+    volume_id = get_object_or_404(Volume, volume_id=volume_id)
+    chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
+    try:
+        chapter_loc = Chapter_Loc.objects.get(chapter=chapter_id)
+        title = chapter_loc.title
+    except Chapter_Loc.DoesNotExist:
+        title = None
+
+    return render(
+        request,
+        "mentapp/chapter.html",
+        {"volume": volume_id, "chapter": chapter_id, "title": title},
+    )
+
+
 def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
     try:
@@ -136,25 +180,3 @@ def request_translation(request, user_id):
         "notifications@kontinua.org",
         [email],
     )
-
-def main(request, volume_id = 1):
-    template = loader.get_template("mentapp/main.html")
-
-    volumes = Volume.objects.values_list('volume_id', flat=True).distinct().order_by('volume_id')
-
-    if volume_id:
-        chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()    
-    else:
-        chapters = []
-
-    chapter_locs = Chapter_Loc.objects.filter(chapter__chapter_id__in=chapters).distinct()
-   
-    context = {'volumes': volumes, "chapters": chapters, "volume_id": volume_id, "chapter_locs": chapter_locs}
-
-    return HttpResponse(template.render(context, request))
-
-
-
-
-
-
