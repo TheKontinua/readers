@@ -37,10 +37,17 @@ from django.contrib.auth.decorators import login_required
 from datetime import date
 from mentoris.latex_to_pdf import latex_to_pdf
 
+
 @login_required
 def latex(request):
-    if request.user.is_quizmaker == False and request.user.is_admin == False and request.user.is_verified == False:
-        return HttpResponseForbidden("Forbidden: Must be mentor or quizmaker to access add questions page.")
+    if (
+        request.user.is_quizmaker == False
+        and request.user.is_admin == False
+        and request.user.is_verified == False
+    ):
+        return HttpResponseForbidden(
+            "Forbidden: Must be mentor or quizmaker to access add questions page."
+        )
     volumes = (
         Volume.objects.values_list("volume_id", flat=True)
         .distinct()
@@ -77,7 +84,8 @@ def latex(request):
             question_object = Question()
             question_loc = Question_Loc()
 
-            # TODO: question_object.creator = CURRENT USER
+            question.creator = request.user
+            question_loc.creator = request.user
 
             chapter_object = request.POST.get("chapter")
             chapter_string = chapter_object.split("_")
@@ -95,7 +103,9 @@ def latex(request):
             question_loc.question_latex = question
             question_loc.answer_latex = answer
             question_loc.rubric_latex = grading
-            # TODO: question_loc.creator = CURRENT USER
+
+            question.creator = request.user
+            question_loc.creator = request.user
             question_loc.save()
 
             question_attachments = request.FILES.getlist("attachments")
@@ -333,9 +343,8 @@ def quiz(request, volume_id, chapter_id, quiz_id):
             feedback = Quiz_Feedback()
             feedback.quiz = quiz_id
             feedback.creator_id = quiz_id.creator_id
-            feedback.viewer_id = (
-                quiz_id.creator_id
-            )  # change this later when we can log in a user
+            feedback.viewer_id = request.user
+
             feedback.challenge_rating = int(request.POST.get("challenge_rating"))
             feedback.time_rating = int(request.POST.get("time_rating"))
             feedback.viewer_comment = request.POST.get("viewer_comment")
@@ -368,8 +377,9 @@ def quiz(request, volume_id, chapter_id, quiz_id):
                 email = Email.objects.get(user=review.viewer_id, is_primary=True)
                 reviews.append([email, review])
 
-            avg_rating = challenge_ratings / len(review_objects)
-            avg_time = time_ratings / len(review_objects)
+            if len(review_objects) > 1:
+                avg_rating = challenge_ratings / len(review_objects)
+                avg_time = time_ratings / len(review_objects)
         except:
             reviews = []
 
@@ -386,6 +396,7 @@ def quiz(request, volume_id, chapter_id, quiz_id):
         ) as error:
             pass
 
+        print(reviews)
         return render(
             request,
             "mentapp/quiz.html",
@@ -473,7 +484,7 @@ def question_approval(request):
             question.approved = True
             question_loc = Question_Loc.objects.get(question=question)
             question_loc.date_approved = date.today()
-            # populate question_loc approver later
+            question_loc.approver = request.user
             question_loc.save()
         question.save()
         return JsonResponse({"success": True})
@@ -681,6 +692,7 @@ def grab_quiz_questions_data_table(quiz_questions):
         question_values["ordering"] = quiz_question.ordering
 
     return questionTable
+
 
 @login_required
 def edit_quiz(request, quiz_id):
@@ -963,9 +975,7 @@ def user_edit(request, user_id):
 
     for key, value in request.POST.items():
         if key == "primary_email":
-            Email.objects.filter(user=user, is_primary=True).update(
-                email_address=value
-            )
+            Email.objects.filter(user=user, is_primary=True).update(email_address=value)
         if key == "other_emails":
             Email.objects.filter(user=user, is_primary=False).delete()
             insEmails = value.split(",")
