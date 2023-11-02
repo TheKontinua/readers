@@ -39,41 +39,58 @@ from mentoris.latex_to_pdf import latex_to_pdf
 
 from functools import wraps
 
+
 def mentor_req(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        #Checking that there is a logged in user else return to the login page
+        # Checking that there is a logged in user else return to the login page
         if not request.user.is_authenticated:
             return render(request, "mentapp/login.html")
-        #Checking that user is mentor (verified) or higher else returning an error
-        if not (request.user.is_quizmaker or request.user.is_admin or request.user.is_verified):
-            return HttpResponseForbidden("Forbidden: Must be mentor or quizmaker to access add questions page.")
+        # Checking that user is mentor (verified) or higher else returning an error
+        if not (
+            request.user.is_quizmaker
+            or request.user.is_admin
+            or request.user.is_verified
+        ):
+            return HttpResponseForbidden(
+                "Forbidden: Must be mentor or quizmaker to access add questions page."
+            )
         return view_func(request, *args, **kwargs)
+
     return _wrapped_view
+
 
 def quizmaker_req(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        #Checking that there is a logged in user else return to the login page
+        # Checking that there is a logged in user else return to the login page
         if not request.user.is_authenticated:
             return render(request, "mentapp/login.html")
-        #Checking user is quiz maker or higher else returning forbidden HTTP page.
+        # Checking user is quiz maker or higher else returning forbidden HTTP page.
         if not (request.user.is_quizmaker or request.user.is_admin):
-            return HttpResponseForbidden("Forbidden: Must be quizmaker or admin to access edit quiz.")
+            return HttpResponseForbidden(
+                "Forbidden: Must be quizmaker or admin to access edit quiz."
+            )
         return view_func(request, *args, **kwargs)
+
     return _wrapped_view
+
 
 def admin_req(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        #Checking that there is a logged in user else return to the login page
+        # Checking that there is a logged in user else return to the login page
         if not request.user.is_authenticated:
-            return redirect('admin:login')
-        #Must be admin!
+            return redirect("admin:login")
+        # Must be admin!
         if not request.user.is_admin:
-            return HttpResponseForbidden("Forbidden: Must be admin to access edit quiz.")
+            return HttpResponseForbidden(
+                "Forbidden: Must be admin to access edit quiz."
+            )
         return view_func(request, *args, **kwargs)
+
     return _wrapped_view
+
 
 @mentor_req
 def latex(request):
@@ -206,6 +223,15 @@ def latex(request):
         )
 
 
+def default(request):
+    if not request.user:
+        return redirect(f"../login")
+    elif not request.user.is_verified:
+        return redirect(f"../profile/{request.user.user_id}")
+    else:
+        return redirect(f"../main")
+
+
 def sign_up(request):
     if request.method == "POST":
         # Add to User table
@@ -308,6 +334,7 @@ def customLogin(request):
     else:
         return render(request, "mentapp/login.html")
 
+
 @mentor_req
 def main(request, volume_id=1):
     template = loader.get_template("mentapp/main.html")
@@ -360,6 +387,7 @@ def chapter(request, volume_id, chapter_id):
             "quizzes": quizzes,
         },
     )
+
 
 @mentor_req
 def quiz(request, volume_id, chapter_id, quiz_id):
@@ -439,6 +467,7 @@ def quiz(request, volume_id, chapter_id, quiz_id):
             },
         )
 
+
 @quizmaker_req
 def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
     volume_id = get_object_or_404(Volume, volume_id=volume_id)
@@ -501,6 +530,7 @@ def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
             },
         )
 
+
 @quizmaker_req
 def question_approval(request):
     if request.method == "POST":
@@ -538,6 +568,7 @@ def question_approval(request):
         {"question": question_info},
     )
 
+
 @admin_req
 def promotion(request):
     if request.method == "POST":
@@ -568,6 +599,7 @@ def promotion(request):
                 "quiz_makers": grab_users(True, True, False, True, True),
             },
         )
+
 
 @admin_req
 def user_directory(request):
