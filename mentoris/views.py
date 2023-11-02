@@ -212,7 +212,7 @@ def sign_up(request):
             emailObject.save()
 
             other_emails = request.POST.get("other_emails")
-            
+
             if other_emails is not None and other_emails != "":
                 email_list = other_emails.split(",")
                 for other_email in email_list:
@@ -221,7 +221,9 @@ def sign_up(request):
                     emailObject.user = user
                     emailObject.is_primary = False
                     emailObject.save()
-            user = authenticate(username=email, password=request.POST.get("password_hash"))
+            user = authenticate(
+                username=email, password=request.POST.get("password_hash")
+            )
             login(request, user)
             return redirect(f"../profile/{user.user_id}")
         return render(
@@ -239,8 +241,10 @@ def profile(request):
     template = loader.get_template("mentapp/profile.html")
     return HttpResponse(template.render())
 
+
 def reset_password(request):
     return render(request, "mentapp/reset_password.html")
+
 
 def customLogin(request):
     if request.method == "POST":
@@ -457,6 +461,43 @@ def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
         )
 
 
+def question_approval(request):
+    if request.method == "POST":
+        question = Question.objects.get(
+            question_id=request.POST.get("question_id"),
+        )
+        question.approval_requested = False
+        if request.POST.get("command") == "accept":
+            question.approved = True
+            question_loc = Question_Loc.objects.get(question=question)
+            question_loc.date_approved = date.today()
+            # populate question_loc approver later
+            question_loc.save()
+        question.save()
+        return JsonResponse({"success": True})
+
+    try:
+        question_locs = Question_Loc.objects.order_by("date_created")
+        question_info = []
+
+        for question_loc in question_locs:
+            question = question_loc.question
+            if question.approval_requested and not question.approved:
+                question_info = [question, question_loc]
+                break
+
+        chapter_loc = Chapter_Loc.objects.get(chapter=question.chapter)
+        question_info.append(chapter_loc)
+    except:
+        question_info = []
+
+    return render(
+        request,
+        "mentapp/question_approval.html",
+        {"question": question_info},
+    )
+
+
 def promotion(request):
     if request.method == "POST":
         email_object = Email.objects.get(
@@ -570,6 +611,7 @@ def grab_verification_info(user_ids):
             )
         )
     return verification_info
+
 
 @login_required
 def user_info(request, user_id):
