@@ -29,7 +29,11 @@ urlpatterns = [
     path("login/", views.customLogin, name="login"),
     path("signUp/", views.sign_up, name="sign_up"),
     path("verify_email/", views.verify_email, name="verify_email"),
-    path("verify_email/<uidb64>/<token>/", views.verify_email_confirm, name="verify_email_confirm"),
+    path(
+        "verify_email/<uidb64>/<token>/",
+        views.verify_email_confirm,
+        name="verify_email_confirm",
+    ),
     path("profile/", views.profile, name="profile"),
     path("profile/<uuid:user_id>/", views.user_info, name="user_info"),
     path("profile/edit/<uuid:user_id>/", views.user_edit, name="user_edit"),

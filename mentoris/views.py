@@ -997,7 +997,6 @@ def edit_quiz_add_question(request, quiz_id):
                         question=question_instance,
                         ordering=quiz_questions.count(),
                     )
-
             return JsonResponse({"success": True})
     elif request.method == "GET" and request.GET.get("command") == "filter":
         chapter_filter = request.GET.get("chapter")
@@ -1006,7 +1005,7 @@ def edit_quiz_add_question(request, quiz_id):
         point_filter = request.GET.get("point")
         time_filter = request.GET.get("time")
         difficulty_filter = request.GET.get("difficulty")
-        question_instances = Question.objects.all()
+        question_instances = Question.objects.all().filter(approved=True)
 
         if volume_filter:
             question_instances = question_instances.filter(
@@ -1426,22 +1425,9 @@ def edit_support(request, quiz_id, support_id):
 
 
 def create_question(request):
-
-    volumes = (
-        Volume.objects.values_list("volume_id", flat=True)
-        .distinct()
-        .order_by("volume_id")
-    )
-
-    volume_id = 1
-    chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
-
-    chapter_locs = Chapter_Loc.objects.filter(
-        chapter__chapter_id__in=chapters
-    ).distinct()
-
-    chapter_object = chapter_locs[0]
     if request.method == "POST":
+        volume_id = 1
+        chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
 
         question = Question.objects.create(chapter=chapters[0])
         question_loc = Question_Loc.objects.create(question=question)
@@ -1506,8 +1492,6 @@ def edit_question(request, question_id):
 
         if "submit-question" in request.POST:
 
-            # TODO: question_object.creator = CURRENT USER
-
             chapter_object = request.POST.get("chapter")
             chapter_string = chapter_object.split("_")
             chapter_title = chapter_string[0]
@@ -1518,13 +1502,15 @@ def edit_question(request, question_id):
             question_object.time_required_mins = request.POST.get("time_required")
             question_object.point_value = request.POST.get("points")
             question_object.pages_required = request.POST.get("pages_required")
+            question_object.approval_requested = True
+            question_object.creator = request.user
             question_object.save()
 
             question_loc.question_latex = hidden_question
             question_loc.answer_latex = hidden_answer
             question_loc.rubric_latex = hidden_grading
-            # TODO: question_loc.creator = CURRENT USER
-
+            question_loc.date_created = date.today()
+            question_loc.creator = request.user
             question_loc.save()
 
             # question_attachments = request.FILES.getlist("attachments")
