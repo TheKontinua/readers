@@ -55,7 +55,7 @@ ROOT_URLCONF = 'mentoris.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['mentoris/templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -81,13 +81,13 @@ DATABASES = {
 
         'NAME': 'mentoris',
 
-        'USER': 'walden',
+        'USER': 'ashton',
 
-        'PASSWORD': '',
+        'PASSWORD': 'postgreshton',
 
         'HOST': 'localhost',
 
-        'PORT': '',
+        'PORT': '5432',
         }
 }
 
