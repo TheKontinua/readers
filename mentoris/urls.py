@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("cars/", include("mentapp.urls")),
     path("katex/", views.katex, name="katex"),
+    path("signUp/", views.sign_up, name="sign_up"),
 ]
