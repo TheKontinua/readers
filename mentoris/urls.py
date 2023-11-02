@@ -20,6 +20,7 @@ from . import views
 from django.conf.urls.static import static
 from django.conf import settings
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("mentapp/", include("mentapp.urls")),
@@ -34,6 +35,8 @@ urlpatterns = [
     path("main/", views.main, name="main"),
     path("main/<int:volume_id>/", views.main, name="main_vol_chap"),
     path("main/<int:volume_id>/<chapter_id>/", views.chapter, name="chapter"),
+    path("main/<int:volume_id>/<chapter_id>/<int:quiz_id>", views.quiz, name="quiz"),
+    path("main/<int:volume_id>/<chapter_id>/<int:quiz_id>/maker_view", views.quiz_maker_view, name="quiz_maker_view"),
     path("edit_quiz/<int:quiz_id>", views.edit_quiz, name="edit_quiz"),
     path(
         "edit_quiz_add_question/<int:quiz_id>",
