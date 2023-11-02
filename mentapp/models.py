@@ -214,7 +214,7 @@ class Quiz_Rendering(models.Model):
 
 class Quiz_Feedback(models.Model):
     feedback_id = models.AutoField(primary_key=True)
-    rendering_id = models.ForeignKey(Quiz_Rendering, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     creator_id = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="creator_id"
     )

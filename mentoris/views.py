@@ -325,7 +325,7 @@ def quiz(request, volume_id, chapter_id, quiz_id):
     if request.method == "POST":
         if request.POST.get("command") == "viewer_publish":
             feedback = Quiz_Feedback()
-            feedback.rendering_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            feedback.quiz = quiz_id
             feedback.creator_id = quiz_id.creator_id
             feedback.viewer_id = (
                 quiz_id.creator_id
@@ -333,13 +333,11 @@ def quiz(request, volume_id, chapter_id, quiz_id):
             feedback.challenge_rating = int(request.POST.get("challenge_rating"))
             feedback.time_rating = int(request.POST.get("time_rating"))
             feedback.viewer_comment = request.POST.get("viewer_comment")
-
             feedback.save()
             return JsonResponse({"success": True})
         elif request.POST.get("command") == "delete":
-            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
             feedback = Quiz_Feedback.objects.get(
-                rendering_id=render_id,
+                quiz=quiz_id,
                 feedback_id=request.POST.get("feedback_id"),
             )
             feedback.delete()
@@ -350,9 +348,8 @@ def quiz(request, volume_id, chapter_id, quiz_id):
 
         try:
             reviews = []
-            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
             review_objects = Quiz_Feedback.objects.filter(
-                rendering_id=render_id,
+                quiz=quiz_id,
                 date_completed__isnull=True,
             ).distinct()
 
@@ -404,9 +401,8 @@ def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
     quiz_id = get_object_or_404(Quiz, quiz_id=quiz_id)
 
     if request.method == "POST":
-        render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
         feedback = Quiz_Feedback.objects.get(
-            rendering_id=render_id,
+            quiz=quiz_id,
             feedback_id=request.POST.get("feedback_id"),
         )
         if request.POST.get("command") == "resolve":
@@ -424,9 +420,8 @@ def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
 
         try:
             reviews = []
-            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
             review_objects = Quiz_Feedback.objects.filter(
-                rendering_id=render_id,
+                quiz=quiz_id,
                 date_completed__isnull=True,
             ).distinct()
 
@@ -668,10 +663,18 @@ def edit_quiz(request, quiz_id):
                         quiz_question.ordering = count
                         quiz_question.save()
             quiz_instance.label = request.POST.get("label")
-            quiz_instance.conceptual_difficulty = float(request.POST.get("conceptual_difficulty"))
-            quiz_instance.time_required_mins = int(request.POST.get("time_required_mins"))
-            quiz_instance.volume = get_object_or_404(Volume, volume_id = request.POST.get("volume"))    
-            quiz_instance.chapter = get_object_or_404(Chapter, chapter_id = request.POST.get("chapter"))
+            quiz_instance.conceptual_difficulty = float(
+                request.POST.get("conceptual_difficulty")
+            )
+            quiz_instance.time_required_mins = int(
+                request.POST.get("time_required_mins")
+            )
+            quiz_instance.volume = get_object_or_404(
+                Volume, volume_id=request.POST.get("volume")
+            )
+            quiz_instance.chapter = get_object_or_404(
+                Chapter, chapter_id=request.POST.get("chapter")
+            )
             calculator_allowed_str = request.POST.get("calculator_allowed")
             computer_allowed_str = request.POST.get("computer_allowed")
             internet_allowed_str = request.POST.get("internet_allowed")
