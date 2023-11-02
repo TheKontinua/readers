@@ -8,7 +8,8 @@ def katex(request):
 
 
 def login(request):
-    template = loader.get_template("login/login.html")
+    template = loader.get_template("mentapp/login.html")
+    return HttpResponse(template.render())
 
 
 def sign_up(request):
