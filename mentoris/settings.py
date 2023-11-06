@@ -78,15 +78,18 @@ WSGI_APPLICATION = 'mentoris.wsgi.application'
 DATABASES = {
         'default': {
 
-             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-             'NAME': 'mentoris',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
 
-             'USER': 'walden',
+        'NAME': 'mentoris',
 
-             'PASSWORD': '',
+        'USER': 'muser',
 
-             'HOST': 'localhost',
-      }
+        'PASSWORD': 'muser',
+
+        'HOST': 'localhost',
+
+        'PORT': '',
+        }
 }
 
 # Password validation
