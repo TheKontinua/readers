@@ -55,7 +55,7 @@ ROOT_URLCONF = 'mentoris.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['mentoris/templates'],
+        'DIRS': ['mentoris/templates', 'mentapp/templates',],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,21 +74,19 @@ WSGI_APPLICATION = 'mentoris.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+
 DATABASES = {
         'default': {
 
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+             'ENGINE': 'django.db.backends.postgresql_psycopg2',
+             'NAME': 'mentoris',
 
-        'NAME': 'mentoris',
+             'USER': 'walden',
 
-        'USER': 'walden',
+             'PASSWORD': '',
 
-        'PASSWORD': '',
-
-        'HOST': 'localhost',
-
-        'PORT': '',
-        }
+             'HOST': 'localhost',
+      }
 }
 
 # Password validation
