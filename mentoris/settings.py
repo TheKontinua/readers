@@ -82,9 +82,9 @@ DATABASES = {
 
         'NAME': 'mentoris',
 
-        'USER': 'muser',
+        'USER': 'Walden',
 
-        'PASSWORD': 'muser',
+        'PASSWORD': '',
 
         'HOST': 'localhost',
 
