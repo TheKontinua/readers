@@ -19,8 +19,9 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("cars/", include("mentapp.urls")),
+    path("mentapp/", include("mentapp.urls")),
     path("katex/", views.katex, name="katex"),
     path("login/", views.login, name="login"),
     path("signUp/", views.sign_up, name="sign_up"),
+    path("profile/", views.profile, name="profile"),
 ]

@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-pbmmo011$5_b^69e9k-#1#)i8)*!n)io8-y0rz=@&e6@h7s!zk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -56,7 +56,7 @@ ROOT_URLCONF = "mentoris.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["mentoris/templates"],
+        "DIRS": ["mentoris/templates", "mentapp/templates,"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -74,6 +74,7 @@ WSGI_APPLICATION = "mentoris.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+
 
 DATABASES = {
     "default": {
@@ -131,6 +132,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "static"
 STATICFILES_DIRS = ["mentoris/static"]
 
 # Default primary key field type
