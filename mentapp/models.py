@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+import uuid
 
 class Volume(models.Model):
     number = models.IntegerField(default=0, primary_key=True)
@@ -74,8 +74,10 @@ class Quiz_Feedback(models.Model):
     feedback = models.TextField()
 
 class User(models.Model):
+    user_id = models.UUIDField(primary_key = True, default=uuid.uuid4, editable = False)
     password_hash = models.CharField(max_length=100)
     display_name = models.CharField(max_length=50)
+    org_name = models.CharField(max_length = 100)
     country_code = models.CharField(max_length=3)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longetude = models.DecimalField(max_digits=9, decimal_places=6)
@@ -84,3 +86,8 @@ class User(models.Model):
     is_quizmaker = models.BooleanField()
     is_active = models.BooleanField()
     
+class Email(models.Model):
+    email_address = models.CharField(max_length=100, primary_key = True)
+    user_id = models.ForeignKey(User, on_delete = models.CASCADE)
+    is_primary = models.BooleanField()
+    is_verified = models.BooleanField()
