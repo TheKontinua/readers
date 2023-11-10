@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+import uuid
 
 
 class Volume(models.Model):
@@ -72,15 +74,38 @@ class Quiz_Feedback(models.Model):
     lang_code = models.CharField(max_length=5)
     dialect_code = models.CharField(max_length=5)
     feedback = models.TextField()
+    
+def generate_user_id():
+    return str(uuid.uuid4())
 
 class User(models.Model):
-    password_hash = models.CharField(max_length=100)
-    display_name = models.CharField(max_length=50)
-    country_code = models.CharField(max_length=3)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6)
-    longetude = models.DecimalField(max_digits=9, decimal_places=6)
-    is_verified = models.BooleanField()
-    is_admin = models.BooleanField()
-    is_quizmaker = models.BooleanField()
-    is_active = models.BooleanField()
-    
+    user_id = models.UUIDField(primary_key = True,  unique=True, default=generate_user_id(), editable = False)
+    full_name = models.CharField(max_length=50, default='new_user')
+    display_name = models.CharField(max_length=50, default='new_user')
+    password = models.CharField(max_length=128, default='pwd')
+    org_name = models.CharField(max_length=50, default='org')
+    country_code = models.CharField(max_length=10, default='code')
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
+    primary_language = models.CharField(max_length=20, default='language')
+    is_verified = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+    is_quizmaker = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
+    def hashpwd(self, *args, **kwargs):
+        self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+
+class Email(models.Model):
+    primary_email = models.CharField(max_length=100, primary_key = True, default="email")
+    user_id = models.ForeignKey(User, on_delete = models.CASCADE)
+    is_primary = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return f"""{self.full_name},
+            {self.display_name}, 
+            Org: {self.org_name}, Country: {self.country_code},
+            Lat: {self.latitude}, Long: {self.longitude}"""

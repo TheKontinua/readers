@@ -83,13 +83,13 @@ DATABASES = {
 
         'NAME': 'mentoris',
 
-        'USER': 'walden',
+        'USER': 'ashton',
 
-        'PASSWORD': '',
+        'PASSWORD': 'postgreshton',
 
         'HOST': 'localhost',
 
-        'PORT': '',
+        'PORT': '5432',
         }
 }
 
