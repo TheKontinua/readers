@@ -1,5 +1,7 @@
 from django.http import HttpResponse
 from django.template import loader
+from mentapp.models import User, Email
+from django.shortcuts import render, get_object_or_404
 
 
 def katex(request):
@@ -20,3 +22,9 @@ def sign_up(request):
 def profile(request):
     template = loader.get_template('mentapp/profile.html')
     return HttpResponse(template.render())
+
+def user_info(request, user_id):
+    user_profile = get_object_or_404(User, user_id=user_id)
+    email = get_object_or_404(Email, user_id=user_id)
+    return render(request, 'mentapp/profile.html', {'user_profile': user_profile,
+                                                    'email': email})
