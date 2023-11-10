@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
 import uuid
 
 
@@ -93,9 +95,17 @@ class User(models.Model):
     is_quizmaker = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
-    def hashpwd(self, *args, **kwargs):
-        self.password = make_password(self.password)
-        super().save(*args, **kwargs)
+    @receiver(pre_save, sender=User)
+    def hash_password(sender, instance, **kwargs):
+        # Check if the password has changed
+        if instance._state.adding or instance.password != User.objects.get(pk=instance.pk).password:
+            instance.password = make_password(instance.password)
+    
+    def __str__(self):
+        return f"""{self.full_name},
+            {self.display_name}, 
+            Org: {self.org_name}, Country: {self.country_code},
+            Lat: {self.latitude}, Long: {self.longitude}"""
 
 class Email(models.Model):
     primary_email = models.CharField(max_length=100, primary_key = True, default="email")
@@ -104,8 +114,3 @@ class Email(models.Model):
     is_verified = models.BooleanField(default=False)
 
 
-    def __str__(self):
-        return f"""{self.full_name},
-            {self.display_name}, 
-            Org: {self.org_name}, Country: {self.country_code},
-            Lat: {self.latitude}, Long: {self.longitude}"""

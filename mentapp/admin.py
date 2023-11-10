@@ -17,5 +17,7 @@ admin.site.register(Quiz_Question)
 admin.site.register(Quiz_Rendering)
 admin.site.register(Quiz_Feedback)
 admin.site.register(User, UserAdmin)
+admin.site.register(Email)
+
 
 

@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.template import loader
-from mentapp.models import User
+from mentapp.models import User, Email
 from django.shortcuts import render, get_object_or_404
 
 
@@ -25,4 +25,6 @@ def profile(request):
 
 def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
-    return render(request, 'mentapp/profile.html', {'user_profile': user_profile})
+    email = get_object_or_404(Email, user_id=user_id)
+    return render(request, 'mentapp/profile.html', {'user_profile': user_profile,
+                                                    'email': email})
