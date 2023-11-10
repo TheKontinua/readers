@@ -6,6 +6,7 @@ from django.db.models.signals import pre_save
 import uuid
 
 
+
 class Volume(models.Model):
     number = models.IntegerField(default=0, primary_key=True)
 
