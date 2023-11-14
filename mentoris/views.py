@@ -1,7 +1,8 @@
 from django.http import HttpResponse
 from django.template import loader
 from mentapp.models import User, Email
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 
 
 def katex(request):
@@ -9,22 +10,49 @@ def katex(request):
     return HttpResponse(template.render())
 
 
-def login(request):
-    template = loader.get_template("mentapp/login.html")
-    return HttpResponse(template.render())
-
-
 def sign_up(request):
     template = loader.get_template("mentapp/sign_up.html")
     return HttpResponse(template.render())
 
-  
+
 def profile(request):
-    template = loader.get_template('mentapp/profile.html')
+    template = loader.get_template("mentapp/profile.html")
     return HttpResponse(template.render())
+
+
+def login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        try:
+            user = User.objects.get(display_name=username, password=password)
+        except User.DoesNotExist:
+            user = None
+
+        if user is not None:
+            # TODO: log user in
+            return redirect(f"../profile/{user.user_id}")
+        else:
+            messages.error(
+                request,
+                "Could not find account, please double-check account credentials",
+            )
+            return render(
+                request,
+                "mentapp/login.html",
+                {"username": username, "password": password},
+            )
+    else:
+        return render(
+            request,
+            "mentapp/login.html",
+        )
+
 
 def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
     email = get_object_or_404(Email, user_id=user_id)
-    return render(request, 'mentapp/profile.html', {'user_profile': user_profile,
-                                                    'email': email})
+    return render(
+        request, "mentapp/profile.html", {"user_profile": user_profile, "email": email}
+    )
