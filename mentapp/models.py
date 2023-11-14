@@ -121,8 +121,8 @@ class User(models.Model):
     #@receiver(pre_save, sender=User)
     #def hash_password(sender, instance, **kwargs):
         # Check if the password has changed
-    #    if instance._state.adding or instance.password != User.objects.get(pk=instance.pk).password:
-     #       instance.password = make_password(instance.password)
+        if instance._state.adding or instance.password != User.objects.get(pk=instance.pk).password:
+            instance.password = make_password(instance.password)
     
     def __str__(self):
         return f"""{self.full_name},
