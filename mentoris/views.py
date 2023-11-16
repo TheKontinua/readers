@@ -27,9 +27,8 @@ def sign_up(request):
             emailObject.save()
 
             other_emails = request.POST.get("other_emails")
-            # TODO: This assumes that the input field is properly inputted
             if other_emails is not None:
-                email_list = other_emails.split(", ")
+                email_list = other_emails.split(",")
                 for other_email in email_list:
                     emailObject = Email()
                     emailObject.primary_email = other_email

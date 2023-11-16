@@ -267,13 +267,17 @@
                         <span class="input-group-text"
                             >Other Email Addresses</span
                         >
-                        <textarea
+                        <input
+                            type="email" multiple
                             class="form-control"
                             aria-label="other-emails"
                             id="other-emails"
                             name="other_emails"
                             placeholder="email1@email.com, email2@email.com"
-                        ></textarea>
+                        ></input>
+                        <div class="invalid-feedback">
+                            Please enter a list of valid email addresses.
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
