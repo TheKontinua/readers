@@ -5,9 +5,6 @@ from django.shortcuts import render
 
 from mentapp.models import Chapter_Loc, Volume, Chapter
 
-
-
-
 def volume_chapter(request, volume_number):
 
     volume = Volume.objects.get(number=volume_number)
