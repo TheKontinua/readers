@@ -4,6 +4,7 @@ from mentapp.models import User, Email
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from mentoris.forms import UserForm
+from django.core.mail import send_mail
 
 
 def katex(request):
@@ -79,4 +80,22 @@ def user_info(request, user_id):
     email = get_object_or_404(Email, user_id=user_id, is_primary=True)
     return render(
         request, "mentapp/profile.html", {"user_profile": user_profile, "email": email}
+    )
+
+
+def request_translation(request, user_id):
+    # need to verify email to ses when they sign up in order for this to work
+    email = get_object_or_404(Email, user_id=user_id, is_primary=True)
+    primary_language = get_object_or_404(User.primary_language, user_id=user_id)
+    send_mail(
+        "Kontinua Quiz Questions Translations Request",
+        "Hi there! We have noticed you are fluent in "
+        + primary_language
+        + ". This week these questions were added in "
+        + primary_language
+        + ". I can do a preliminary translation to "
+        + primary_language
+        + " using Google Translate. Would you look at and correct those preliminary translations?  Click here.",
+        "notifications@kontinua.org",
+        [email],
     )
