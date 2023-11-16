@@ -3,6 +3,7 @@ from django.template import loader
 from mentapp.models import User, Email
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from mentoris.forms import UserForm
 
 
 def katex(request):
@@ -11,8 +12,35 @@ def katex(request):
 
 
 def sign_up(request):
-    template = loader.get_template("mentapp/sign_up.html")
-    return HttpResponse(template.render())
+    if request.method == "POST":
+        # Add to User table
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+
+            # Add to Email table
+            email = request.POST.get("primary_email")
+            emailObject = Email()
+            emailObject.primary_email = email
+            emailObject.user_id = user
+            emailObject.is_primary = True
+            emailObject.save()
+
+            other_emails = request.POST.get("other_emails")
+            # TODO: This assumes that the input field is properly inputted
+            if other_emails is not None:
+                email_list = other_emails.split(", ")
+                for other_email in email_list:
+                    emailObject = Email()
+                    emailObject.primary_email = other_email
+                    emailObject.user_id = user
+                    emailObject.save()
+
+            return redirect(f"../profile/{user.user_id}")
+
+        return render(request, "mentapp/sign_up.html", {"form": form})
+    else:
+        return render(request, "mentapp/sign_up.html")
 
 
 def profile(request):
@@ -44,15 +72,12 @@ def login(request):
                 {"username": username, "password": password},
             )
     else:
-        return render(
-            request,
-            "mentapp/login.html",
-        )
+        return render(request, "mentapp/login.html")
 
 
 def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
-    email = get_object_or_404(Email, user_id=user_id)
+    email = get_object_or_404(Email, user_id=user_id, is_primary=True)
     return render(
         request, "mentapp/profile.html", {"user_profile": user_profile, "email": email}
     )
