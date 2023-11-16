@@ -61,7 +61,7 @@ def user_info(request, user_id):
 
 def request_translation(request, user_id):
     # need to verify email to ses when they sign up in order for this to work
-    email = get_object_or_404(Email, user_id=user_id)
+    email = get_object_or_404(Email, user_id=user_id, is_primary=True)
     primary_language = get_object_or_404(User.primary_language, user_id=user_id)
     send_mail(
         "Kontinua Quiz Questions Translations Request",
