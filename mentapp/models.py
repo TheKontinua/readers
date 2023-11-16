@@ -21,13 +21,14 @@ class User(models.Model):
     country_code = models.CharField(max_length=10, default="code")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
+    promotion_requested = models.BooleanField(default=False)
     primary_lang_code = models.CharField(max_length=20, default="EN")
     primary_dialect_code = models.CharField(max_length=20, default="US")
 
     is_verified = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_quizmaker = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     def set_password(self, raw_password):
         return make_password(password=raw_password)
