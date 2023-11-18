@@ -18,13 +18,18 @@ def sign_up(request):
     template = loader.get_template("mentapp/sign_up.html")
     return HttpResponse(template.render())
 
-  
+
 def profile(request):
-    template = loader.get_template('mentapp/profile.html')
+    template = loader.get_template("mentapp/profile.html")
     return HttpResponse(template.render())
+
 
 def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
-    email = get_object_or_404(Email, user_id=user_id)
-    return render(request, 'mentapp/profile.html', {'user_profile': user_profile,
-                                                    'email': email})
+    try:
+        email = Email.objects.get(user_id=user_id)
+    except Email.DoesNotExist:
+        email = None
+    return render(
+        request, "mentapp/profile.html", {"user_profile": user_profile, "email": email}
+    )
