@@ -12,10 +12,12 @@ class Volume(models.Model):
     volume_id = models.AutoField(default=0, primary_key=True)
 
 
+
 class Chapter(models.Model):
     chapter_id = models.AutoField(primary_key=True)
     volume_id = models.ForeignKey(Volume, on_delete=models.SET_NULL, null=True)
     ordering = models.IntegerField(default=0)
+
 
     def __lt__(self, other):
         return self.ordering < other.ordering
@@ -46,6 +48,7 @@ class Question(models.Model):
     pages_required = models.FloatField(default=0)
 
 
+
 class Question_Loc(models.Model):
     question_id = models.ForeignKey(Question, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
@@ -65,6 +68,7 @@ class Question_Loc(models.Model):
         indexes = [
             models.Index(fields=['question_id', 'lang_code', 'dialect_code'], name='question_loc_comp_pkey')
         ]
+
 
     def __str__(self):
         return self.question.__str__() + "_" + self.lang_code + "_" + self.dialect_code
@@ -105,6 +109,7 @@ class Support_Attachment(models.Model):
             models.Index(fields=['question_id', 'lang_code', 'dialect_code'], name='support_attachment_comp_pkey')
         ]
 
+
 class Quiz(models.Model):
     quiz_id = models.AutoField(default=0, primary_key=True)
     conceptual_difficulty = models.FloatField()
@@ -115,6 +120,7 @@ class Quiz(models.Model):
     book_allowed = models.BooleanField(default=False)
     volume_id = models.ForeignKey(Volume, on_delete=models.SET_NULL, null=True)
     chapter_id = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
+
 
 
 class Quiz_Question(models.Model):
@@ -146,6 +152,8 @@ class Quiz_Rendering(models.Model):
             models.Index(fields=['quiz_id', 'lang_code', 'dialect_code'], name='quiz_rendering_comp_pkey')
         ]
 
+
+
 class Quiz_Feedback(models.Model):
     quiz_id = models.ForeignKey(Quiz_Rendering, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
@@ -166,6 +174,7 @@ class Quiz_Feedback(models.Model):
             models.Index(fields=['quiz_id', 'lang_code', 'dialect_code'], name='quiz_feedback_comp_pkey')
         ]
 
+
 def generate_user_id():
     return str(uuid.uuid4())
 
@@ -182,6 +191,7 @@ class User(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
     primary_lang_code = models.CharField(max_length=20, default="EN")
     primary_dialect_code = models.CharField(max_length=20, default="US")
+
     is_verified = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_quizmaker = models.BooleanField(default=False)
@@ -192,6 +202,7 @@ class User(models.Model):
     # Check if the password has changed
     #    if instance._state.adding or instance.password != User.objects.get(pk=instance.pk).password:
     #       instance.password = make_password(instance.password)
+
 
     def __str__(self):
         return f"""{self.full_name},
@@ -286,3 +297,4 @@ class Quiz_Support(models.Model):
     quiz_id = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     support_id = models.ForeignKey(Support, on_delete=models.CASCADE)
     ordering = models.IntegerField(default=0)
+

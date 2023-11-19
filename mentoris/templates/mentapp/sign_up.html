@@ -38,7 +38,13 @@
             <hr />
         </div>
         <div class="container">
-            <form class="needs-validation" novalidate>
+            <form
+                class="needs-validation"
+                novalidate
+                method="POST"
+                action="{% url 'sign_up' %}"
+            >
+                {% csrf_token %}
                 <div class="row mb-3">
                     <div class="form-group required col-md-6">
                         <label for="full-name" class="control-label"
@@ -48,6 +54,7 @@
                             type="text"
                             class="form-control"
                             id="full-name"
+                            name="full_name"
                             placeholder="First Last"
                             required
                         />
@@ -71,6 +78,7 @@
                                 type="text"
                                 class="form-control"
                                 id="display-name"
+                                name="display_name"
                                 aria-describedby="inputGroupPrepend"
                                 required
                             />
@@ -82,7 +90,13 @@
                 </div>
                 <div class="form-group col-12 mb-3">
                     <label for="organization">Organization Name</label>
-                    <input type="text" class="form-control" id="organization" />
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="organization"
+                        name="org_name"
+                        autocomplete="organization"
+                    />
                 </div>
                 <div class="form-group required col-12 mb-3">
                     <label for="email-address" class="control-label"
@@ -92,6 +106,7 @@
                         type="email"
                         class="form-control"
                         id="email-address"
+                        name="primary_email"
                         aria-describedby="email-address"
                         placeholder="email@email.com"
                         required
@@ -108,6 +123,7 @@
                         type="password"
                         class="form-control"
                         id="user-password"
+                        name="password"
                         required
                     />
                     <div class="invalid-feedback">
@@ -125,6 +141,7 @@
                             <select
                                 class="form-select"
                                 id="country-code"
+                                name="country_code"
                                 required
                             >
                                 <option selected disabled value="">
@@ -146,6 +163,7 @@
                             <select
                                 class="form-select"
                                 id="primary-language"
+                                name="primary_language"
                                 required
                             >
                                 <option selected disabled value="">
@@ -167,6 +185,7 @@
                             <select
                                 class="selectpicker"
                                 id="other-languages"
+                                name="other_languages"
                                 title="Choose..."
                                 data-width="100%"
                                 multiple
@@ -186,6 +205,7 @@
                             type="text"
                             class="form-control"
                             id="latitude"
+                            name="latitude"
                             placeholder=""
                         />
                     </div>
@@ -195,6 +215,7 @@
                             type="text"
                             class="form-control"
                             id="longitude"
+                            name="longitude"
                             placeholder=""
                         />
                     </div>
@@ -214,6 +235,7 @@
                                 type="text"
                                 class="form-control"
                                 id="github"
+                                name="github"
                                 placeholder="Github Username"
                                 aria-describedby="inputGroupPrepend"
                             />
@@ -233,6 +255,7 @@
                                 type="text"
                                 class="form-control"
                                 id="twitter"
+                                name="twitter"
                                 placeholder="Twitter Username"
                                 aria-describedby="inputGroupPrepend"
                             />
@@ -244,11 +267,17 @@
                         <span class="input-group-text"
                             >Other Email Addresses</span
                         >
-                        <textarea
+                        <input
+                            type="email" multiple
                             class="form-control"
                             aria-label="other-emails"
+                            id="other-emails"
+                            name="other_emails"
                             placeholder="email1@email.com, email2@email.com"
-                        ></textarea>
+                        ></input>
+                        <div class="invalid-feedback">
+                            Please enter a list of valid email addresses.
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -256,6 +285,7 @@
                         Sign Up
                     </button>
                     <button
+                        type="button"
                         class="btn btn-link"
                         onclick="window.location.href='/login'"
                     >
@@ -287,7 +317,6 @@
             crossorigin="anonymous"
         ></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/i18n/defaults-*.min.js"></script>
         <script>
             (function () {
                 "use strict";

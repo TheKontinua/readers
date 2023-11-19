@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-pbmmo011$5_b^69e9k-#1#)i8)*!n)io8-y0rz=@&e6@h7s!zk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -44,8 +44,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -77,14 +77,18 @@ WSGI_APPLICATION = "mentoris.wsgi.application"
 
 DATABASES = {
 
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mentoris',
-        'USER': 'walden',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '',
-        }
+   # 'default': {
+   #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+   #     'NAME': 'mentoris',
+   #     'USER': 'walden',
+   #     'PASSWORD': '',
+   #     'HOST': 'localhost',
+   #     'PORT': '',
+   #     }
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
 
 
@@ -138,6 +142,7 @@ STATICFILES_DIRS = ["mentoris/static"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Email Notifications - AWS SES
+EMAIL_BACKEND = "django_ses.SESBackend"

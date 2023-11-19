@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.DS_Store
+mentapp/.DS_Store
+mentoris/.DS_Store
 
 # C extensions
 *.so
@@ -110,6 +113,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.vscode/
+docs/
 
 # Spyder project settings
 .spyderproject
@@ -133,3 +138,6 @@ dmypy.json
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# Migrations
+mentapp/migrations
