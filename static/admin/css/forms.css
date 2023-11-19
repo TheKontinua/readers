@@ -1,4 +1,4 @@
-@import url('widgets.css');
+@import url("widgets.css");
 
 /* FORM ROWS */
 
@@ -9,7 +9,8 @@
     border-bottom: 1px solid var(--hairline-color);
 }
 
-.form-row img, .form-row input {
+.form-row img,
+.form-row input {
     vertical-align: middle;
 }
 
@@ -39,7 +40,8 @@ label {
     font-size: 0.8125rem;
 }
 
-.required label, label.required {
+.required label,
+label.required {
     font-weight: bold;
     color: var(--body-fg);
 }
@@ -84,13 +86,15 @@ form ul.inline li {
 }
 
 .aligned label:not(.vCheckboxLabel):after {
-    content: '';
+    content: "";
     display: inline-block;
     vertical-align: middle;
     height: 1.625rem;
 }
 
-.aligned label + p, .aligned .checkbox-row + div.help, .aligned label + div.readonly {
+.aligned label + p,
+.aligned .checkbox-row + div.help,
+.aligned label + div.readonly {
     padding: 6px 0;
     margin-top: 0;
     margin-bottom: 0;
@@ -108,7 +112,8 @@ form ul.inline li {
     margin-bottom: 0;
 }
 
-.colMS .aligned .vLargeTextField, .colMS .aligned .vXMLLargeTextField {
+.colMS .aligned .vLargeTextField,
+.colMS .aligned .vXMLLargeTextField {
     width: 350px;
 }
 
@@ -176,7 +181,8 @@ form .aligned table p {
     margin-top: -4px;
 }
 
-.colM .aligned .vLargeTextField, .colM .aligned .vXMLLargeTextField {
+.colM .aligned .vLargeTextField,
+.colM .aligned .vXMLLargeTextField {
     width: 610px;
 }
 
@@ -207,7 +213,8 @@ form div.help ul {
     margin-left: 0;
 }
 
-.colM fieldset.wide .vLargeTextField, .colM fieldset.wide .vXMLLargeTextField {
+.colM fieldset.wide .vLargeTextField,
+.colM fieldset.wide .vXMLLargeTextField {
     width: 450px;
 }
 
@@ -217,7 +224,8 @@ fieldset.collapsed * {
     display: none;
 }
 
-fieldset.collapsed h2, fieldset.collapsed {
+fieldset.collapsed h2,
+fieldset.collapsed {
     display: block;
 }
 
@@ -271,7 +279,8 @@ body.popup .submit-row {
     line-height: 0.9375rem;
 }
 
-.submit-row input, .submit-row a {
+.submit-row input,
+.submit-row a {
     margin: 0;
 }
 
@@ -327,7 +336,8 @@ body.popup .submit-row {
     border: none;
 }
 
-.vDateField, .vTimeField {
+.vDateField,
+.vTimeField {
     margin-right: 2px;
     margin-bottom: 4px;
 }
@@ -344,7 +354,8 @@ body.popup .submit-row {
     width: 30em;
 }
 
-.vLargeTextField, .vXMLLargeTextField {
+.vLargeTextField,
+.vXMLLargeTextField {
     width: 48em;
 }
 
@@ -368,7 +379,8 @@ body.popup .submit-row {
     width: 5em;
 }
 
-.vTextField, .vUUIDField {
+.vTextField,
+.vUUIDField {
     width: 20em;
 }
 

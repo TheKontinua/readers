@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='user_id',
-            field=models.UUIDField(default='68113fbd-e2e1-4e58-a27c-6628b482d8ae', editable=False, primary_key=True, serialize=False, unique=True),
+            field=models.UUIDField(default='8f737e50-929f-435f-b83f-06a80ba2f535', editable=False, primary_key=True, serialize=False, unique=True),
+
         ),
     ]
