@@ -28,7 +28,7 @@ def sign_up(request):
             emailObject.save()
 
             other_emails = request.POST.get("other_emails")
-            if other_emails is not None:
+            if other_emails is not None and other_emails != "":
                 email_list = other_emails.split(",")
                 for other_email in email_list:
                     emailObject = Email()
