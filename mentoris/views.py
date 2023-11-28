@@ -85,6 +85,18 @@ def user_info(request, user_id):
         request, "mentapp/profile.html", {"user_profile": user_profile, "email": email}
     )
 
+def user_edit(request, user_id):
+    user = get_object_or_404(User, user_id=user_id)
+    for key, value in request.POST.items():
+        # Check if the user object has this field and the value is not empty
+        if hasattr(user, key) and value.strip():
+            # Optionally, add extra checks for security, like excluding certain fields
+            if key not in ['fields', 'to', 'exclude']:
+                setattr(user, key, value)
+    user.save()
+    return redirect(f"/profile/{user.user_id}")
+
+
 
 def request_translation(request, user_id):
     # need to verify email to ses when they sign up in order for this to work
