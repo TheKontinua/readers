@@ -23,7 +23,7 @@ def sign_up(request):
             email = request.POST.get("primary_email")
             emailObject = Email()
             emailObject.primary_email = email
-            emailObject.user_id = user
+            emailObject.user_id = user_id
             emailObject.is_primary = True
             emailObject.save()
 
