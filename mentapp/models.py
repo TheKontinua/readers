@@ -14,8 +14,8 @@ class Volume(models.Model):
 
 
 class Chapter(models.Model):
-    chapter_id = models.AutoField(primary_key=True)
-    volume_id = models.ForeignKey(Volume, on_delete=models.SET_NULL, null=True)
+    chapter_id = models.CharField(max_length=50, primary_key=True)
+    volume = models.ForeignKey(Volume, on_delete=models.SET_NULL, null=True)
     ordering = models.IntegerField(default=0)
 
 
@@ -24,15 +24,15 @@ class Chapter(models.Model):
 
 
 class Chapter_Loc(models.Model):
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     title = models.CharField(max_length=200, null=True)
 
     class Meta:
-        unique_together = ("chapter_id", "lang_code", "dialect_code")
+        unique_together = ("chapter", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['chapter_id', 'lang_code', 'dialect_code'], name='chapter_loc_comp_pkey')
+            models.Index(fields=['chapter', 'lang_code', 'dialect_code'], name='chapter_loc_comp_pkey')
         ]
     def __str__(self):
         return self.title + "_" + self.lang_code + "_" + self.dialect_code
@@ -40,8 +40,8 @@ class Chapter_Loc(models.Model):
 
 class Question(models.Model):
     question_id = models.AutoField(default=0, primary_key=True)
-    creator_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
     conceptual_difficulty = models.FloatField(default=0)
     time_required_mins = models.FloatField(default=0)
     point_value = models.FloatField(default=0)
@@ -50,7 +50,7 @@ class Question(models.Model):
 
 
 class Question_Loc(models.Model):
-    question_id = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     question_latex = models.TextField()
@@ -58,15 +58,15 @@ class Question_Loc(models.Model):
     rubric_latex = models.TextField()
     date_created = models.DateField(default=now)
     date_approved = models.DateTimeField(null=True, blank=True)
-    creator_id = models.ForeignKey(
+    creator = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name='created_chapter_loc')
-    approver_id = models.ForeignKey(
+    approver = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name='approved_chapter_loc')
 
     class Meta:
-        unique_together = ("question_id", "lang_code", "dialect_code")
+        unique_together = ("question", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['question_id', 'lang_code', 'dialect_code'], name='question_loc_comp_pkey')
+            models.Index(fields=['question', 'lang_code', 'dialect_code'], name='question_loc_comp_pkey')
         ]
 
 
@@ -80,7 +80,7 @@ class Blob(models.Model):
 
 
 class Question_Attachment(models.Model):
-    question_id = models.ForeignKey(Question_Loc, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question_Loc, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     filename = models.FileField(
@@ -89,13 +89,13 @@ class Question_Attachment(models.Model):
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question_id", "lang_code", "dialect_code")
+        unique_together = ("question", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['question_id', 'lang_code', 'dialect_code'], name='question_attachment_comp_pkey')
+            models.Index(fields=['question', 'lang_code', 'dialect_code'], name='question_attachment_comp_pkey')
         ]
 
 class Support_Attachment(models.Model):
-    question_id = models.ForeignKey(Question_Loc, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question_Loc, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5)
     dialect_code = models.CharField(max_length=5)
     filename = models.FileField(
@@ -104,9 +104,9 @@ class Support_Attachment(models.Model):
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question_id", "lang_code", "dialect_code")
+        unique_together = ("question", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['question_id', 'lang_code', 'dialect_code'], name='support_attachment_comp_pkey')
+            models.Index(fields=['question', 'lang_code', 'dialect_code'], name='support_attachment_comp_pkey')
         ]
 
 
@@ -118,20 +118,20 @@ class Quiz(models.Model):
     computer_allowed = models.BooleanField(default=False)
     internet_allowed = models.BooleanField(default=False)
     book_allowed = models.BooleanField(default=False)
-    volume_id = models.ForeignKey(Volume, on_delete=models.SET_NULL, null=True)
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
+    volume = models.ForeignKey(Volume, on_delete=models.SET_NULL, null=True)
+    chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
 
 
 
 class Quiz_Question(models.Model):
-    quiz_id = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    question_id = models.ForeignKey(Question, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
     ordering = models.IntegerField(default=0)
 
     class Meta:
-        unique_together = ("quiz_id", "question_id")
+        unique_together = ("quiz", "question")
         indexes = [
-            models.Index(fields=['quiz_id', 'question_id'], name='quiz_question_comp_pkey')
+            models.Index(fields=['quiz', 'question'], name='quiz_question_comp_pkey')
         ]
     def __lt__(self, other):
         return self.ordering < other.ordering
@@ -139,7 +139,7 @@ class Quiz_Question(models.Model):
 
 class Quiz_Rendering(models.Model):
     rendering_id = models.AutoField(default=0, primary_key=True)
-    quiz_id = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     lang_code = models.CharField(default="EN",max_length=5)
     dialect_code = models.CharField(default="US",max_length=5)
     date_created = models.DateField(default=now)
@@ -147,15 +147,15 @@ class Quiz_Rendering(models.Model):
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("quiz_id", "lang_code", "dialect_code")
+        unique_together = ("quiz", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['quiz_id', 'lang_code', 'dialect_code'], name='quiz_rendering_comp_pkey')
+            models.Index(fields=['quiz', 'lang_code', 'dialect_code'], name='quiz_rendering_comp_pkey')
         ]
 
 
 
 class Quiz_Feedback(models.Model):
-    quiz_id = models.ForeignKey(Quiz_Rendering, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz_Rendering, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     date_created = models.DateField(default=now)
@@ -169,9 +169,9 @@ class Quiz_Feedback(models.Model):
     comments_text = models.TextField(null=True)
 
     class Meta:
-        unique_together = ("quiz_id", "lang_code", "dialect_code")
+        unique_together = ("quiz", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['quiz_id', 'lang_code', 'dialect_code'], name='quiz_feedback_comp_pkey')
+            models.Index(fields=['quiz', 'lang_code', 'dialect_code'], name='quiz_feedback_comp_pkey')
         ]
 
 
@@ -184,7 +184,7 @@ class User(models.Model):
         primary_key=True, unique=True, default=generate_user_id(), editable=False
     )
     full_name = models.CharField(max_length=50, default="new_user")
-    password_hash = models.CharField(max_length=128, default="pwd")
+    password_hash = models.CharField(max_length=128, default="password")
     org_name = models.CharField(max_length=50, default="org")
     country_code = models.CharField(max_length=10, default="code")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
@@ -212,7 +212,7 @@ class User(models.Model):
 
 class Email(models.Model):
     email_address = models.CharField(max_length=100, primary_key=True, default="email")
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_primary = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
 
@@ -223,78 +223,78 @@ class Site(models.Model):
 
 class Handle(models.Model):
     handle_id = models.CharField(max_length=100, primary_key=True, default="handle")
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    site_id = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
     handle = models.CharField(max_length=50, default="handle")
     is_verified = models.BooleanField(default=False)
 
 
 class Verification(models.Model):
-    verifier_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifier_user')
-    verified_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verified_user')
+    verifier = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifier_user')
+    verified = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verified_user')
     date_requested = models.DateTimeField(null=True, blank=True)
     date_granted = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ("verifier_id", "verified_id")
+        unique_together = ("verifier", "verified")
         indexes = [
-            models.Index(fields=['verifier_id', 'verified_id'], name='verification_comp_pkey')
+            models.Index(fields=['verifier', 'verified'], name='verification_comp_pkey')
         ]
 
 class Chapter_Feedback(models.Model):
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     date_created = models.DateField(default=now)
     status = models.CharField(max_length=300, null=True)
-    creator_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_chapter_feedback')
-    viewer_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='viewed_chapter_feedback')
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_chapter_feedback')
+    viewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='viewed_chapter_feedback')
     creator_comment = models.CharField(max_length=300, null=True)
     viewer_comment = models.CharField(max_length=300, null=True)
 
     class Meta:
-        unique_together = ("chapter_id", "lang_code", "dialect_code")
+        unique_together = ("chapter", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['chapter_id', 'lang_code', 'dialect_code'], name='chapter_feedback_comp_pkey')
+            models.Index(fields=['chapter', 'lang_code', 'dialect_code'], name='chapter_feedback_comp_pkey')
         ]
 
 class Language(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     is_primary = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ("user_id", "lang_code", "dialect_code")
+        unique_together = ("user", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['user_id', 'lang_code', 'dialect_code'], name='language_comp_pkey')
+            models.Index(fields=['user', 'lang_code', 'dialect_code'], name='language_comp_pkey')
         ]
 
 class Support(models.Model):
     support_id = models.AutoField(primary_key=True, default=0, editable=False)
-    creator_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
 
 
 class Support_Loc(models.Model):
-    support_id = models.ForeignKey(Support, on_delete=models.CASCADE)
+    support = models.ForeignKey(Support, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     title_latex = models.CharField(max_length=100, null=True)
     content_latex = models.CharField(max_length=500, null=True)
     date_created = models.DateField(default=now)
     date_approved = models.DateTimeField(null=True, blank=True)
-    creator_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_support_loc')
-    approver_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='approved_support_loc')
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_support_loc')
+    approver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='approved_support_loc')
 
     class Meta:
-        unique_together = ("support_id", "lang_code", "dialect_code")
+        unique_together = ("support", "lang_code", "dialect_code")
         indexes = [
-            models.Index(fields=['support_id', 'lang_code', 'dialect_code'], name='support_loc_comp_pkey')
+            models.Index(fields=['support', 'lang_code', 'dialect_code'], name='support_loc_comp_pkey')
         ]
 
 class Quiz_Support(models.Model):
-    quiz_id = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    support_id = models.ForeignKey(Support, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    support = models.ForeignKey(Support, on_delete=models.CASCADE)
     ordering = models.IntegerField(default=0)
 
