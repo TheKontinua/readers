@@ -54,23 +54,23 @@
                 {% csrf_token %}
                 <div class="mx-auto" style="width: 500px">
                     <input
-                        type="text"
+                        type="email"
                         class="form-control"
-                        id="username"
-                        name="username"
-                        placeholder="Username"
-                        autocomplete="username"
-                        value="{{ username }}"
+                        id="email"
+                        name="email"
+                        placeholder="Email Address"
+                        autocomplete="email"
+                        value="{{ email }}"
                         required
                     />
                     <div class="invalid-feedback">
-                        Please enter your username.
+                        Please enter your email.
                     </div>
                 </div>
                 <div class="container" style="margin-top: 20px"></div>
                 <div class="mx-auto" style="width: 500px">
                     <input
-                        type="text"
+                        type="password"
                         class="form-control"
                         id="password"
                         name="password"
