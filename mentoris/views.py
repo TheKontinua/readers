@@ -50,12 +50,15 @@ def profile(request):
 
 def login(request):
     if request.method == "POST":
-        username = request.POST.get("username")
+        email = request.POST.get("email")
         password = request.POST.get("password")
 
         try:
-            user = User.objects.get(display_name=username, password=password)
-        except User.DoesNotExist:
+            emailObject = Email.objects.get(email_address=email)
+            user = emailObject.user
+            if user.password_hash != password:
+                user = None
+        except Email.DoesNotExist:
             user = None
 
         if user is not None:
@@ -69,7 +72,7 @@ def login(request):
             return render(
                 request,
                 "mentapp/login.html",
-                {"username": username, "password": password},
+                {"email": email, "password": password},
             )
     else:
         return render(request, "mentapp/login.html")
