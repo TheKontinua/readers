@@ -45,8 +45,15 @@
                 </div>
                   
                 <div class="form-group required mb-3">
-                  <label for="password" class="control-label">Password</label>
-                  <input type="password" class="form-control" name="password" id="password" value = "{{ user_profile.password_hash }}" required>
+                  <label for="user-password" class="control-label">Password</label>
+                  <input
+                        type="password"
+                        class="form-control"
+                        id="user-password"
+                        name="password_hash"
+                        value = "{{ user_profile.password_hash }}"
+                        required
+                    />
                   <div class="invalid-feedback">
                     Please enter your password.
                   </div>
@@ -96,20 +103,20 @@
                   
                   <div class="form-group required mb-3" >
                     <label for="latitude">Latitude</label>
-                    <input type="text" class="form-control" id="latitude" value = "{{ user_profile.latitude }}" placeholder="36.7783° N">  
+                    <input type="text" class="form-control" id="latitude" name="latitude" value = "{{ user_profile.latitude }}" placeholder="36.7783° N">  
                   </div>
                   
                   <div class="form-group required mb-3">
                     <label for="longitude">Longitude</label>
-                    <input type="text" class="form-control" id="longitude" value = "{{ user_profile.longitude }}" placeholder="119.4179° W">  
+                    <input type="text" class="form-control" id="longitude" name="longitude" value = "{{ user_profile.longitude }}" placeholder="119.4179° W">  
                   </div>
                   
                   <div class="input-group mb-3" >
                     <label class="input-group-text control-label" for="primary-language">Primary Language</label>
-                    <select class="form-select" name="primary_language" id="primary-language" >
-                      <option value="ENG" {% if user_profile.primary_language == 'ENG' %} selected {% endif %}>ENG</option>
-                      <option value="ESP" {% if user_profile.primary_language == 'ESP' %} selected {% endif %}>ESP</option>
-                      <option value="FRA" {% if user_profile.primary_language == 'FRA' %} selected {% endif %}>FRA</option>
+                    <select class="form-select" id="primary_lang_code" name="primary_lang_code">
+                      <option value="ENG" {% if user_profile.primary_lang_code == 'ENG' %} selected {% endif %}>ENG</option>
+                      <option value="ESP" {% if user_profile.primary_lang_code == 'ESP' %} selected {% endif %}>ESP</option>
+                      <option value="FRA" {% if user_profile.primary_lang_code == 'FRA' %} selected {% endif %}>FRA</option>
                     </select>
                   </div>
                 </div>
