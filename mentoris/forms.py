@@ -22,5 +22,8 @@ class UserForm(forms.ModelForm):
                 setattr(instance, field, default_value)
 
         if commit:
-            instance.save()
+            try:
+                instance.save()
+            except Exception as e:
+                print(f"Error saving instance: {e}")
         return instance

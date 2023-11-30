@@ -77,10 +77,41 @@ def login(request):
 
 def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
-    email = get_object_or_404(Email, user_id=user_id, is_primary=True)
+    try:
+        email = Email.objects.get(user_id=user_id, is_primary=True)
+        other_emails = Email.objects.filter(user_id=user_id, is_primary = False)
+        other_emailss = [obj.email_address for obj in other_emails]
+        other_email = ', '.join(other_emailss)
+    except Email.DoesNotExist:
+        email = None
     return render(
-        request, "mentapp/profile.html", {"user_profile": user_profile, "email": email}
+        request, "mentapp/profile.html", {"user_profile": user_profile, "email": email, "other_email" : other_email}
     )
+
+
+def user_edit(request, user_id):
+    user = get_object_or_404(User, user_id=user_id)
+    # print("user items", user)
+    # print("request items", request.POST)
+    for key, value in request.POST.items():
+        # print("KEY", key, "VALUE", value)
+        if key == "primary_email":
+            Email.objects.filter(user_id=user_id, is_primary = True).update(email_address=value)
+        if key == "other_emails":
+            Email.objects.filter(user_id=user_id, is_primary = False).delete()
+            insEmails = value.split(',')
+            for em in insEmails:
+                emailObject = Email()
+                emailObject.email_address = em
+                emailObject.user_id = user
+                emailObject.save()
+        # Check if the user object has this field and the value is not empty
+        if hasattr(user, key) and value.strip():
+            # print("USERKEY", key, "USERVAL", value)
+            setattr(user, key, value)  
+    user.save()
+    return redirect(f"/profile/{user.user_id}")
+
 
 
 def request_translation(request, user_id):
