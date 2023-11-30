@@ -79,11 +79,16 @@ def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
     try:
         email = Email.objects.get(user_id=user_id, is_primary=True)
+        other_emails = Email.objects.filter(user_id=user_id, is_primary = False)
+        other_emailss = [obj.email_address for obj in other_emails]
+        other_email = ', '.join(other_emailss)
+        print("THIS IS OTHER EMAILS", other_email)
     except Email.DoesNotExist:
         email = None
     return render(
-        request, "mentapp/profile.html", {"user_profile": user_profile, "email": email}
+        request, "mentapp/profile.html", {"user_profile": user_profile, "email": email, "other_email" : other_email}
     )
+
 
 def user_edit(request, user_id):
     user = get_object_or_404(User, user_id=user_id)
