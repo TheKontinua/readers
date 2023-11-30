@@ -91,23 +91,24 @@ def user_info(request, user_id):
 
 def user_edit(request, user_id):
     user = get_object_or_404(User, user_id=user_id)
-    # print("user items", user)
-    # print("request items", request.POST)
+    print("user items", user)
+    print("request items", request.POST)
     for key, value in request.POST.items():
-        # print("KEY", key, "VALUE", value)
+        print("KEY", key, "VALUE", value)
         if key == "primary_email":
             Email.objects.filter(user_id=user_id, is_primary = True).update(email_address=value)
         if key == "other_emails":
             Email.objects.filter(user_id=user_id, is_primary = False).delete()
-            insEmails = value.split(',')
-            for em in insEmails:
-                emailObject = Email()
-                emailObject.email_address = em
-                emailObject.user_id = user
-                emailObject.save()
+            if value:
+                insEmails = value.split(',')
+                for em in insEmails:
+                    emailObject = Email()
+                    emailObject.email_address = em
+                    emailObject.user_id = user_id
+                    emailObject.save()
         # Check if the user object has this field and the value is not empty
         if hasattr(user, key) and value.strip():
-            # print("USERKEY", key, "USERVAL", value)
+            print("USERKEY", key, "USERVAL", value)
             setattr(user, key, value)  
     user.save()
     return redirect(f"/profile/{user.user_id}")
