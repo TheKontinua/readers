@@ -110,7 +110,7 @@ def user_edit(request, user_id):
             for em in insEmails:
                 emailObject = Email()
                 emailObject.email_address = em
-                emailObject.user_id = user
+                emailObject.user_id = user_id
                 emailObject.save()
         # Check if the user object has this field and the value is not empty
         if hasattr(user, key) and value.strip():
