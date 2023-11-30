@@ -119,6 +119,13 @@
                       <option value="FRA" {% if user_profile.primary_lang_code == 'FRA' %} selected {% endif %}>FRA</option>
                     </select>
                   </div>
+                  <div class="input-group mb-3" >
+                    <label class="input-group-text control-label" for="primary-dialect">Primary Dialect</label>
+                    <select class="form-select" id="primary_dialect_code" name="primary_dialect_code">
+                      <option value="EN" {% if user_profile.primary_dialect_code == 'EN' %} selected {% endif %}>EN</option>
+                      <option value="ES" {% if user_profile.primary_dialect_code == 'ES' %} selected {% endif %}>ES</option>
+                    </select>
+                  </div>
                 </div>
                 <button type="submit" class="btn btn-primary" style="margin-left: 585px;">Save</button>
           </div>

@@ -20,10 +20,10 @@ def sign_up(request):
             user = form.save()
 
             # Add to Email table
-            email = request.POST.get("primary_email")
+            email = request.POST.get("email_address")
             emailObject = Email()
-            emailObject.primary_email = email
-            emailObject.user_id = user
+            emailObject.email_address = email
+            emailObject.user = user
             emailObject.is_primary = True
             emailObject.save()
 
@@ -32,8 +32,8 @@ def sign_up(request):
                 email_list = other_emails.split(",")
                 for other_email in email_list:
                     emailObject = Email()
-                    emailObject.primary_email = other_email
-                    emailObject.user_id = user
+                    emailObject.email_address = other_email
+                    emailObject.user = user
                     emailObject.save()
 
             return redirect(f"../profile/{user.user_id}")
@@ -79,13 +79,15 @@ def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
     try:
         email = Email.objects.get(user_id=user_id, is_primary=True)
-        other_emails = Email.objects.filter(user_id=user_id, is_primary = False)
+        other_emails = Email.objects.filter(user_id=user_id, is_primary=False)
         other_emailss = [obj.email_address for obj in other_emails]
-        other_email = ', '.join(other_emailss)
+        other_email = ", ".join(other_emailss)
     except Email.DoesNotExist:
         email = None
     return render(
-        request, "mentapp/profile.html", {"user_profile": user_profile, "email": email, "other_email" : other_email}
+        request,
+        "mentapp/profile.html",
+        {"user_profile": user_profile, "email": email, "other_email": other_email},
     )
 
 
@@ -96,10 +98,12 @@ def user_edit(request, user_id):
     for key, value in request.POST.items():
         # print("KEY", key, "VALUE", value)
         if key == "primary_email":
-            Email.objects.filter(user_id=user_id, is_primary = True).update(email_address=value)
+            Email.objects.filter(user_id=user_id, is_primary=True).update(
+                email_address=value
+            )
         if key == "other_emails":
-            Email.objects.filter(user_id=user_id, is_primary = False).delete()
-            insEmails = value.split(',')
+            Email.objects.filter(user_id=user_id, is_primary=False).delete()
+            insEmails = value.split(",")
             for em in insEmails:
                 emailObject = Email()
                 emailObject.email_address = em
@@ -108,10 +112,9 @@ def user_edit(request, user_id):
         # Check if the user object has this field and the value is not empty
         if hasattr(user, key) and value.strip():
             # print("USERKEY", key, "USERVAL", value)
-            setattr(user, key, value)  
+            setattr(user, key, value)
     user.save()
     return redirect(f"/profile/{user.user_id}")
-
 
 
 def request_translation(request, user_id):

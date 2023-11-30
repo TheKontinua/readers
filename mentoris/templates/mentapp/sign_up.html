@@ -45,47 +45,20 @@
                 action="{% url 'sign_up' %}"
             >
                 {% csrf_token %}
-                <div class="row mb-3">
-                    <div class="form-group required col-md-6">
-                        <label for="full-name" class="control-label"
-                            >Full Name</label
-                        >
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="full-name"
-                            name="full_name"
-                            placeholder="First Last"
-                            required
-                        />
-                        <div class="invalid-feedback">
-                            Please enter your full name.
-                        </div>
-                    </div>
-                    <div class="form-group required col-md-6">
-                        <label for="display-name" class="control-label"
-                            >Display Name</label
-                        >
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span
-                                    class="input-group-text"
-                                    id="inputGroupPrepend"
-                                    >@</span
-                                >
-                            </div>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="display-name"
-                                name="display_name"
-                                aria-describedby="inputGroupPrepend"
-                                required
-                            />
-                            <div class="invalid-feedback">
-                                Please choose a unique display name.
-                            </div>
-                        </div>
+                <div class="form-group required col-12 mb-3">
+                    <label for="full-name" class="control-label"
+                        >Full Name</label
+                    >
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="full-name"
+                        name="full_name"
+                        placeholder="First Last"
+                        required
+                    />
+                    <div class="invalid-feedback">
+                        Please enter your full name.
                     </div>
                 </div>
                 <div class="form-group col-12 mb-3">
@@ -106,7 +79,7 @@
                         type="email"
                         class="form-control"
                         id="email-address"
-                        name="primary_email"
+                        name="email_address"
                         aria-describedby="email-address"
                         placeholder="email@email.com"
                         required
@@ -116,14 +89,14 @@
                     </div>
                 </div>
                 <div class="form-group required col-12 mb-3">
-                    <label for="user-password" class="control-label"
+                    <label for="password_hash" class="control-label"
                         >Password</label
                     >
                     <input
                         type="password"
                         class="form-control"
-                        id="user-password"
-                        name="password"
+                        id="password_hash"
+                        name="password_hash"
                         required
                     />
                     <div class="invalid-feedback">
@@ -131,7 +104,7 @@
                     </div>
                 </div>
                 <div class="form-group required row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="input-group mb-3">
                             <label
                                 class="input-group-text control-label"
@@ -153,17 +126,17 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="input-group mb-3">
                             <label
                                 class="input-group-text control-label"
-                                for="primary-language"
+                                for="primary_lang_code"
                                 >Primary Language</label
                             >
                             <select
                                 class="form-select"
-                                id="primary-language"
-                                name="primary_language"
+                                id="primary_lang_code"
+                                name="primary_lang_code"
                                 required
                             >
                                 <option selected disabled value="">
@@ -172,6 +145,27 @@
                                 <option value="English">English</option>
                                 <option value="German">German</option>
                                 <option value="Spanish">Spanish</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group mb-3">
+                            <label
+                                class="input-group-text control-label"
+                                for="primary_dialect_code"
+                                >Dialect Code</label
+                            >
+                            <select
+                                class="form-select"
+                                id="primary_dialect_code"
+                                name="primary_dialect_code"
+                                required
+                            >
+                                <option selected disabled value="">
+                                    Choose...
+                                </option>
+                                <option value="EN">EN</option>
+                                <option value="ES">ES</option>
                             </select>
                         </div>
                     </div>
