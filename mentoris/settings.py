@@ -97,6 +97,14 @@ DATABASES = {
     #     'HOST': 'mentorisdb.cmkrvc9icttm.us-west-2.rds.amazonaws.com',
     #     'PORT': '5432',
     #     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME': 'mentoris',
+    #     'USER': 'walden',
+    #     'PASSWORD': '',
+    #     'HOST': 'localhost',
+    #     'PORT': '5432',
+    # }
 
     # "default": {
     #     "ENGINE": "django.db.backends.sqlite3",
