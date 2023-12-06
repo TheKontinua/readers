@@ -7,6 +7,9 @@ The mentors for the students using this curriculum will need quizzes
 (and answer keys) for each chapter. Mentoris is the web app that will
 supply them with those quizzes and answer keys.
 
+Here is our [Technical Specification](https://github.com/TheKontinua/mentoris/files/13572053/Technical.Specification.-.Kontinua.docx.pdf) which outlines the entire project in more detail.
+
+
 ## Infrastructure
 
 The web application will be open source. The primary programming
