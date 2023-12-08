@@ -88,15 +88,6 @@ DATABASES = {
     #     }
 
     #Production db
-
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'MentappMentorispasSCars2ElasticStalkBean!',
-        'HOST': 'mentorisdb.cmkrvc9icttm.us-west-2.rds.amazonaws.com',
-        'PORT': '5432',
-        }
     
 
     # "default": {
