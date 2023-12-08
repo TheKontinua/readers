@@ -175,13 +175,13 @@ class Quiz_Feedback(models.Model):
         ]
 
 
-def generate_user_id():
-    return str(uuid.uuid4())
+# def generate_user_id():
+#     return str(uuid.uuid4())
 
 
 class User(models.Model):
     user_id = models.UUIDField(
-        primary_key=True, unique=True, default=generate_user_id(), editable=False
+        primary_key=True, unique=True, default=uuid.uuid4, editable=False
     )
     full_name = models.CharField(max_length=50, default="new_user")
     password_hash = models.CharField(max_length=128, default="password")
