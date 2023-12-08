@@ -1,138 +1,172 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>User Profile</title>
-    <link rel="stylesheet" type="text/css" 
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">  <link rel="stylesheet" type="text/css">
-    <style>
-      .form-group.required .control-label:after {
-        content:"*";
-        color:red;
-      }
-    </style>
+  <title>User Profile</title>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css">
+  <style>
+    .form-group.required .control-label:after {
+      content: "*";
+      color: red;
+    }
+  </style>
 </head>
+
 <body style="padding-left: 100px; padding-right: 100px;">
-    <div class="bg-info container" style="height: 130px; margin-top: 20px; margin-bottom: 30px; padding: 10px;">
-        <div class="row mb-5">
-          <div class="col-md-6">
-            {% load static %}
-            <img src="{% static 'kontinua_foundation_logo.png' %}" alt="Responsive image" style="width: 450px;">
-          </div>
-          <div class="col-md-6" style="margin-top: 20px;">
-                {% load static %}
-                <img src="{% static 'default-profile.png' %}" alt="Responsive image" style="float: right; padding: 10px; width: 100px;">
-          </div>
-        </div>
+  <div class="bg-info container" style="height: 130px; margin-top: 20px; margin-bottom: 30px; padding: 10px;">
+    <div class="row mb-5">
+      <div class="col-md-6">
+        {% load static %}
+        <img src="{% static 'kontinua_foundation_logo.png' %}" alt="Responsive image" style="width: 450px;">
       </div>
+      <div class="col-md-6" style="margin-top: 20px;">
+        {% load static %}
+        <img src="{% static 'default-profile.png' %}" alt="Responsive image"
+          style="float: right; padding: 10px; width: 100px;">
+      </div>
+    </div>
+  </div>
 
-      <div class="container-fluid">
-        <form class="needs-validation" novalidate>
-        <div class="row">
+  <div class="container-fluid">
+    <form class="needs-validation" novalidate>
+      <div class="row">
         <div class="col-md-6">
-            <div class="list-group">
-              <div class="form-group required mb-3">
-                <label for="full-name" class="control-label">Full Name</label>
-                <input type="text" class="form-control" id="full-name" value = "{{ user_profile.full_name }}" required>
-                <div class="invalid-feedback">
-                  Please enter your full name.
-                </div>
+          <div class="list-group">
+            <div class="form-group required mb-3">
+              <label for="full-name" class="control-label">Full Name</label>
+              <input type="text" class="form-control" id="full-name" value="{{ user_profile.full_name }}" required>
+              <div class="invalid-feedback">
+                Please enter your full name.
               </div>
-                
-              <div class="form-group required mb-3">
-                <label for="password" class="control-label">Password</label>
-                <input type="password" class="form-control" id="password" value = "{{ user_profile.password_hash }}" required>
-                <div class="invalid-feedback">
-                  Please enter your password.
-                </div>
-              </div>
-                
-              <div class="form-group required mb-3">
-                <label for="org-name" >Organization Name</label>
-                <input type="text" class="form-control" id="org-name" value = "{{ user_profile.org_name }}" >  
-              </div>
+            </div>
 
-              <div class="form-group required mb-3">
-                <label for="primary-email" class="control-label">Primary email</label>
-                <input type="text" class="form-control" id="primary-email" value = "{{ email.email_address }}"  required>
-                <div class="invalid-feedback">
-                  Please enter your primary email.
-                </div>
+            <div class="form-group required mb-3">
+              <label for="password" class="control-label">Password</label>
+              <input type="password" class="form-control" id="password" value="{{ user_profile.password_hash }}"
+                required>
+              <div class="invalid-feedback">
+                Please enter your password.
               </div>
-                  <div class="input-group">
-                    <span class="input-group-text">Other Email Addresses</span>
-                    <textarea class="form-control" aria-label="other-emails" placeholder="email1@email.com, email2@email.com"></textarea>
-                  </div>
-              </div> 
+            </div>
+
+            <div class="form-group required mb-3">
+              <label for="org-name">Organization Name</label>
+              <input type="text" class="form-control" id="org-name" value="{{ user_profile.org_name }}">
+            </div>
+
+            <div class="form-group required mb-3">
+              <label for="primary-email" class="control-label">Primary email</label>
+              <input type="text" class="form-control" id="primary-email" value="{{ email.email_address }}" required>
+              <div class="invalid-feedback">
+                Please enter your primary email.
+              </div>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text">Other Email Addresses</span>
+              <textarea class="form-control" aria-label="other-emails"
+                placeholder="email1@email.com, email2@email.com"></textarea>
+            </div>
+          </div>
         </div>
         <div class="col-md-6">
-            <button type="button" class="btn btn-primary">Edit Handles</button>
-            <div class="row gy-2">
+          <button type="button" class="btn btn-primary">Edit Handles</button>
+          <div class="row gy-2">
             <div class="col-6">
               <div class="p-2"></div>
             </div>
-        </div>
-            <button type="button" class="btn btn-primary">Request Authentication</button>
-            <div class="row gy-2">
-                <div class="col-6">
-                  <div class="p-4"></div>
-                </div>
+          </div>
+          <button type="button" class="btn btn-primary">Request Authentication</button>
+          <div class="row gy-2">
+            <div class="col-6">
+              <div class="p-4"></div>
             </div>
-            
-            <div class="form-group required">
-                <div class="input-group mb-3">
-                    <label class="input-group-text control-label" for="country-code">Country Code</label>
-                    <select class="form-select" id="country-code" >
-                      <option value="US" {% if user_profile.country_code == 'US' %} selected {% endif %}>US</option>
-                      <option value="AUS" {% if user_profile.country_code == 'AUS' %} selected {% endif %}>AUS</option>
-                      <option value="UK" {% if user_profile.country_code == 'UK' %} selected {% endif %}>UK</option>
-                    </select>
-                  </div>
-                
-                <div class="form-group required mb-3" >
-                  <label for="latitude">Latitude</label>
-                  <input type="text" class="form-control" id="latitude" value = "{{ user_profile.latitude }}" placeholder="36.7783° N">  
-                </div>
-                
-                <div class="form-group required mb-3">
-                  <label for="longitude">Longitude</label>
-                  <input type="text" class="form-control" id="longitude" value = "{{ user_profile.longitude }}" placeholder="119.4179° W">  
-                </div>
-                
-                <div class="input-group mb-3" >
-                  <label class="input-group-text control-label" for="primary-language">Primary Language</label>
-                  <select class="form-select" id="primary-language" >
-                    <option value="ENG" {% if user_profile.primary_language == 'ENG' %} selected {% endif %}>ENG</option>
-                    <option value="ESP" {% if user_profile.primary_language == 'ESP' %} selected {% endif %}>ESP</option>
-                    <option value="FRA" {% if user_profile.primary_language == 'FRA' %} selected {% endif %}>FRA</option>
-                  </select>
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary" style="margin-left: 585px;">Save</button>
-        </div>
+          </div>
+
+          <div class="form-group required">
+            <div class="input-group mb-3">
+              <label class="input-group-text control-label" for="country-code">Country Code</label>
+              <select class="form-select" id="country-code">
+                {% if user_profile.country_code == 'US' %}
+                <option value="US" selected>US</option>
+                {% else %}
+                <option value="US" selected>US</option>
+                {% endif %}
+                {% if user_profile.country_code == 'AUS' %}
+                <option value="AUS" selected>AUS</option>
+                {% else %}
+                <option value="AUS" selected>AUS</option>
+                {% endif %}
+                {% if user_profile.country_code == 'UK' %}
+                <option value="UK" selected>UK</option>
+                {% else %}
+                <option value="UK" selected>UK</option>
+                {% endif %}
+              </select>
+            </div>
+
+            <div class="form-group required mb-3">
+              <label for="latitude">Latitude</label>
+              <input type="text" class="form-control" id="latitude" value="{{ user_profile.latitude }}"
+                placeholder="36.7783° N">
+            </div>
+
+            <div class="form-group required mb-3">
+              <label for="longitude">Longitude</label>
+              <input type="text" class="form-control" id="longitude" value="{{ user_profile.longitude }}"
+                placeholder="119.4179° W">
+            </div>
+
+            <div class="input-group mb-3">
+              <label class="input-group-text control-label" for="primary-language">Primary Language</label>
+              <select class="form-select" id="primary-language">
+                {% if user_profile.primary_language == 'ENG' %}
+                <option value="ENG" selected>ENG</option>
+                {% else %}
+                <option value="ENG">ENG</option>
+                {% endif %}
+                {% if user_profile.primary_language == 'ESP' %}
+                <option value="ESP" selected>ESP</option>
+                {% else %}
+                <option value="ESP">ESP</option>
+                {% endif %}
+                {% if user_profile.primary_language == 'FRA' %}
+                <option value="FRA" selected>FRA</option>
+                {% else %}
+                <option value="FRA">FRA</option>
+                {% endif %}
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-left: 585px;">Save</button>
         </div>
       </div>
-    </form>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <script>
-      (function () {
-        'use strict'
+  </div>
+  </form>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+    crossorigin="anonymous"></script>
+  <script>
+    (function () {
+      'use strict'
 
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        var forms = document.querySelectorAll('.needs-validation')
+      // Fetch all the forms we want to apply custom Bootstrap validation styles to
+      var forms = document.querySelectorAll('.needs-validation')
 
-        // Loop over them and prevent submission
-        Array.prototype.slice.call(forms)
-          .forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-              if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-              }
+      // Loop over them and prevent submission
+      Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
 
-              form.classList.add('was-validated')
-            }, false)
-          })
-      })()
-    </script>
+            form.classList.add('was-validated')
+          }, false)
+        })
+    })()
+  </script>
 </body>
+
 </html>

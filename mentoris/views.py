@@ -1,4 +1,4 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.template import loader
 from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc
 from django.shortcuts import render, get_object_or_404, redirect
@@ -142,7 +142,7 @@ def main(request, volume_id = 1):
 
     volumes = Volume.objects.values_list('volume_id', flat=True).distinct().order_by('volume_id')
 
-    if volume_id is not None:
+    if volume_id:
         chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()    
     else:
         chapters = []
