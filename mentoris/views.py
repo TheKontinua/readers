@@ -68,7 +68,7 @@ def sign_up(request):
                     emailObject.save()
 
             return redirect(f"../profile/{user.user_id}")
-        
+
         return render(
             request,
             "mentapp/sign_up.html",
@@ -88,12 +88,12 @@ def profile(request):
 def login(request):
     if request.method == "POST":
         email = request.POST.get("email")
-        password = request.POST.get("password")
+        password = request.POST.get("password_hash")
 
         try:
             emailObject = Email.objects.get(email_address=email)
             user = emailObject.user
-            if user.password_hash != password:
+            if not user.check_password(password):
                 user = None
         except Email.DoesNotExist:
             user = None
