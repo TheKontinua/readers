@@ -28,5 +28,5 @@ urlpatterns = [
     path('profile/edit/<uuid:user_id>/', views.user_edit, name='user_edit'),
     path("main/", views.main, name="main"),
     path("main/<int:volume_id>/", views.main, name="main_vol_chap"),
-
+    path("main/<int:volume_id>/<chapter_id>/", views.chapter, name="chapter"),
 ]
