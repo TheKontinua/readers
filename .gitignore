@@ -140,4 +140,4 @@ dmypy.json
 !.elasticbeanstalk/*.global.yml
 
 # Migrations
-mentapp/migrations
+mentapp/migrations/*

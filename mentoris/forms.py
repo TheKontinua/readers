@@ -21,6 +21,9 @@ class UserForm(forms.ModelForm):
                 default_value = User._meta.get_field(field).default
                 setattr(instance, field, default_value)
 
+        password = self.cleaned_data.get("password_hash")
+        setattr(instance, "password_hash", self.Meta.model.set_password(self, password))
+
         if commit:
             try:
                 instance.save()
