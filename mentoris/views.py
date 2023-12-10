@@ -16,9 +16,39 @@ def sign_up(request):
     if request.method == "POST":
         # Add to User table
         form = UserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
 
+        if form.is_valid():
+            email_exists = False
+            other_email_exists = False
+
+            if Email.objects.filter(
+                email_address=request.POST.get("email_address")
+            ).exists():
+                email_exists = True
+
+            other_emails = request.POST.get("other_emails")
+            if other_emails is not None and other_emails != "":
+                email_list = other_emails.split(",")
+                for other_email in email_list:
+                    if Email.objects.filter(email_address=other_email.strip()).exists():
+                        other_email_exists = True
+
+            # TODO: Change location of error message to be in proper place based on exists
+            if email_exists or other_email_exists:
+                if email_exists:
+                    form.add_error(None, "Primary")
+                if other_email_exists:
+                    form.add_error(None, "Other")
+                return render(
+                    request,
+                    "mentapp/sign_up.html",
+                    {
+                        "form": form,
+                        "email": request.POST.get("email_address"),
+                        "other_emails": request.POST.get("other_emails"),
+                    },
+                )
+            user = form.save()
             # Add to Email table
             email = request.POST.get("email_address")
             emailObject = Email()
@@ -32,13 +62,20 @@ def sign_up(request):
                 email_list = other_emails.split(",")
                 for other_email in email_list:
                     emailObject = Email()
-                    emailObject.email_address = other_email
+                    emailObject.email_address = other_email.strip()
                     emailObject.user = user
+                    emailObject.is_primary = False
                     emailObject.save()
 
             return redirect(f"../profile/{user.user_id}")
 
-        return render(request, "mentapp/sign_up.html", {"form": form})
+        return render(
+            request,
+            "mentapp/sign_up.html",
+            {
+                "form": form,
+            },
+        )
     else:
         return render(request, "mentapp/sign_up.html")
 
@@ -51,12 +88,12 @@ def profile(request):
 def login(request):
     if request.method == "POST":
         email = request.POST.get("email")
-        password = request.POST.get("password")
+        password = request.POST.get("password_hash")
 
         try:
             emailObject = Email.objects.get(email_address=email)
             user = emailObject.user
-            if user.password_hash != password:
+            if not user.check_password(password):
                 user = None
         except Email.DoesNotExist:
             user = None
