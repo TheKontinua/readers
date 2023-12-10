@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.template import loader
-from mentapp.models import User, Email
+from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from mentoris.forms import UserForm
@@ -173,3 +173,25 @@ def request_translation(request, user_id):
         "notifications@kontinua.org",
         [email],
     )
+
+def main(request, volume_id = 1):
+    template = loader.get_template("mentapp/main.html")
+
+    volumes = Volume.objects.values_list('volume_id', flat=True).distinct().order_by('volume_id')
+
+    if volume_id:
+        chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()    
+    else:
+        chapters = []
+
+    chapter_locs = Chapter_Loc.objects.filter(chapter__chapter_id__in=chapters).distinct()
+   
+    context = {'volumes': volumes, "chapters": chapters, "volume_id": volume_id, "chapter_locs": chapter_locs}
+
+    return HttpResponse(template.render(context, request))
+
+
+
+
+
+

@@ -12,59 +12,6 @@ def generate_user_id():
     return str(uuid.uuid4())
 
 
-class User(models.Model):
-    user_id = models.UUIDField(
-        primary_key=True, unique=True, editable=False, default=generate_user_id()
-    )
-    full_name = models.CharField(max_length=50, default="new_user")
-    password_hash = models.CharField(max_length=128, default="default_password")
-    org_name = models.CharField(max_length=50, default="org")
-    country_code = models.CharField(max_length=10, default="code")
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
-    primary_lang_code = models.CharField(max_length=20, default="EN")
-    primary_dialect_code = models.CharField(max_length=20, default="US")
-
-    is_verified = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-    is_quizmaker = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
-
-    # def save(self, *args, **kwargs):
-    #     if not self.pk and not self.password.startswith(
-    #         ("pbkdf2_sha256$", "bcrypt", "argon2")
-    #     ):
-    #         self.password = make_password(self.password or "password")
-
-    #     super().save(*args, **kwargs)
-
-    # @receiver(pre_save, sender=User)
-    # def hash_password(sender, instance, **kwargs):
-    # Check if the password has changed
-    #    if instance._state.adding or instance.password != User.objects.get(pk=instance.pk).password:
-    #       instance.password = make_password(instance.password)
-
-    def set_password(self, raw_password):
-        return make_password(password=raw_password)
-
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password_hash)
-
-    # def save(self, commit=True):
-    #     user = super().save(commit=False)
-    #     user.set_password(self.cleaned_data['password'])
-
-    #     if commit:
-    #         user.save()
-
-    #     return user
-
-    def __str__(self):
-        return f"""{self.full_name},
-            Org: {self.org_name}, Country: {self.country_code},
-            Lat: {self.latitude}, Long: {self.longitude}"""
-
-
 class Volume(models.Model):
     volume_id = models.AutoField(default=0, primary_key=True)
 
@@ -253,6 +200,36 @@ class Quiz_Feedback(models.Model):
                 name="quiz_feedback_comp_pkey",
             )
         ]
+
+
+class User(models.Model):
+    user_id = models.UUIDField(
+        primary_key=True, unique=True, default=uuid.uuid4, editable=False
+    )
+    full_name = models.CharField(max_length=50, default="new_user")
+    password_hash = models.CharField(max_length=128, default="password")
+    org_name = models.CharField(max_length=50, default="org")
+    country_code = models.CharField(max_length=10, default="code")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
+    primary_lang_code = models.CharField(max_length=20, default="EN")
+    primary_dialect_code = models.CharField(max_length=20, default="US")
+
+    is_verified = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+    is_quizmaker = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
+    def set_password(self, raw_password):
+        return make_password(password=raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password_hash)
+
+    def __str__(self):
+        return f"""{self.full_name},
+            Org: {self.org_name}, Country: {self.country_code},
+            Lat: {self.latitude}, Long: {self.longitude}"""
 
 
 class Email(models.Model):
