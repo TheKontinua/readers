@@ -10,7 +10,7 @@ supply them with those quizzes and answer keys.
 Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwoVZBdJGd_tcb1RkzF5oQL2ENw1O/edit?usp=sharing&ouid=107605930377207959573&rtpof=true&sd=true) which outlines the entire project in more detail.
 
 ## Set Up
-1. Install Python 3.11 Python Release Python 3.11.0 | Python.org
+1. Install Python 3.11 [Python Release Python 3.11.0 | Python.org](https://docs.djangoproject.com/en/5.0/intro/install/)
 2. Follow the Django installation guide: `Quick install guide | Django documentation | Django (djangoproject.com).` We are using Django version 4.2.5
 3. Install the Elastic Beanstalk CLI: Install the `EB CLI - AWS Elastic Beanstalk (amazon.com)`
 4. Locate the config file in the `.AWS folder` (location varies based on operating system, usually in the home directory). Ask the team for the AWS Elastic Beanstalk credentials
