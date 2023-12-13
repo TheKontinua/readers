@@ -20,7 +20,7 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwo
         - Select 1 `(mentoris)`
         - Do not continue with CodeCommit
     - Use the command `eb deploy` to deploy code into AWS Elastic Beanstalk  when ready
-    - The current state of the project after deployment can be viewed here: [mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com](https://mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/)](http://mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/)
+    - The current state of the project after deployment can be viewed here: [mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com](https://mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/)
     - The current deployment should always match what is in the main branch on the Github: [GitHub - TheKontinua/mentoris: The web app for mentors](https://github.com/TheKontinua/mentoris)
 5. Complete the official Django tutorial: [Writing your first Django app, part 1 | Django documentation | Django (djangoproject.com)](https://docs.djangoproject.com/en/5.0/intro/tutorial01/)
 6. Meet with the team to get tasks for your first sprint.
