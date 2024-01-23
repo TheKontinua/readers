@@ -217,3 +217,4 @@ def request_translation(request, user_id):
         "notifications@kontinua.org",
         [email],
     )
+    
