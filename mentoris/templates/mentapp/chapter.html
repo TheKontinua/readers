@@ -172,31 +172,17 @@
         crossorigin="anonymous"></script>
     <script>
         document.getElementById('downloadPDF').addEventListener('click', function () {
-            // Replace 'your_blob_key' with the actual key of the Blob you want to download
             var blobKey = '0';
 
             fetch(`/download_pdf/${blobKey}/`)
                 .then(response => response.blob())
                 .then(blob => {
-                    // Create a Blob from the binary data
                     var fileBlob = new Blob([blob], { type: 'application/pdf' });
-
-                    // Create a link element
                     var link = document.createElement('a');
-
-                    // Set the href attribute with the Blob URL
                     link.href = URL.createObjectURL(fileBlob);
-
-                    // Set the download attribute with the desired filename
                     link.download = 'downloaded.pdf';
-
-                    // Append the link to the body
                     document.body.appendChild(link);
-
-                    // Trigger a click event on the link to start the download
                     link.click();
-
-                    // Remove the link element from the body
                     document.body.removeChild(link);
                 });
         });
