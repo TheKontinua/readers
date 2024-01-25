@@ -29,6 +29,6 @@ urlpatterns = [
     path("main/", views.main, name="main"),
     path("main/<int:volume_id>/", views.main, name="main_vol_chap"),
     path("main/<int:volume_id>/<chapter_id>/", views.chapter, name="chapter"),
-    path('download_pdf/<int:blob_key>/', views.download_pdf, name='download_pdf'),
-    path('upload_pdf/<path:pdf_path>/', views.upload_pdf, name='upload_pdf'),
+    path("download_pdf/<int:blob_key>/", views.download_pdf, name='download_pdf'),
+    path("upload_pdf/<path:pdf_path>/", views.upload_pdf, name='upload_pdf'),
 ]
