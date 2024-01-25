@@ -1,10 +1,14 @@
-from django.http import HttpResponse
+import os
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
-from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc
+from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc, Blob
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from mentoris.forms import UserForm
 from django.core.mail import send_mail
+from django.core.files.base import ContentFile
+
+
 
 
 def katex(request):
@@ -217,3 +221,30 @@ def request_translation(request, user_id):
         "notifications@kontinua.org",
         [email],
     )
+
+def download_pdf(request, blob_key):
+    blob_instance = get_object_or_404(Blob, blob_key=blob_key)
+
+    response = HttpResponse(blob_instance.file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{blob_instance.filename}"'
+    return response
+
+
+def upload_pdf(request, pdf_path):
+    try:
+        with open(pdf_path, 'rb') as pdf_file:
+            pdf_content = pdf_file.read()
+
+        # Use Django's ContentFile to create a file-like object
+        content_file = ContentFile(pdf_content, name=os.path.basename(pdf_path))
+
+        blob_instance = Blob(
+            file=content_file,
+            content_type='application/pdf',
+            filename=os.path.basename(pdf_path)
+        )
+        blob_instance.save()
+
+        return JsonResponse({'status': 'success', 'message': 'File uploaded successfully'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
