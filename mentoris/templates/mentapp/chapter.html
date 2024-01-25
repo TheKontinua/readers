@@ -150,7 +150,7 @@
             </table>
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">
+            <button id="uploadPDF" type="submit" class="btn btn-primary">
                 Submit a new Quiz Question
             </button>
         </div>
@@ -172,7 +172,7 @@
         crossorigin="anonymous"></script>
     <script>
         document.getElementById('downloadPDF').addEventListener('click', function () {
-            var blobKey = '0';
+            var blobKey = '0'; //whatever the QuizRedering blob_key is
 
             fetch(`/download_pdf/${blobKey}/`)
                 .then(response => response.blob())
@@ -186,6 +186,45 @@
                     document.body.removeChild(link);
                 });
         });
+    </script>
+    <script>
+        document.getElementById('uploadPDF').addEventListener('click', function () {
+            const pdfPath = 'mentoris/dummy.pdf';
+
+            fetch(`/upload_pdf/${pdfPath}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),  // Include CSRF token for Django
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);  // Log the response from the server
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Check if this cookie name is the one we are looking for
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
     </script>
 </body>
 
