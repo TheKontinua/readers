@@ -74,14 +74,13 @@ class Chapter_Loc(models.Model):
 
 
 class Question(models.Model):
-    question_id = models.AutoField(default=0, primary_key=True)
+    question_id = models.AutoField(primary_key=True)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
     conceptual_difficulty = models.FloatField(default=0)
     time_required_mins = models.FloatField(default=0)
     point_value = models.FloatField(default=0)
     pages_required = models.FloatField(default=0)
-    
 
 
 class Question_Loc(models.Model):
@@ -120,8 +119,10 @@ class Question_Loc(models.Model):
 
 
 class Blob(models.Model):
-    blob_key = models.BinaryField(primary_key=True, default=b"")
+    blob_key = models.AutoField(primary_key=True)
     binary_data = models.BinaryField()
+    content_type = models.CharField(max_length=255, null=True, blank=True)
+    filename = models.CharField(max_length=255, null=True, blank=True)
 
 
 class Question_Attachment(models.Model):
@@ -163,7 +164,7 @@ class Support_Attachment(models.Model):
 
 
 class Quiz(models.Model):
-    quiz_id = models.AutoField(default=0, primary_key=True)
+    quiz_id = models.AutoField(primary_key=True)
     conceptual_difficulty = models.FloatField()
     time_required_mins = models.IntegerField()
     calculator_allowed = models.BooleanField(default=False)

@@ -17,8 +17,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Blob',
             fields=[
-                ('blob_key', models.BinaryField(default=b'', primary_key=True, serialize=False)),
+                ('blob_key', models.AutoField(primary_key=True, default=0)),
                 ('binary_data', models.BinaryField()),
+                ('content_type', models.CharField(max_length=255, null=True, blank=True)),
+                ('filename', models.CharField(max_length=255, null=True, blank=True))
             ],
         ),
         migrations.CreateModel(

@@ -1,271 +1,206 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link
-            rel="stylesheet"
-            type="text/css"
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        />
-        <link rel="stylesheet" type="text/css" />
-    </head>
-    <body style="padding-left: 100px; padding-right: 100px">
-        <div
-            class="bg-info container"
-            style="
+
+<head>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" />
+</head>
+
+<body style="padding-left: 100px; padding-right: 100px">
+    <div class="bg-info container" style="
                 height: 130px;
                 margin-top: 20px;
                 margin-bottom: 30px;
                 padding: 10px;
-            "
-        >
-            <div class="row mb-5">
-                <div class="col-md-6">
-                    <button
-                        type="submit"
-                        class="btn"
-                        onclick="window.location.href='/main/{{volume.volume_id }}'"
-                        style="border-color: transparent; padding-top: 0px; padding-left: 0px;";
-                    >
-                        {% load static %}
-                        <img
-                            src="{% static 'kontinua_foundation_logo.png' %}"
-                            alt="Responsive image"
-                            style="width: 450px"
-                        />
-                    </button>
-                </div>
-                <div class="col-md-6" style="margin-top: 20px">
-                    <img
-                        src="{% static 'default-profile.png' %}"
-                        alt="Responsive image"
-                        style="float: right; padding: 10px; width: 100px"
-                        id="profile-img"
-                    />
-                </div>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                    onclick="window.location.href='/main/{{volume.volume_id }}'"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        fill="currentColor"
-                        class="bi bi-arrow-left"
-                        viewBox="0 0 16 16"
-                    >
-                        <path
-                            fill-rule="evenodd"
-                            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
-                        />
-                    </svg>
-                    Back
-                </button>
-            </div>
+            ">
+        <div class="row mb-5">
             <div class="col-md-6">
-                <h2 style="text-align: center">
-                    Quizzes for Vol {{ volume.volume_id }} Chapter: {{ title }}
-                </h2>
-            </div>
-        </div>
-        <div class="row mb-12">
-            <div class="col-md-10">
-                <table class="table border">
-                    <tbody>
-                        <tr>
-                            <th scope="row" style="width: 20%">
-                                <a href="" class="text-dark"
-                                    ><p
-                                        style="
-                                            margin-top: 2%;
-                                            margin-bottom: 0px;
-                                        "
-                                    >
-                                        Intro Quiz 1
-                                    </p></a
-                                >
-                            </th>
-                            <td class="text-secondary" style="width: 25%">
-                                <p
-                                    class="text-secondary"
-                                    style="margin-top: 2%; margin-bottom: 0px"
-                                >
-                                    Created by @Harry_Potter
-                                </p>
-                            </td>
-                            <td style="width: 20%">
-                                <p
-                                    class="text-secondary"
-                                    style="margin-top: 3%; margin-bottom: 0px"
-                                >
-                                    11-23-23, 09:00am
-                                </p>
-                            </td>
-                            <td style="padding-left: 30%; padding-right: 0%">
-                                <button
-                                    type="button"
-                                    class="btn"
-                                    style="
-                                        background-color: transparent;
-                                        float: right;
-                                    "
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        fill="currentColor"
-                                        class="bi bi-download"
-                                        viewBox="0 0 16 16"
-                                    >
-                                        <path
-                                            d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"
-                                        />
-                                        <path
-                                            d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
-                                        />
-                                    </svg>
-                                </button>
-                            </td>
-                            <td style="padding-left: 0px">
-                                <button
-                                    type="button"
-                                    class="btn"
-                                    style="
-                                        background-color: transparent;
-                                        float: right;
-                                    "
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        fill="currentColor"
-                                        class="bi bi-three-dots-vertical"
-                                        viewBox="0 0 16 16"
-                                    >
-                                        <path
-                                            d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"
-                                        />
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row" style="width: 20%">
-                                <a href="" class="text-dark"
-                                    ><p
-                                        style="
-                                            margin-top: 2%;
-                                            margin-bottom: 0px;
-                                        "
-                                    >
-                                        Intro Quiz 2
-                                    </p></a
-                                >
-                            </th>
-                            <td style="width: 25%">
-                                <p
-                                    class="text-secondary"
-                                    style="margin-top: 2%; margin-bottom: 0px"
-                                >
-                                    Created by @Luna_Lovegood
-                                </p>
-                            </td>
-                            <td style="width: 20%">
-                                <p
-                                    class="text-secondary"
-                                    style="margin-top: 3%; margin-bottom: 0px"
-                                >
-                                    11-23-23, 09:00am
-                                </p>
-                            </td>
-                            <td style="padding-left: 30%; padding-right: 0%">
-                                <button
-                                    type="button"
-                                    class="btn"
-                                    style="
-                                        background-color: transparent;
-                                        float: right;
-                                    "
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        fill="currentColor"
-                                        class="bi bi-download"
-                                        viewBox="0 0 16 16"
-                                    >
-                                        <path
-                                            d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"
-                                        />
-                                        <path
-                                            d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
-                                        />
-                                    </svg>
-                                </button>
-                            </td>
-                            <td style="padding-left: 0px">
-                                <button
-                                    type="button"
-                                    class="btn"
-                                    style="
-                                        background-color: transparent;
-                                        float: right;
-                                    "
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        fill="currentColor"
-                                        class="bi bi-three-dots-vertical"
-                                        viewBox="0 0 16 16"
-                                    >
-                                        <path
-                                            d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"
-                                        />
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary">
-                    Submit a new Quiz Question
+                <button type="submit" class="btn" onclick="window.location.href='/main/{{volume.volume_id }}'"
+                    style="border-color: transparent; padding-top: 0px; padding-left: 0px;" ;>
+                    {% load static %}
+                    <img src="{% static 'kontinua_foundation_logo.png' %}" alt="Responsive image"
+                        style="width: 450px" />
                 </button>
             </div>
+            <div class="col-md-6" style="margin-top: 20px">
+                <img src="{% static 'default-profile.png' %}" alt="Responsive image"
+                    style="float: right; padding: 10px; width: 100px" id="profile-img" />
+            </div>
         </div>
-        <div class="container" style="position: absolute; bottom: 0">
-            <hr />
-            <footer>
-                <div
-                    class="d-flex flex-wrap justify-content-between mx-auto py-4"
-                >
-                    <div class="d-flex flex-wrap align-items-center">
-                        <span class="ms-4 h5 mb-0 font-weight-bold"
-                            >Kontinua</span
-                        >
-                        <small class="ms-2"
-                            >&copy; 2023 The Kontinua Foundation. All Rights
-                            Reserved.</small
-                        >
-                    </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary" onclick="window.location.href='/main/{{volume.volume_id }}'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+                </svg>
+                Back
+            </button>
+        </div>
+        <div class="col-md-6">
+            <h2 style="text-align: center">
+                Quizzes for Vol {{ volume.volume_id }} Chapter: {{ title }}
+            </h2>
+        </div>
+    </div>
+    <div class="row mb-12">
+        <div class="col-md-10">
+            <table class="table border">
+                <tbody>
+                    <tr>
+                        <th scope="row" style="width: 20%">
+                            <a href="" class="text-dark">
+                                <p style="
+                                            margin-top: 2%;
+                                            margin-bottom: 0px;
+                                        ">
+                                    Intro Quiz 1
+                                </p>
+                            </a>
+                        </th>
+                        <td class="text-secondary" style="width: 25%">
+                            <p class="text-secondary" style="margin-top: 2%; margin-bottom: 0px">
+                                Created by @Harry_Potter
+                            </p>
+                        </td>
+                        <td style="width: 20%">
+                            <p class="text-secondary" style="margin-top: 3%; margin-bottom: 0px">
+                                11-23-23, 09:00am
+                            </p>
+                        </td>
+                        <td style="padding-left: 30%; padding-right: 0%">
+                            <button id="downloadPDF" type="button" class="btn" style="
+                                        background-color: transparent;
+                                        float: right;
+                                    ">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    class="bi bi-download" viewBox="0 0 16 16">
+                                    <path
+                                        d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                                    <path
+                                        d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                                </svg>
+                            </button>
+                        </td>
+                        <td style="padding-left: 0px">
+                            <button type="button" class="btn" style="
+                                        background-color: transparent;
+                                        float: right;
+                                    ">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                                    <path
+                                        d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="width: 20%">
+                            <a href="" class="text-dark">
+                                <p style="
+                                            margin-top: 2%;
+                                            margin-bottom: 0px;
+                                        ">
+                                    Intro Quiz 2
+                                </p>
+                            </a>
+                        </th>
+                        <td style="width: 25%">
+                            <p class="text-secondary" style="margin-top: 2%; margin-bottom: 0px">
+                                Created by @Luna_Lovegood
+                            </p>
+                        </td>
+                        <td style="width: 20%">
+                            <p class="text-secondary" style="margin-top: 3%; margin-bottom: 0px">
+                                11-23-23, 09:00am
+                            </p>
+                        </td>
+                        <td style="padding-left: 30%; padding-right: 0%">
+                            <button id="downloadPDF" type="button" class="btn" style="
+                                        background-color: transparent;
+                                        float: right;
+                                    ">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    class="bi bi-download" viewBox="0 0 16 16">
+                                    <path
+                                        d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                                    <path
+                                        d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                                </svg>
+                            </button>
+                        </td>
+                        <td style="padding-left: 0px">
+                            <button type="button" class="btn" style="
+                                        background-color: transparent;
+                                        float: right;
+                                    ">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                                    <path
+                                        d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">
+                Submit a new Quiz Question
+            </button>
+        </div>
+    </div>
+    <div class="container" style="position: absolute; bottom: 0">
+        <hr />
+        <footer>
+            <div class="d-flex flex-wrap justify-content-between mx-auto py-4">
+                <div class="d-flex flex-wrap align-items-center">
+                    <span class="ms-4 h5 mb-0 font-weight-bold">Kontinua</span>
+                    <small class="ms-2">&copy; 2023 The Kontinua Foundation. All Rights
+                        Reserved.</small>
                 </div>
-            </footer>
-        </div>
-        <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-            crossorigin="anonymous"
-        ></script>
-    </body>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <script>
+        document.getElementById('downloadPDF').addEventListener('click', function () {
+            // Replace 'your_blob_key' with the actual key of the Blob you want to download
+            var blobKey = '0';
+
+            fetch(`/download_pdf/${blobKey}/`)
+                .then(response => response.blob())
+                .then(blob => {
+                    // Create a Blob from the binary data
+                    var fileBlob = new Blob([blob], { type: 'application/pdf' });
+
+                    // Create a link element
+                    var link = document.createElement('a');
+
+                    // Set the href attribute with the Blob URL
+                    link.href = URL.createObjectURL(fileBlob);
+
+                    // Set the download attribute with the desired filename
+                    link.download = 'downloaded.pdf';
+
+                    // Append the link to the body
+                    document.body.appendChild(link);
+
+                    // Trigger a click event on the link to start the download
+                    link.click();
+
+                    // Remove the link element from the body
+                    document.body.removeChild(link);
+                });
+        });
+    </script>
+</body>
+
 </html>

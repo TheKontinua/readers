@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.template import loader
-from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc
+from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc, Blob
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from mentoris.forms import UserForm
@@ -217,4 +217,10 @@ def request_translation(request, user_id):
         "notifications@kontinua.org",
         [email],
     )
-    
+
+def download_pdf(request, blob_key):
+    blob_instance = get_object_or_404(Blob, blob_key=blob_key)
+
+    response = HttpResponse(blob_instance.binary_data, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{blob_instance.filename}"'
+    return response
