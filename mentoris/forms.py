@@ -1,5 +1,5 @@
 from django import forms
-from mentapp.models import User
+from mentapp.models import User, Quiz
 
 
 class UserForm(forms.ModelForm):
@@ -30,3 +30,9 @@ class UserForm(forms.ModelForm):
             except Exception as e:
                 print(f"Error saving instance: {e}")
         return instance
+
+class QuizForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        fields = "__all__"
+

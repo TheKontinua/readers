@@ -74,7 +74,7 @@ class Chapter_Loc(models.Model):
 
 
 class Question(models.Model):
-    question_id = models.AutoField(default=0, primary_key=True)
+    question_id = models.AutoField(primary_key=True)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
     conceptual_difficulty = models.FloatField(default=0)
@@ -162,7 +162,7 @@ class Support_Attachment(models.Model):
 
 
 class Quiz(models.Model):
-    quiz_id = models.AutoField(default=0, primary_key=True)
+    quiz_id = models.AutoField(primary_key=True)
     conceptual_difficulty = models.FloatField()
     time_required_mins = models.IntegerField()
     calculator_allowed = models.BooleanField(default=False)

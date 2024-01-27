@@ -29,4 +29,7 @@ urlpatterns = [
     path("main/", views.main, name="main"),
     path("main/<int:volume_id>/", views.main, name="main_vol_chap"),
     path("main/<int:volume_id>/<chapter_id>/", views.chapter, name="chapter"),
+    path("edit_quiz/<int:quiz_id>", views.edit_quiz, name="edit_quiz"),
+    path("<str:page>/header.html/", views.header, name="header"),
+    path("<str:page>/footer.html/", views.footer, name="footer")
 ]
