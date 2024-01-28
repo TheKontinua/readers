@@ -257,16 +257,23 @@ def edit_quiz(request, quiz_id):
 
 
         if form.is_valid():
-            form.cleaned_data["quiz_id"] = quiz_instance.quiz_id
-            form.save()
+            quiz_instance.conceptual_difficulty = form.cleaned_data["conceptual_difficulty"]
+            quiz_instance.time_required_mins = form.cleaned_data["time_required_mins"]
+            quiz_instance.computer_allowed = form.cleaned_data["computer_allowed"]
+            quiz_instance.book_allowed = form.cleaned_data["book_allowed"]
+            quiz_instance.calculator_allowed = form.cleaned_data["calculator_allowed"]
+            quiz_instance.internet_allowed = form.cleaned_data["internet_allowed"]
+            quiz_instance.volume = form.cleaned_data["volume"]
+            quiz_instance.chapter = form.cleaned_data["chapter"]
+            quiz_instance.save()
 
             return render(
-            request, 
-            "mentapp/edit_quiz.html", 
-            {"form": form, 
-            "quiz_instance": quiz_instance, 
-            "questions_Loc_and_quiz": questions_Loc}, 
-    )
+                request, 
+                "mentapp/edit_quiz.html", 
+                {"form": form, 
+                "quiz_instance": quiz_instance, 
+                "questions_Loc_and_quiz": questions_Loc}, 
+            )
 
     form = QuizForm(initial_values)
     return render(
