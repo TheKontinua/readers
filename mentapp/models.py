@@ -119,8 +119,10 @@ class Question_Loc(models.Model):
 
 
 class Blob(models.Model):
-    blob_key = models.BinaryField(primary_key=True, default=b"")
-    binary_data = models.BinaryField()
+    blob_key = models.AutoField(primary_key=True)
+    file = models.FileField(upload_to='pdfs/', null=True, blank=True)
+    content_type = models.CharField(max_length=255, null=True, blank=True)
+    filename = models.CharField(max_length=255, null=True, blank=True)
 
 
 class Question_Attachment(models.Model):
