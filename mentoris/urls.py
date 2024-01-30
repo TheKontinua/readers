@@ -31,7 +31,7 @@ urlpatterns = [
     path("main/<int:volume_id>/<chapter_id>/", views.chapter, name="chapter"),
     path("edit_quiz/<int:quiz_id>", views.edit_quiz, name="edit_quiz"),
     path("<str:page>/header.html/", views.header, name="header"),
-    path("<str:page>/footer.html/", views.footer, name="footer")
+    path("<str:page>/footer.html/", views.footer, name="footer"),
     path("download_pdf/<int:blob_key>/", views.download_pdf, name='download_pdf'),
     path("upload_pdf/<path:pdf_path>/", views.upload_pdf, name='upload_pdf'),
 ]
