@@ -1,14 +1,15 @@
 import os
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
-from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc, Blob
+from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc, Blob, Question_Loc, Quiz, Quiz_Question, Question
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from mentoris.forms import UserForm
+from mentoris.forms import QuizForm
+import json, random
 from django.core.mail import send_mail
+from django.http import JsonResponse
 from django.core.files.base import ContentFile
-
-
 
 
 def katex(request):
@@ -178,6 +179,120 @@ def user_info(request, user_id):
         {"user_profile": user_profile, "email": email, "other_email": other_email},
     )
 
+
+
+
+def edit_quiz(request, quiz_id):
+    quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
+    quiz_questions = Quiz_Question.objects.all().filter(quiz = quiz_instance.quiz_id).order_by("ordering")
+    questions_Loc = list()
+
+    for quiz_question in quiz_questions:
+        questions_Loc_local = Question_Loc.objects.all().filter(question = quiz_question.question)
+
+        for question_Loc in questions_Loc_local:
+            #TODO add an if statement for language, quizzes currently have no language
+            questions_Loc.append( (question_Loc, quiz_question) )
+    
+
+    initial_values = {
+        "conceptual_difficulty": quiz_instance.conceptual_difficulty,
+        "time_required_mins": quiz_instance.time_required_mins,
+        "computer_allowed": quiz_instance.computer_allowed,
+        "internet_allowed": quiz_instance.internet_allowed,
+        "book_allowed": quiz_instance.book_allowed,
+        "calculator_allowed": quiz_instance.calculator_allowed,
+        "volume": quiz_instance.volume,
+        "chapter": quiz_instance.chapter
+    }
+
+
+    if request.method == "POST":
+        form = QuizForm(request.POST, initial_values)
+
+        if request.POST.get("command") == "save":
+            orderings_str = json.loads(request.POST.get("orderings"))
+            ids_str = json.loads(request.POST.get("ids"))
+
+            orderings = list()
+            ids = list()
+            for id_str, ordering_str in zip(ids_str, orderings_str):
+                ids.append(int(id_str))
+                orderings.append(int(ordering_str))
+
+            for question in quiz_questions:
+                if question.question not in ids:
+                    question.delete()
+            
+            for id, ordering in zip(ids, orderings):
+                for quiz_question in quiz_questions:
+                    if quiz_question.question.question_id == id:
+                        quiz_question.ordering = ordering
+                        quiz_question.save()
+            return JsonResponse({'success': True})
+
+        #TODO modify behavior once add quiz question page is added
+        elif request.POST.get("command") == "add_question":
+            question_latex = list()
+            question_latex.append("f(x) = ax^2 + bx + c")
+            question_latex.append("\int_{0}^{\pi}x^2 \,dx")
+            question_latex.append("\\boxed{\log(x) + \sqrt{1+x^2}}")
+            question_latex.append("\\frac{-b\pm\sqrt{b^2-4ac}}{2a}")
+            question_latex.append("x = a_0 + \cfrac{1}{a_1 + \cfrac{1}{a_2 + \cfrac{1}{a_3 + a_4}}} ")
+            question_latex.append("\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \\right) \left( \sum_{k=1}^n b_k^2 \right) ")
+            question_latex.append("2\\times2")
+            question_latex.append("2_2 +2^2")
+            question_latex.append("\oint_a^bx^2")
+            
+
+            question = Question.objects.create()
+            quiz_question = Quiz_Question.objects.create(quiz= quiz_instance, question=question, ordering = quiz_questions.count())
+            quiz_question_loc = Question_Loc.objects.create(
+                question = question,
+                lang_code = "ENG",
+                dialect_code = "US",
+                question_latex = question_latex[random.randint(0, 8)],
+                answer_latex = question_latex[random.randint(0, 8)],
+                rubric_latex = question_latex[random.randint(0, 8)]
+            )
+            return JsonResponse({'success': True})
+
+
+        if form.is_valid():
+            quiz_instance.conceptual_difficulty = form.cleaned_data["conceptual_difficulty"]
+            quiz_instance.time_required_mins = form.cleaned_data["time_required_mins"]
+            quiz_instance.computer_allowed = form.cleaned_data["computer_allowed"]
+            quiz_instance.book_allowed = form.cleaned_data["book_allowed"]
+            quiz_instance.calculator_allowed = form.cleaned_data["calculator_allowed"]
+            quiz_instance.internet_allowed = form.cleaned_data["internet_allowed"]
+            quiz_instance.volume = form.cleaned_data["volume"]
+            quiz_instance.chapter = form.cleaned_data["chapter"]
+            quiz_instance.save()
+
+            return render(
+                request, 
+                "mentapp/edit_quiz.html", 
+                {"form": form, 
+                "quiz_instance": quiz_instance, 
+                "questions_Loc_and_quiz": questions_Loc}, 
+            )
+
+    form = QuizForm(initial_values)
+    return render(
+        request, 
+        "mentapp/edit_quiz.html", 
+         {"form": form, 
+            "quiz_instance": quiz_instance, 
+            "questions_Loc_and_quiz": questions_Loc}, 
+    )
+
+
+
+def header(request, page):
+    return render(request, "mentapp/header.html",)
+
+def footer(request, page):
+    return render(request, "mentapp/footer.html",)
 
 def user_edit(request, user_id):
     user = get_object_or_404(User, user_id=user_id)

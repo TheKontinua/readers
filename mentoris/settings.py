@@ -75,24 +75,13 @@ WSGI_APPLICATION = "mentoris.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-   #Local db
 
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mentoris',
-        'USER': 'walden',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        }
-    
 
     # "default": {
     #     "ENGINE": "django.db.backends.sqlite3",
     #     "NAME": BASE_DIR / "db.sqlite3",
     # }
-}
+
 
 
 STORAGES = {
@@ -149,3 +138,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email Notifications - AWS SES
 EMAIL_BACKEND = "django_ses.SESBackend"
+
+# Allows Iframes to display from pages hosted by this server
+X_FRAME_OPTIONS = 'SAMEORIGIN'

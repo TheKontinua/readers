@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Header</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static "/css/colors.css"%}">
+        <style>
+
+            body {
+                margin: 0px;
+            }
+
+            .container{
+                background-color: var(--KontinuaBlue);
+                padding: 10px;
+                margin: 0px;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+                {% load static %}
+                <img
+                    src="{% static 'kontinua_foundation_logo.png' %}"
+                    alt="Responsive image"
+                    style="border: 10px; border-color: white; border-style: solid; border-radius: 5%;"
+                    height="45"
+                />
+        </div>
+    </body>
+</html>
