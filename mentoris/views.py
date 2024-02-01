@@ -3,13 +3,39 @@ from django.template import loader
 from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from mentoris.forms import UserForm
+from mentoris.forms import UserForm, LatexForm
 from django.core.mail import send_mail
 
 
+
 def katex(request):
-    template = loader.get_template("katex/index.html")
-    return HttpResponse(template.render())
+    if request.method == "POST":
+        form = LatexForm(request.POST)
+        question = request.POST.get("latex_question")
+        answer = request.POST.get("latex_answer")
+        grading = request.POST.get("latex_grading")
+
+        hidden_question = request.POST.get("question_hidden")
+        hidden_answer = request.POST.get("answer_hidden")
+        hidden_grading = request.POST.get("grading_hidden")
+
+        if "question-button" in request.POST:
+            answer = hidden_answer
+            grading = hidden_grading
+        if "answer-button" in request.POST:
+            question = hidden_question
+            grading = hidden_grading
+        if "grading-button" in request.POST:
+            question = hidden_question
+            answer = hidden_answer
+    
+        return render(
+            request,
+            "katex/index.html",
+            {"form": form, "question": question, "answer": answer, "grading": grading},
+        )
+    else:
+        return render(request, "katex/index.html", {"form": LatexForm()})
 
 
 def sign_up(request):
@@ -32,8 +58,7 @@ def sign_up(request):
                 for other_email in email_list:
                     if Email.objects.filter(email_address=other_email.strip()).exists():
                         other_email_exists = True
-
-            # TODO: Change location of error message to be in proper place based on exists
+                        
             if email_exists or other_email_exists:
                 if email_exists:
                     form.add_error(None, "Primary")
