@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 
 
 
-def katex(request):
+def latex(request):
     if request.method == "POST":
         form = LatexForm(request.POST)
         question = request.POST.get("latex_question")
@@ -31,11 +31,11 @@ def katex(request):
     
         return render(
             request,
-            "katex/index.html",
+            "mentapp/latex_question.html",
             {"form": form, "question": question, "answer": answer, "grading": grading},
         )
     else:
-        return render(request, "katex/index.html", {"form": LatexForm()})
+        return render(request, "mentapp/latex_question.html", {"form": LatexForm()})
 
 
 def sign_up(request):
