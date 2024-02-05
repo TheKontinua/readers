@@ -10,9 +10,9 @@ supply them with those quizzes and answer keys.
 Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwoVZBdJGd_tcb1RkzF5oQL2ENw1O/edit?usp=sharing&ouid=107605930377207959573&rtpof=true&sd=true) which outlines the entire project in more detail.
 
 ## Set Up
-1. Install Python 3.11 Python Release Python 3.11.0 | Python.org
-2. Follow the Django installation guide: `Quick install guide | Django documentation | Django (djangoproject.com).` We are using Django version 4.2.5
-3. Install the Elastic Beanstalk CLI: Install the `EB CLI - AWS Elastic Beanstalk (amazon.com)`
+1. Install Python 3.11 [Python Release Python 3.11.0 | Python.org](https://www.python.org/downloads/release/python-3110/)
+2. Follow the Django installation guide: [Quick install guide | Django documentation | Django (djangoproject.com)](https://docs.djangoproject.com/en/5.0/intro/install/). We are using Django version 4.2.5
+3. Install the Elastic Beanstalk CLI: Install the [EB CLI - AWS Elastic Beanstalk (amazon.com)](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html)
 4. Locate the config file in the `.AWS folder` (location varies based on operating system, usually in the home directory). Ask the team for the AWS Elastic Beanstalk credentials
     - Run the command `eb init` in the root directory of the project
         - Select 3 `(us-west-2 : US West (Oregon))`
@@ -20,12 +20,12 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwo
         - Select 1 `(mentoris)`
         - Do not continue with CodeCommit
     - Use the command `eb deploy` to deploy code into AWS Elastic Beanstalk  when ready
-    - The current state of the project after deployment can be viewed here: `Page not found at / (eba-tsm5gnpk.us-west-2.elasticbeanstalk.com)`
-    - The current deployment should always match what is in the main branch on the Github: `GitHub - TheKontinua/mentoris: The web app for mentors`
-5. Complete the official Django tutorial: `Writing your first Django app, part 1 | Django documentation | Django (djangoproject.com)`
+    - The current state of the project after deployment can be viewed here: [mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com](http://mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/)
+    - The current deployment should always match what is in the main branch on the Github: [GitHub - TheKontinua/mentoris: The web app for mentors](https://github.com/TheKontinua/mentoris)
+5. Complete the official Django tutorial: [Writing your first Django app, part 1 | Django documentation](https://docs.djangoproject.com/en/5.0/intro/tutorial01/)
 6. Meet with the team to get tasks for your first sprint.
 7. You are now ready to start writing code!
-8. Pull from main on `Kontinua Mentoris Github: GitHub - TheKontinua/mentoris: The web app for mentors`
+8. Pull from main on: [Kontinua Mentoris Github: GitHub - TheKontinua/mentoris: The web app for mentors](https://github.com/TheKontinua/mentoris)
 9. Ask the team for the AWS RDS credentials to use in settings.py
 10. Perform tasks using your IDE or text editor of choice
     a. Write clean code with comments as needed
