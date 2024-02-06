@@ -2,6 +2,12 @@ from django import forms
 from mentapp.models import User, Quiz
 
 
+class LatexForm(forms.Form):
+    latex_question = forms.CharField(widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False)
+    latex_answer = forms.CharField(widget=forms.Textarea(attrs={"class": "latex-input-field"}), required = False)
+    latex_grading = forms.CharField(widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False)
+
+
 class UserForm(forms.ModelForm):
     class Meta:
         model = User
