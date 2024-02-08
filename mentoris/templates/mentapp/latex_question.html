@@ -220,13 +220,35 @@
                                         <div class="col">
                                             <div class="form-group required">
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     class="form-control"
                                                     id="time-required"
                                                     name="time_required"
-                                                    value="0"
+                                                    value="{{ form.time_required.value }}"
                                                     required
                                                 />
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <label
+                                                for="volume"
+                                                class="control-label"
+                                                >Volume</label
+                                            >
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group required">
+                                                <select
+                                                    class="form-select"
+                                                    id="volume"
+                                                    name="volume"
+                                                >
+                                                {% for v in volumes %} {% if v == volume_id %}
+                                                <option value="{{ v }}" selected>{{ v }}</option>
+                                                {% else %}
+                                                <option value="{{ v }}">{{ v }}</option>
+                                                {% endif %} {% endfor %}
+                                                    </select>
                                             </div>
                                         </div>
                                         <div class="col">
@@ -238,14 +260,17 @@
                                         </div>
                                         <div class="col">
                                             <div class="form-group required">
-                                                <input
-                                                    type="text"
-                                                    class="form-control"
+                                                <select
+                                                    class="form-select"
                                                     id="chapter"
                                                     name="chapter"
-                                                    value="0"
-                                                    required
-                                                />
+                                                >
+                                                {% for c in chapters %} {% if c == chapter %}
+                                                <option value="{{ c }}" selected>{{ c }}</option>
+                                                {% else %}
+                                                <option value="{{ c }}">{{ c }}</option>
+                                                {% endif %} {% endfor %}
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col">
@@ -258,11 +283,11 @@
                                         <div class="col">
                                             <div class="form-group required">
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     class="form-control"
                                                     id="difficulty"
                                                     name="difficulty"
-                                                    value="0"
+                                                    value="{{ form.difficulty.value }}"
                                                     required
                                                 />
                                             </div>
@@ -277,11 +302,11 @@
                                         <div class="col">
                                             <div class="form-group required">
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     class="form-control"
                                                     id="points"
                                                     name="points"
-                                                    value="0"
+                                                    value="{{ form.points.value }}"
                                                     required
                                                 />
                                             </div>
@@ -296,11 +321,12 @@
                                         <div class="col">
                                             <div class="form-group required">
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     class="form-control"
                                                     id="pages-required"
                                                     name="pages_required"
-                                                    value="0"
+                                                    value="{{ form.pages_required.value }}"
+                                                    step="0.1"
                                                     required
                                                 />
                                             </div>
@@ -313,7 +339,7 @@
                             >
                                 <button
                                     type="submit"
-                                    name="submit"
+                                    name="submit-question"
                                     class="btn btn-primary"
                                     style="
                                         height: 100%;
@@ -327,8 +353,18 @@
                         </div>
                     </footer>
                     <div class="container" style="margin-top: 30px"></div>
+                    <button type="submit" hidden id="volume-button" name="volume-button"></button>
                 </form>
             </div>
         </div>
+        <script>
+            var selectedVolume = document.getElementById("volume").value;
+            document
+                .getElementById("volume")
+                .addEventListener("change", function () {
+                    var button = document.getElementById("volume-button");
+                    button.click();
+                });
+        </script>
     </body>
 </html>
