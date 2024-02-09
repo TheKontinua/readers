@@ -3,9 +3,22 @@ from mentapp.models import User, Quiz
 
 
 class LatexForm(forms.Form):
-    latex_question = forms.CharField(widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False)
-    latex_answer = forms.CharField(widget=forms.Textarea(attrs={"class": "latex-input-field"}), required = False)
-    latex_grading = forms.CharField(widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False)
+    latex_question = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False
+    )
+    latex_answer = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False
+    )
+    latex_grading = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False
+    )
+
+    time_required = forms.IntegerField(initial=0)
+    volume = forms.IntegerField(initial=1)
+    chapter = forms.CharField(max_length=50)
+    difficulty = forms.IntegerField(initial=0)
+    points = forms.IntegerField(initial=0)
+    pages_required = forms.DecimalField(initial=0.0)
 
 
 class UserForm(forms.ModelForm):
@@ -37,8 +50,8 @@ class UserForm(forms.ModelForm):
                 print(f"Error saving instance: {e}")
         return instance
 
+
 class QuizForm(forms.ModelForm):
     class Meta:
         model = Quiz
         fields = "__all__"
-

@@ -1,7 +1,18 @@
 import os
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
-from mentapp.models import User, Email, Volume, Chapter, Chapter_Loc, Blob, Question_Loc, Quiz, Quiz_Question, Question
+from mentapp.models import (
+    User,
+    Email,
+    Volume,
+    Chapter,
+    Chapter_Loc,
+    Blob,
+    Question_Loc,
+    Quiz,
+    Quiz_Question,
+    Question,
+)
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from mentoris.forms import UserForm, LatexForm, QuizForm
@@ -11,17 +22,65 @@ from django.http import JsonResponse
 from django.core.files.base import ContentFile
 
 
-
 def latex(request):
+    volumes = (
+        Volume.objects.values_list("volume_id", flat=True)
+        .distinct()
+        .order_by("volume_id")
+    )
+
+    volume_id = 1
+    chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
+
+    chapter_locs = Chapter_Loc.objects.filter(
+        chapter__chapter_id__in=chapters
+    ).distinct()
+
+    chapter = chapter_locs[0]
+
     if request.method == "POST":
         form = LatexForm(request.POST)
         question = request.POST.get("latex_question")
         answer = request.POST.get("latex_answer")
         grading = request.POST.get("latex_grading")
+        volume_id = request.POST.get("volume")
+        volume_id = int(volume_id)
+        chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
+
+        chapter_locs = Chapter_Loc.objects.filter(
+            chapter__chapter_id__in=chapters
+        ).distinct()
 
         hidden_question = request.POST.get("question_hidden")
         hidden_answer = request.POST.get("answer_hidden")
         hidden_grading = request.POST.get("grading_hidden")
+
+        if "submit-question" in request.POST:
+            question_object = Question()
+            question_loc = Question_Loc()
+
+            # TODO: question_object.creator = CURRENT USER
+
+            chapter = request.POST.get("chapter")
+            chapter_string = chapter.split("_")
+            chapter_title = chapter_string[0]
+            chapter_loc = get_object_or_404(Chapter_Loc, title=chapter_title)
+            question_object.chapter = chapter_loc.chapter
+
+            question_object.conceptual_difficulty = request.POST.get("difficulty")
+            question_object.time_required_mins = request.POST.get("time_required")
+            question_object.point_value = request.POST.get("points")
+            question_object.pages_required = request.POST.get("pages_required")
+            question_object.save()
+
+            question_loc.question = question_object
+            question_loc.question_latex = question
+            question_loc.answer_latex = answer
+            question_loc.rubric_latex = grading
+            # TODO: question_loc.creator = CURRENT USER
+            question_loc.save()
+
+            return main(request)
 
         if "question-button" in request.POST:
             answer = hidden_answer
@@ -32,14 +91,41 @@ def latex(request):
         if "grading-button" in request.POST:
             question = hidden_question
             answer = hidden_answer
-    
+        if "volume-button" not in request.POST:
+            chapter = request.POST.get("chapter")
+            chapter_string = chapter.split("_")
+            chapter_title = chapter_string[0]
+            chapter = get_object_or_404(Chapter_Loc, title=chapter_title)
+        else:
+            chapter = chapters[0]
+
         return render(
             request,
             "mentapp/latex_question.html",
-            {"form": form, "question": question, "answer": answer, "grading": grading},
+            {
+                "form": form,
+                "question": question,
+                "answer": answer,
+                "grading": grading,
+                "volume_id": volume_id,
+                "volumes": volumes,
+                "chapters": chapter_locs,
+                "chapter": chapter,
+            },
         )
     else:
-        return render(request, "mentapp/latex_question.html", {"form": LatexForm()})
+        print(chapters)
+        return render(
+            request,
+            "mentapp/latex_question.html",
+            {
+                "form": LatexForm(),
+                "volumes": volumes,
+                "volume_id": volume_id,
+                "chapters": chapter_locs,
+                "chapter": chapter,
+            },
+        )
 
 
 def sign_up(request):
@@ -62,7 +148,7 @@ def sign_up(request):
                 for other_email in email_list:
                     if Email.objects.filter(email_address=other_email.strip()).exists():
                         other_email_exists = True
-                        
+
             if email_exists or other_email_exists:
                 if email_exists:
                     form.add_error(None, "Primary")
@@ -204,20 +290,23 @@ def user_info(request, user_id):
     )
 
 
-
-
 def edit_quiz(request, quiz_id):
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
-    quiz_questions = Quiz_Question.objects.all().filter(quiz = quiz_instance.quiz_id).order_by("ordering")
+    quiz_questions = (
+        Quiz_Question.objects.all()
+        .filter(quiz=quiz_instance.quiz_id)
+        .order_by("ordering")
+    )
     questions_Loc = list()
 
     for quiz_question in quiz_questions:
-        questions_Loc_local = Question_Loc.objects.all().filter(question = quiz_question.question)
+        questions_Loc_local = Question_Loc.objects.all().filter(
+            question=quiz_question.question
+        )
 
         for question_Loc in questions_Loc_local:
-            #TODO add an if statement for language, quizzes currently have no language
-            questions_Loc.append( (question_Loc, quiz_question) )
-    
+            # TODO add an if statement for language, quizzes currently have no language
+            questions_Loc.append((question_Loc, quiz_question))
 
     initial_values = {
         "conceptual_difficulty": quiz_instance.conceptual_difficulty,
@@ -227,9 +316,8 @@ def edit_quiz(request, quiz_id):
         "book_allowed": quiz_instance.book_allowed,
         "calculator_allowed": quiz_instance.calculator_allowed,
         "volume": quiz_instance.volume,
-        "chapter": quiz_instance.chapter
+        "chapter": quiz_instance.chapter,
     }
-
 
     if request.method == "POST":
         form = QuizForm(request.POST, initial_values)
@@ -247,43 +335,49 @@ def edit_quiz(request, quiz_id):
             for question in quiz_questions:
                 if question.question not in ids:
                     question.delete()
-            
+
             for id, ordering in zip(ids, orderings):
                 for quiz_question in quiz_questions:
                     if quiz_question.question.question_id == id:
                         quiz_question.ordering = ordering
                         quiz_question.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({"success": True})
 
-        #TODO modify behavior once add quiz question page is added
+        # TODO modify behavior once add quiz question page is added
         elif request.POST.get("command") == "add_question":
             question_latex = list()
             question_latex.append("f(x) = ax^2 + bx + c")
             question_latex.append("\int_{0}^{\pi}x^2 \,dx")
             question_latex.append("\\boxed{\log(x) + \sqrt{1+x^2}}")
             question_latex.append("\\frac{-b\pm\sqrt{b^2-4ac}}{2a}")
-            question_latex.append("x = a_0 + \cfrac{1}{a_1 + \cfrac{1}{a_2 + \cfrac{1}{a_3 + a_4}}} ")
-            question_latex.append("\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \\right) \left( \sum_{k=1}^n b_k^2 \right) ")
+            question_latex.append(
+                "x = a_0 + \cfrac{1}{a_1 + \cfrac{1}{a_2 + \cfrac{1}{a_3 + a_4}}} "
+            )
+            question_latex.append(
+                "\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \\right) \left( \sum_{k=1}^n b_k^2 \right) "
+            )
             question_latex.append("2\\times2")
             question_latex.append("2_2 +2^2")
             question_latex.append("\oint_a^bx^2")
-            
 
             question = Question.objects.create()
-            quiz_question = Quiz_Question.objects.create(quiz= quiz_instance, question=question, ordering = quiz_questions.count())
-            quiz_question_loc = Question_Loc.objects.create(
-                question = question,
-                lang_code = "ENG",
-                dialect_code = "US",
-                question_latex = question_latex[random.randint(0, 8)],
-                answer_latex = question_latex[random.randint(0, 8)],
-                rubric_latex = question_latex[random.randint(0, 8)]
+            quiz_question = Quiz_Question.objects.create(
+                quiz=quiz_instance, question=question, ordering=quiz_questions.count()
             )
-            return JsonResponse({'success': True})
-
+            quiz_question_loc = Question_Loc.objects.create(
+                question=question,
+                lang_code="ENG",
+                dialect_code="US",
+                question_latex=question_latex[random.randint(0, 8)],
+                answer_latex=question_latex[random.randint(0, 8)],
+                rubric_latex=question_latex[random.randint(0, 8)],
+            )
+            return JsonResponse({"success": True})
 
         if form.is_valid():
-            quiz_instance.conceptual_difficulty = form.cleaned_data["conceptual_difficulty"]
+            quiz_instance.conceptual_difficulty = form.cleaned_data[
+                "conceptual_difficulty"
+            ]
             quiz_instance.time_required_mins = form.cleaned_data["time_required_mins"]
             quiz_instance.computer_allowed = form.cleaned_data["computer_allowed"]
             quiz_instance.book_allowed = form.cleaned_data["book_allowed"]
@@ -294,29 +388,40 @@ def edit_quiz(request, quiz_id):
             quiz_instance.save()
 
             return render(
-                request, 
-                "mentapp/edit_quiz.html", 
-                {"form": form, 
-                "quiz_instance": quiz_instance, 
-                "questions_Loc_and_quiz": questions_Loc}, 
+                request,
+                "mentapp/edit_quiz.html",
+                {
+                    "form": form,
+                    "quiz_instance": quiz_instance,
+                    "questions_Loc_and_quiz": questions_Loc,
+                },
             )
 
     form = QuizForm(initial_values)
     return render(
-        request, 
-        "mentapp/edit_quiz.html", 
-         {"form": form, 
-            "quiz_instance": quiz_instance, 
-            "questions_Loc_and_quiz": questions_Loc}, 
+        request,
+        "mentapp/edit_quiz.html",
+        {
+            "form": form,
+            "quiz_instance": quiz_instance,
+            "questions_Loc_and_quiz": questions_Loc,
+        },
     )
 
 
-
 def header(request, page):
-    return render(request, "mentapp/header.html",)
+    return render(
+        request,
+        "mentapp/header.html",
+    )
+
 
 def footer(request, page):
-    return render(request, "mentapp/footer.html",)
+    return render(
+        request,
+        "mentapp/footer.html",
+    )
+
 
 def user_edit(request, user_id):
     user = get_object_or_404(User, user_id=user_id)
@@ -361,17 +466,18 @@ def request_translation(request, user_id):
         [email],
     )
 
+
 def download_pdf(request, blob_key):
     blob_instance = get_object_or_404(Blob, blob_key=blob_key)
 
-    response = HttpResponse(blob_instance.file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{blob_instance.filename}"'
+    response = HttpResponse(blob_instance.file, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{blob_instance.filename}"'
     return response
 
 
 def upload_pdf(request, pdf_path):
     try:
-        with open(pdf_path, 'rb') as pdf_file:
+        with open(pdf_path, "rb") as pdf_file:
             pdf_content = pdf_file.read()
 
         # Use Django's ContentFile to create a file-like object
@@ -379,11 +485,13 @@ def upload_pdf(request, pdf_path):
 
         blob_instance = Blob(
             file=content_file,
-            content_type='application/pdf',
-            filename=os.path.basename(pdf_path)
+            content_type="application/pdf",
+            filename=os.path.basename(pdf_path),
         )
         blob_instance.save()
 
-        return JsonResponse({'status': 'success', 'message': 'File uploaded successfully'})
+        return JsonResponse(
+            {"status": "success", "message": "File uploaded successfully"}
+        )
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+        return JsonResponse({"status": "error", "message": str(e)})
