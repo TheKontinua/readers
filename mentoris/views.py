@@ -292,19 +292,14 @@ def edit_quiz_add_question(request, quiz_id):
     creators = User.objects.all()
 
     if request.method == "POST":
-        print("POST!!!!!!!!")
         quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
         if request.POST.get("command") == "save_changes":
             quiz_questions = Quiz_Question.objects.all().filter(quiz = quiz_id).order_by("ordering")
             questions_to_add_id_str = json.loads(request.POST.get("questions_to_add_ids"))
-            
-            print(questions_to_add_id_str)
 
             for question_id in questions_to_add_id_str:
                 if quiz_questions.filter(question_id = question_id).count() == 0:
-                    print(question_id)
                     question_instance = get_object_or_404(Question, question_id= question_id)
-                    print(question_id)
                     Quiz_Question.objects.create(quiz=quiz_instance, question= question_instance, ordering= quiz_questions.count())
                     
             
@@ -317,6 +312,9 @@ def edit_quiz_add_question(request, quiz_id):
             time_filter = request.GET.get("time")
             difficulty_filter = request.GET.get("difficulty")
             question_instances = Question.objects.all()
+
+            if volume_filter:
+                question_instances = question_instances.filter(chapter__volume__volume_id = volume_filter)
 
             if chapter_filter:
                 question_instances = question_instances.filter(chapter = chapter_filter)
@@ -342,8 +340,10 @@ def edit_quiz_add_question(request, quiz_id):
 
                 if question.chapter is not None:
                     question_values["chapter"] = question.chapter.chapter_id
+                    question_values["volume"] = question.chapter.volume.volume_id
                 else:
                     question_values["chapter"] = ""
+                    question_values["volume"] = ""
                 
                 if question.creator is not None:
                     question_values["creator"] = question_Loc.creator.full_name
@@ -357,9 +357,6 @@ def edit_quiz_add_question(request, quiz_id):
                 questions_list.append(question_values)
             return JsonResponse(questions_list, safe=False)
     
-
-    
-
     return render(
         request, 
         "mentapp/edit_quiz_add_question.html/", 

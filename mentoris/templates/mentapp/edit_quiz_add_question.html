@@ -77,7 +77,7 @@
             <div>
                 <div class="filter_wrapper">
                     <span class="filter_label">Volume: </span>
-                        <select id="volume" name="volume">
+                        <select id="volume_value" name="volume_value">
                         <option value = "">Any Volume</option>
                         {% for volume in volumes %}
                             <option value="{{volume.volume_id}}">{{volume.volume_id}}</option>
@@ -168,6 +168,8 @@
 
                 // Dynamicly create each question when filter is pressed
                 $('#filter_button').on('click', function(event){
+                    console.log(document.getElementById('volume_value').value);
+                    volume_value = document.getElementById('volume_value').value;
                     chapter_value = document.getElementById('chapter_value').value;
                     point_value = document.getElementById("point_value").value;
                     creator_value = document.getElementById('creator_value').value;
@@ -182,8 +184,8 @@
                             csrfmiddlewaretoken: "{{csrf_token}}",
                             command: "filter",
                             chapter: chapter_value,
+                            volume: volume_value,
                             creator: creator_value,
-                            volume: "",
                             time: time_value,
                             point: point_value,
                             difficulty: difficulty_value 
@@ -202,6 +204,7 @@
                             var question_wrapper = document.createElement("div");
                             question_wrapper.style.float = "left";
                             question_wrapper.appendChild(make_attribute_label("Difficulty: ", "conceptual_difficulty", data[i]["conceptual_difficulty"]));
+                            question_wrapper.appendChild(make_attribute_label("Volume: ", "volume", data[i]["volume"]));
                             question_wrapper.appendChild(make_attribute_label("Chapter: ", "chapter", data[i]["chapter"]));
                             question_wrapper.appendChild(make_attribute_label("Creator: ", "creator", data[i]["creator"]));
                             question_wrapper.appendChild(make_attribute_label("Point Value: ", "point_value", data[i]["point_value"]));
