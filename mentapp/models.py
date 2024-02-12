@@ -42,7 +42,7 @@ class User(models.Model):
 
 
 class Volume(models.Model):
-    volume_id = models.AutoField(default=0, primary_key=True)
+    volume_id = models.AutoField(primary_key=True)
 
 
 class Chapter(models.Model):
