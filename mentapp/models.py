@@ -143,9 +143,13 @@ class Question_Attachment(models.Model):
             )
         ]
 
+class Support(models.Model):
+    support_id = models.AutoField(primary_key=True, default=0, editable=False)
+    volume_id = models.ForeignKey(Volume, null=True, on_delete=models.CASCADE)
+    
 
 class Support_Attachment(models.Model):
-    question = models.ForeignKey(Question_Loc, on_delete=models.CASCADE)
+    support = models.ForeignKey(Support, null=True, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5)
     dialect_code = models.CharField(max_length=5)
     filename = models.FileField(
@@ -154,10 +158,10 @@ class Support_Attachment(models.Model):
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question", "lang_code", "dialect_code")
+        unique_together = ("support", "lang_code", "dialect_code")
         indexes = [
             models.Index(
-                fields=["question", "lang_code", "dialect_code"],
+                fields=["support", "lang_code", "dialect_code"],
                 name="support_attachment_comp_pkey",
             )
         ]
@@ -313,13 +317,6 @@ class Language(models.Model):
             )
         ]
 
-
-class Support(models.Model):
-    support_id = models.AutoField(primary_key=True, default=0, editable=False)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
-    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
-
-
 class Support_Loc(models.Model):
     support = models.ForeignKey(Support, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
@@ -349,3 +346,12 @@ class Quiz_Support(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     support = models.ForeignKey(Support, on_delete=models.CASCADE)
     ordering = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ("quiz", "support")
+        indexes = [
+            models.Index(
+                fields=["quiz", "support"],
+                name="quiz_support_comp_pkey",
+            )
+        ]
