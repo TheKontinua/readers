@@ -48,8 +48,9 @@
     </div>
     <div class="row mb-12">
         <div class="col-md-10">
-            <table class="table border">
+            <table class="table border" >
                 <tbody>
+                    {% for quiz in quizzes %}
                     <tr>
                         <th scope="row" style="width: 20%">
                             <a href="" class="text-dark">
@@ -57,18 +58,18 @@
                                             margin-top: 2%;
                                             margin-bottom: 0px;
                                         ">
-                                    Intro Quiz 1
+                                    Quiz ID: {{ quiz.quiz_id }}
                                 </p>
                             </a>
                         </th>
                         <td class="text-secondary" style="width: 25%">
                             <p class="text-secondary" style="margin-top: 2%; margin-bottom: 0px">
-                                Created by @Harry_Potter
+                                Conceptual Difficulty: {{ quiz.conceptual_difficulty }}
                             </p>
                         </td>
                         <td style="width: 20%">
                             <p class="text-secondary" style="margin-top: 3%; margin-bottom: 0px">
-                                11-23-23, 09:00am
+                                Time Required: {{ quiz.time_required_mins }}
                             </p>
                         </td>
                         <td style="padding-left: 30%; padding-right: 0%">
@@ -98,54 +99,7 @@
                             </button>
                         </td>
                     </tr>
-                    <tr>
-                        <th scope="row" style="width: 20%">
-                            <a href="" class="text-dark">
-                                <p style="
-                                            margin-top: 2%;
-                                            margin-bottom: 0px;
-                                        ">
-                                    Intro Quiz 2
-                                </p>
-                            </a>
-                        </th>
-                        <td style="width: 25%">
-                            <p class="text-secondary" style="margin-top: 2%; margin-bottom: 0px">
-                                Created by @Luna_Lovegood
-                            </p>
-                        </td>
-                        <td style="width: 20%">
-                            <p class="text-secondary" style="margin-top: 3%; margin-bottom: 0px">
-                                11-23-23, 09:00am
-                            </p>
-                        </td>
-                        <td style="padding-left: 30%; padding-right: 0%">
-                            <button id="downloadPDF" type="button" class="btn" style="
-                                        background-color: transparent;
-                                        float: right;
-                                    ">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-download" viewBox="0 0 16 16">
-                                    <path
-                                        d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
-                                    <path
-                                        d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-                                </svg>
-                            </button>
-                        </td>
-                        <td style="padding-left: 0px">
-                            <button type="button" class="btn" style="
-                                        background-color: transparent;
-                                        float: right;
-                                    ">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
-                                    <path
-                                        d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

@@ -156,11 +156,19 @@ def chapter(request, volume_id, chapter_id):
         title = chapter_loc.title
     except Chapter_Loc.DoesNotExist:
         title = None
-
+    try:
+        quizzes = Quiz.objects.filter(chapter=chapter_id, volume=volume_id)
+    except Quiz.DoesNotExist:
+        quizzes = None
+    quizdebug = Quiz.objects.all()
+    for quizd in quizdebug:
+        print("Stored in quiz object in DB", quizd.chapter.chapter_id)
+    print("this is quizzes: ", quizzes, "this is volume_id: ",
+           volume_id.volume_id, "this is chapter_id: ", chapter_id)
     return render(
         request,
         "mentapp/chapter.html",
-        {"volume": volume_id, "chapter": chapter_id, "title": title},
+        {"volume": volume_id, "chapter": chapter_id, "title": title, "quizzes": quizzes},
     )
 
 
