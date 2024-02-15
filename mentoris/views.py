@@ -1,4 +1,4 @@
-import os
+import json, os, random
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from mentapp.models import (
@@ -12,13 +12,12 @@ from mentapp.models import (
     Quiz,
     Quiz_Question,
     Question,
+    Verification,
 )
+from mentoris.forms import UserForm, LatexForm, QuizForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from mentoris.forms import UserForm, LatexForm, QuizForm
-import json, random
 from django.core.mail import send_mail
-from django.http import JsonResponse
 from django.core.files.base import ContentFile
 
 
@@ -148,7 +147,6 @@ def sign_up(request):
                 for other_email in email_list:
                     if Email.objects.filter(email_address=other_email.strip()).exists():
                         other_email_exists = True
-
             if email_exists or other_email_exists:
                 if email_exists:
                     form.add_error(None, "Primary")
@@ -272,6 +270,175 @@ def chapter(request, volume_id, chapter_id):
         "mentapp/chapter.html",
         {"volume": volume_id, "chapter": chapter_id, "title": title},
     )
+
+
+def promotion(request):
+    if request.method == "POST":
+        email_object = Email.objects.get(
+            email_address=request.POST.get("email"), is_primary=True
+        )
+        user = get_object_or_404(User, user_id=email_object.user_id)
+
+        if request.POST.get("command") == "promote":
+            if user.is_active == True:
+                if user.is_quizmaker == True:
+                    user.is_admin = True
+                elif user.is_verified == True:
+                    user.is_quizmaker = True
+                elif user.is_verified == False:
+                    user.is_verified = True
+
+        user.promotion_requested = False
+        user.save()
+        return JsonResponse({"success": True})
+    else:
+        users = grab_users(True)
+        return render(
+            request,
+            "mentapp/promotion.html",
+            {
+                "newbies": users["newbies"],
+                "mentors": users["mentors"],
+                "quiz_makers": users["quiz_makers"],
+            },
+        )
+
+
+def user_directory(request):
+    if request.method == "POST":
+        email_object = Email.objects.get(
+            email_address=request.POST.get("email"), is_primary=True
+        )
+        user = get_object_or_404(User, user_id=email_object.user_id)
+        status = "Newbie"
+        color = "btn btn-outline-secondary"
+
+        if request.POST.get("command") == "demote":
+            if user.is_active == True:
+                if user.is_admin == True:
+                    user.is_admin = False
+                    status = "Quiz Maker"
+                    color = "btn btn-outline-warning"
+                elif user.is_quizmaker == True:
+                    user.is_quizmaker = False
+                    status = "Mentor"
+                    color = "btn btn-outline-info"
+                elif user.is_verified == True:
+                    user.is_verified = False
+        else:
+            user.is_active = False
+
+        user.save()
+        return JsonResponse({"success": True, "status": status, "color": color})
+    else:
+        users = grab_users(False)
+        return render(
+            request,
+            "mentapp/user_directory.html",
+            {
+                "newbies": users["newbies"],
+                "mentors": users["mentors"],
+                "quiz_makers": users["quiz_makers"],
+                "admins": users["admins"],
+            },
+        )
+
+
+def grab_users(get_promotion):
+    try:
+        newbie_ids = (
+            User.objects.filter(
+                is_verified=False,
+                is_quizmaker=False,
+                is_admin=False,
+                is_active=True,
+                promotion_requested=get_promotion,
+            )
+            .values_list("user_id", flat=True)
+            .distinct()
+        )
+        newbies = grab_verification_info(newbie_ids)
+    except:
+        newbies = []
+
+    try:
+        mentor_ids = (
+            User.objects.filter(
+                is_verified=True,
+                is_quizmaker=False,
+                is_admin=False,
+                is_active=True,
+                promotion_requested=get_promotion,
+            )
+            .values_list("user_id", flat=True)
+            .distinct()
+        )
+        mentors = grab_verification_info(mentor_ids)
+    except:
+        mentors = []
+
+    try:
+        quiz_maker_ids = (
+            User.objects.filter(
+                is_verified=True,
+                is_quizmaker=True,
+                is_admin=False,
+                is_active=True,
+                promotion_requested=get_promotion,
+            )
+            .values_list("user_id", flat=True)
+            .distinct()
+        )
+        quiz_makers = grab_verification_info(quiz_maker_ids)
+    except:
+        quiz_makers = []
+
+    try:
+        admin_ids = (
+            User.objects.filter(
+                is_verified=True,
+                is_quizmaker=True,
+                is_admin=True,
+                is_active=True,
+            )
+            .values_list("user_id", flat=True)
+            .distinct()
+        )
+        admins = grab_verification_info(admin_ids)
+    except:
+        admins = []
+
+    return {
+        "newbies": newbies,
+        "mentors": mentors,
+        "quiz_makers": quiz_makers,
+        "admins": admins,
+    }
+
+
+def grab_verification_info(user_ids):
+    verification_info = []
+    for user_id in user_ids:
+        email = Email.objects.get(user_id=user_id, is_primary=True)
+        try:
+            verifications = Verification.objects.exclude(date_granted__isnull=True).get(
+                verified=user_id
+            )
+            verifier_id = verifications.verifier.user_id
+            verifier = get_object_or_404(User, user_id=verifier_id)
+            verifier_email = Email.objects.get(user_id=verifier_id, is_primary=True)
+        except Verification.DoesNotExist:
+            verifier = None
+
+        verification_info.append(
+            (
+                user_id,
+                email.email_address,
+                verifier.full_name,
+                verifier_email.email_address,
+            )
+        )
+    return verification_info
 
 
 def user_info(request, user_id):
@@ -408,6 +575,7 @@ def edit_quiz(request, quiz_id):
         },
     )
 
+
 def edit_quiz_add_question(request, quiz_id):
     questions_Locs = Question_Loc.objects.all()
     chapters = Chapter.objects.all()
@@ -417,79 +585,101 @@ def edit_quiz_add_question(request, quiz_id):
     if request.method == "POST":
         quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
         if request.POST.get("command") == "save_changes":
-            quiz_questions = Quiz_Question.objects.all().filter(quiz = quiz_id).order_by("ordering")
-            questions_to_add_id_str = json.loads(request.POST.get("questions_to_add_ids"))
+            quiz_questions = (
+                Quiz_Question.objects.all().filter(quiz=quiz_id).order_by("ordering")
+            )
+            questions_to_add_id_str = json.loads(
+                request.POST.get("questions_to_add_ids")
+            )
 
             for question_id in questions_to_add_id_str:
-                if quiz_questions.filter(question_id = question_id).count() == 0:
-                    question_instance = get_object_or_404(Question, question_id= question_id)
-                    Quiz_Question.objects.create(quiz=quiz_instance, question= question_instance, ordering= quiz_questions.count())
-                    
-            
-            return JsonResponse({'success': True})
+                if quiz_questions.filter(question_id=question_id).count() == 0:
+                    question_instance = get_object_or_404(
+                        Question, question_id=question_id
+                    )
+                    Quiz_Question.objects.create(
+                        quiz=quiz_instance,
+                        question=question_instance,
+                        ordering=quiz_questions.count(),
+                    )
+
+            return JsonResponse({"success": True})
     elif request.method == "GET" and request.GET.get("command") == "filter":
-            chapter_filter = request.GET.get("chapter")
-            creator_filter = request.GET.get("creator")
-            volume_filter = request.GET.get("volume")
-            point_filter = request.GET.get("point")
-            time_filter = request.GET.get("time")
-            difficulty_filter = request.GET.get("difficulty")
-            question_instances = Question.objects.all()
+        chapter_filter = request.GET.get("chapter")
+        creator_filter = request.GET.get("creator")
+        volume_filter = request.GET.get("volume")
+        point_filter = request.GET.get("point")
+        time_filter = request.GET.get("time")
+        difficulty_filter = request.GET.get("difficulty")
+        question_instances = Question.objects.all()
 
-            if volume_filter:
-                question_instances = question_instances.filter(chapter__volume__volume_id = volume_filter)
+        if volume_filter:
+            question_instances = question_instances.filter(
+                chapter__volume__volume_id=volume_filter
+            )
 
-            if chapter_filter:
-                question_instances = question_instances.filter(chapter = chapter_filter)
+        if chapter_filter:
+            question_instances = question_instances.filter(chapter=chapter_filter)
 
-            if creator_filter:
-                question_instances = question_instances.filter(creator=creator_filter)
-            
-            if point_filter:
-                question_instances = question_instances.filter(point_value = point_filter)
+        if creator_filter:
+            question_instances = question_instances.filter(creator=creator_filter)
 
-            if difficulty_filter:
-                question_instances = question_instances.filter(conceptual_difficulty = difficulty_filter)
+        if point_filter:
+            question_instances = question_instances.filter(point_value=point_filter)
 
-            if time_filter:
-                question_instances = question_instances.filter(time_required_mins = time_filter)
-            
+        if difficulty_filter:
+            question_instances = question_instances.filter(
+                conceptual_difficulty=difficulty_filter
+            )
 
-            questions_list = list()
-            for question in  question_instances:
-                question_Loc = Question_Loc.objects.all().filter(lang_code = "ENG", dialect_code = "US", question= question.question_id).first()
-                question_values = dict()
-                question_values["question_id"] = question.question_id
+        if time_filter:
+            question_instances = question_instances.filter(
+                time_required_mins=time_filter
+            )
 
-                if question.chapter is not None:
-                    question_values["chapter"] = question.chapter.chapter_id
-                    question_values["volume"] = question.chapter.volume.volume_id
-                else:
-                    question_values["chapter"] = ""
-                    question_values["volume"] = ""
-                
-                if question.creator is not None:
-                    question_values["creator"] = question_Loc.creator.full_name
-                else:
-                    question_values["creator"] = ""
+        questions_list = list()
+        for question in question_instances:
+            question_Loc = (
+                Question_Loc.objects.all()
+                .filter(
+                    lang_code="ENG", dialect_code="US", question=question.question_id
+                )
+                .first()
+            )
+            question_values = dict()
+            question_values["question_id"] = question.question_id
 
-                question_values["conceptual_difficulty"] = question.conceptual_difficulty
-                question_values["time_required_mins"] = question.time_required_mins
-                question_values["point_value"] = question.point_value
-                question_values["question_latex"] = question_Loc.question_latex
-                questions_list.append(question_values)
-            return JsonResponse(questions_list, safe=False)
-    
+            if question.chapter is not None:
+                question_values["chapter"] = question.chapter.chapter_id
+                question_values["volume"] = question.chapter.volume.volume_id
+            else:
+                question_values["chapter"] = ""
+                question_values["volume"] = ""
+
+            if question.creator is not None:
+                question_values["creator"] = question_Loc.creator.full_name
+            else:
+                question_values["creator"] = ""
+
+            question_values["conceptual_difficulty"] = question.conceptual_difficulty
+            question_values["time_required_mins"] = question.time_required_mins
+            question_values["point_value"] = question.point_value
+            question_values["question_latex"] = question_Loc.question_latex
+            questions_list.append(question_values)
+        return JsonResponse(questions_list, safe=False)
+
     return render(
-        request, 
-        "mentapp/edit_quiz_add_question.html/", 
+        request,
+        "mentapp/edit_quiz_add_question.html/",
         {
-            "quiz_id": quiz_id, 
+            "quiz_id": quiz_id,
             "questions_Locs": questions_Locs,
             "chapters": chapters,
             "volumes": volumes,
-            "creators": creators}, 
+            "creators": creators,
+        },
     )
+
 
 def header(request, page):
     return render(
