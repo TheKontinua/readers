@@ -255,19 +255,20 @@
                                                 id="volume"
                                                 name="volume"
                                             >
-                                                {% for v in volumes %} {% if v
-                                                == volume_id %}
-                                                <option
-                                                    value="{{ v }}"
-                                                    selected
-                                                >
-                                                    {{ v }}
-                                                </option>
-                                                {% else %}
-                                                <option value="{{ v }}">
-                                                    {{ v }}
-                                                </option>
-                                                {% endif %} {% endfor %}
+                                                {% for v in volumes %} 
+                                                    {% if v == volume_id %}
+                                                        <option
+                                                            value="{{ v }}"
+                                                            selected
+                                                        >
+                                                        {{ v }}
+                                                        </option>
+                                                        {% else %}
+                                                        <option value="{{ v }}">
+                                                            {{ v }}
+                                                        </option>
+                                                    {% endif %} 
+                                                {% endfor %}
                                             </select>
                                         </div>
                                     </div>
@@ -285,19 +286,20 @@
                                                 id="chapter"
                                                 name="chapter"
                                             >
-                                                {% for c in chapters %} {% if c
-                                                == chapter %}
-                                                <option
-                                                    value="{{ c }}"
-                                                    selected
-                                                >
-                                                    {{ c }}
-                                                </option>
-                                                {% else %}
-                                                <option value="{{ c }}">
-                                                    {{ c }}
-                                                </option>
-                                                {% endif %} {% endfor %}
+                                                {% for c in chapters %} 
+                                                    {% if c == chapter %}
+                                                        <option
+                                                            value="{{ c }}"
+                                                            selected
+                                                        >
+                                                        {{ c }}
+                                                    </option>
+                                                    {% else %}
+                                                    <option value="{{ c }}">
+                                                        {{ c }}
+                                                    </option>
+                                                    {% endif %} 
+                                                {% endfor %}
                                             </select>
                                         </div>
                                     </div>
