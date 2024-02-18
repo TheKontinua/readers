@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="{% static "/css/quiz_styles.css"%}">
 
         <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
+        <script src= "{% static "/scripts/toggle_attachments_visible.js" %}"></script>
         <script>
             customElements.define("latex-js", latexjs.LaTeXJSComponent);
         </script>
@@ -31,10 +32,11 @@
                 text-align: center;
                 border: 2px solid Black;
                 border-radius: 25px;
-                margin: 5px;
-                width: 8em;
+                margin: 0px;
+                width: 100%;
                 height: 2em;
-                vertical-align: middle;
+                background-color:  var(--KontinuaBlue);
+                
             }
 
             #quiz_content {
@@ -60,9 +62,12 @@
         <div id = "quiz_content" class = "bordered" background="red">
             <ul id = "quiz_questions_list" style="list-style-type:none;">
                 {% for question_Loc_and_quiz in questions_Loc_and_quiz %}
-                <li id = "{{question_Loc_and_quiz.0.question.question_id}}">
-                    <div class = "bordered">
-                        <div>
+                    <li>
+                        <div class="bordered">
+
+                                <p class="bold_font question_support_label" >
+                                    Question
+                                </p>
                             <div style="float: left;">
                                 <p class = "small_margin"> 
                                     <span class="bold_font">Ordering: </span>
@@ -113,16 +118,21 @@
                             </div>
                             <div style="clear: both;">
                                 <latex-js>{{question_Loc_and_quiz.0.question_latex}}</latex-js>
-                            </div>
-                            <div style="float: right;">
-                                <p class="bold_font question_support_label" 
-                                    style="background-color:  var(--KontinuaBlue);">
-                                    Question</p>
+
+                                {% if question_Loc_and_quiz.2 %}
+                                <div style="float: right">
+                                    <button class="attachments_button invisible_state bold_font">Show Attatchments</button>
+                                </div>
+                                <div class = "bordered attachments" style = "clear:both; display: none;">
+                                    {% for image in question_Loc_and_quiz.2%}
+                                        <img src = "{{image.url}}" width="200" style = "position:relative; left: 25%">
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
-                    </div>
                 </li>
-            {% endfor %}
+                {% endfor %}
             </ul>
         </div>
 
@@ -278,6 +288,11 @@
                         }
                     }
                     list_element.removeChild(list[index]);
+                });
+
+                // Function to toggle attachment visibility
+                $('.attachments_button').on('click', function(event){
+                    toggle_attachments_visible("quiz_questions_list", $(this)[0], "attachments");
                 });
                 
                 // Function to handle increasing order

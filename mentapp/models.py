@@ -130,13 +130,11 @@ class Question_Attachment(models.Model):
     question = models.ForeignKey(Question_Loc, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
-    filename = models.FileField(
-        upload_to="question_attachments/",
-    )
-    blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
+    filename = models.CharField(max_length=255)
+    blob = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question", "lang_code", "dialect_code")
+        unique_together = ("question", "filename", "lang_code", "dialect_code")
         indexes = [
             models.Index(
                 fields=["question", "lang_code", "dialect_code"],
