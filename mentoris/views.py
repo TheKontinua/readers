@@ -458,6 +458,8 @@ def user_info(request, user_id):
 
 
 def edit_quiz(request, quiz_id):
+    chapters = Chapter.objects.all()
+    volumes = Volume.objects.all()
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
     quiz_questions = (
         Quiz_Question.objects.all()
@@ -467,111 +469,75 @@ def edit_quiz(request, quiz_id):
     questions_Loc = list()
 
     for quiz_question in quiz_questions:
+        # Display question only with ENG lang code and US dialect code for editing 
         questions_Loc_local = Question_Loc.objects.all().filter(
-            question=quiz_question.question
+            question=quiz_question.question,
+            lang_code="ENG", dialect_code="US",
         )
 
         for question_Loc in questions_Loc_local:
-            # TODO add an if statement for language, quizzes currently have no language
             questions_Loc.append((question_Loc, quiz_question))
 
-    initial_values = {
-        "conceptual_difficulty": quiz_instance.conceptual_difficulty,
-        "time_required_mins": quiz_instance.time_required_mins,
-        "computer_allowed": quiz_instance.computer_allowed,
-        "internet_allowed": quiz_instance.internet_allowed,
-        "book_allowed": quiz_instance.book_allowed,
-        "calculator_allowed": quiz_instance.calculator_allowed,
-        "volume": quiz_instance.volume,
-        "chapter": quiz_instance.chapter,
-    }
-
     if request.method == "POST":
-        form = QuizForm(request.POST, initial_values)
-
         if request.POST.get("command") == "save":
-            orderings_str = json.loads(request.POST.get("orderings"))
             ids_str = json.loads(request.POST.get("ids"))
 
-            orderings = list()
             ids = list()
-            for id_str, ordering_str in zip(ids_str, orderings_str):
+            for id_str in ids_str:
                 ids.append(int(id_str))
-                orderings.append(int(ordering_str))
 
             for question in quiz_questions:
                 if question.question not in ids:
                     question.delete()
 
-            for id, ordering in zip(ids, orderings):
+            for count, id in enumerate(ids):
                 for quiz_question in quiz_questions:
                     if quiz_question.question.question_id == id:
-                        quiz_question.ordering = ordering
+                        quiz_question.ordering = count
                         quiz_question.save()
-            return JsonResponse({"success": True})
 
-        # TODO modify behavior once add quiz question page is added
-        elif request.POST.get("command") == "add_question":
-            question_latex = list()
-            question_latex.append("f(x) = ax^2 + bx + c")
-            question_latex.append("\int_{0}^{\pi}x^2 \,dx")
-            question_latex.append("\\boxed{\log(x) + \sqrt{1+x^2}}")
-            question_latex.append("\\frac{-b\pm\sqrt{b^2-4ac}}{2a}")
-            question_latex.append(
-                "x = a_0 + \cfrac{1}{a_1 + \cfrac{1}{a_2 + \cfrac{1}{a_3 + a_4}}} "
-            )
-            question_latex.append(
-                "\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \\right) \left( \sum_{k=1}^n b_k^2 \right) "
-            )
-            question_latex.append("2\\times2")
-            question_latex.append("2_2 +2^2")
-            question_latex.append("\oint_a^bx^2")
+            quiz_instance.conceptual_difficulty = float(request.POST.get("conceptual_difficulty"))
+            quiz_instance.time_required_mins = int(request.POST.get("time_required_mins"))
+            quiz_instance.volume = get_object_or_404(Volume, volume_id = request.POST.get("volume"))
+            quiz_instance.chapter = get_object_or_404(Chapter, chapter_id = request.POST.get("chapter"))
 
-            question = Question.objects.create()
-            quiz_question = Quiz_Question.objects.create(
-                quiz=quiz_instance, question=question, ordering=quiz_questions.count()
-            )
-            quiz_question_loc = Question_Loc.objects.create(
-                question=question,
-                lang_code="ENG",
-                dialect_code="US",
-                question_latex=question_latex[random.randint(0, 8)],
-                answer_latex=question_latex[random.randint(0, 8)],
-                rubric_latex=question_latex[random.randint(0, 8)],
-            )
-            return JsonResponse({"success": True})
+            calculator_allowed_str = request.POST.get("calculator_allowed")
+            computer_allowed_str = request.POST.get("computer_allowed")
+            internet_allowed_str = request.POST.get("internet_allowed")
+            book_allowed_str = request.POST.get("book_allowed")
 
-        if form.is_valid():
-            quiz_instance.conceptual_difficulty = form.cleaned_data[
-                "conceptual_difficulty"
-            ]
-            quiz_instance.time_required_mins = form.cleaned_data["time_required_mins"]
-            quiz_instance.computer_allowed = form.cleaned_data["computer_allowed"]
-            quiz_instance.book_allowed = form.cleaned_data["book_allowed"]
-            quiz_instance.calculator_allowed = form.cleaned_data["calculator_allowed"]
-            quiz_instance.internet_allowed = form.cleaned_data["internet_allowed"]
-            quiz_instance.volume = form.cleaned_data["volume"]
-            quiz_instance.chapter = form.cleaned_data["chapter"]
+
+            if calculator_allowed_str == "true":
+                quiz_instance.calculator_allowed = True
+            else:
+                quiz_instance.calculator_allowed = False
+
+            if computer_allowed_str == "true":
+                quiz_instance.computer_allowed = True
+            else:
+                quiz_instance.computer_allowed = False
+
+            if internet_allowed_str == "true":
+                quiz_instance.internet_allowed = True
+            else:
+                quiz_instance.internet_allowed = False
+
+            if book_allowed_str == "true":
+                quiz_instance.book_allowed = True
+            else:
+                quiz_instance.book_allowed = False
+
             quiz_instance.save()
+            return JsonResponse({"success": True})
 
-            return render(
-                request,
-                "mentapp/edit_quiz.html",
-                {
-                    "form": form,
-                    "quiz_instance": quiz_instance,
-                    "questions_Loc_and_quiz": questions_Loc,
-                },
-            )
-
-    form = QuizForm(initial_values)
     return render(
         request,
         "mentapp/edit_quiz.html",
         {
-            "form": form,
             "quiz_instance": quiz_instance,
             "questions_Loc_and_quiz": questions_Loc,
+            "volumes": volumes,
+            "chapters": chapters
         },
     )
 
@@ -638,8 +604,10 @@ def edit_quiz_add_question(request, quiz_id):
             )
 
         questions_list = list()
+
         for question in question_instances:
             question_Loc = (
+                # Display question only with ENG lang code and US dialect code for editing 
                 Question_Loc.objects.all()
                 .filter(
                     lang_code="ENG", dialect_code="US", question=question.question_id

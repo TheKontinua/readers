@@ -21,16 +21,6 @@
         </script>
 
         <style>
-
-            .filter_label {
-                display: inline-block;
-                width: 7em;
-            }
-            
-            .filter_wrapper {
-                margin: 5px;
-            }
-
             .add_question_button {
                 border: 2px solid Black;
                 border-radius: 25px;
@@ -75,8 +65,8 @@
     <div id = "right_panel">
         <div class="bordered" id = "meta_data">
             <div>
-                <div class="filter_wrapper">
-                    <span class="filter_label">Volume: </span>
+                <div class="form_element_wrapper">
+                    <span class="form_label">Volume: </span>
                         <select id="volume_value" name="volume_value">
                         <option value = "">Any Volume</option>
                         {% for volume in volumes %}
@@ -84,8 +74,8 @@
                         {% endfor %}
                         </select>
                 </div>
-                <div class="filter_wrapper">
-                    <span class="filter_label">Chapter: </span>
+                <div class="form_element_wrapper">
+                    <span class="form_label">Chapter: </span>
                     <select id="chapter_value" name="chapter_value">
                         <option value = "">Any Chapter</option>
                         {% for chapter in chapters %}
@@ -93,8 +83,8 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="filter_wrapper">
-                    <span class="filter_label">Creator: </span>
+                <div class="form_element_wrapper">
+                    <span class="form_label">Creator: </span>
                         <select id="creator_value" name="creator_value">
                         <option value="">Any Creator</option>
                         {% for creator in creators %}
@@ -102,16 +92,16 @@
                         {% endfor %}
                         </select>
                 </div>
-                <div class="filter_wrapper">
-                    <span class="filter_label">Time (minutes): </span>
+                <div class="form_element_wrapper">
+                    <span class="form_label">Time (minutes): </span>
                     <input type="text" id="time_value" name="time">
                 </div>
-                <div class="filter_wrapper">
-                    <span class="filter_label">Point Value: </span>
+                <div class="form_element_wrapper">
+                    <span class="form_label">Point Value: </span>
                     <input type="text" id="point_value">
                 </div>
-                <div class="filter_wrapper">
-                    <span class="filter_label">Difficulty: </span>
+                <div class="form_element_wrapper">
+                    <span class="form_label">Difficulty: </span>
                     <input type="text" id="difficulty_value">
                 </div>
             </div>
@@ -168,7 +158,6 @@
 
                 // Dynamicly create each question when filter is pressed
                 $('#filter_button').on('click', function(event){
-                    console.log(document.getElementById('volume_value').value);
                     volume_value = document.getElementById('volume_value').value;
                     chapter_value = document.getElementById('chapter_value').value;
                     point_value = document.getElementById("point_value").value;

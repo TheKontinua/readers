@@ -2,6 +2,16 @@ li {
     font-size: .9em;
 }
 
+
+.form_label {
+    display: inline-block;
+    width: 10em;
+}
+
+.form_element_wrapper {
+    margin: 5px;
+}
+
 .small_margin {
     margin: .1em;
 }
@@ -20,6 +30,7 @@ li {
 
 #right_panel {
     float: right;
+    width: 35em;
 }
 #left_panel {
     float: left;

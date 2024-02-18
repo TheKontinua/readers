@@ -129,11 +129,71 @@
     <div id = "right_panel">
         <div class="bordered" id = "meta_data">
             <form action="" method="post">
-                {% csrf_token %}
-                <table>
-                    {{form.as_table}}
-                </table>
-                <input type="submit" value="Submit"/>
+                <div class="form_element_wrapper">
+                    <span class = "form_label">Conceptual Difficulty: </span>
+                    <input type = "text" id = "conceptual_difficulty" value = {{quiz_instance.conceptual_difficulty}}>
+                </div>
+                <div class="form_element_wrapper">
+                    <span class = "form_label">Time Required (mins): </span>
+                    <input type = "text" id = "time_required_mins" value ={{quiz_instance.time_required_mins}}>
+                </div>
+                <div class="form_element_wrapper">
+                    <span class = "form_label">Calculator Allowed: </span>
+                    <input type = "checkbox" id = "calculator_allowed" 
+                        {% if quiz_instance.calculator_allowed %}
+                            checked
+                        {% endif %}
+                    >
+                </div>
+                <div class="form_element_wrapper">
+                    <span class = "form_label">Computer Allowed: </span>
+                    <input type = "checkbox" id = "computer_allowed"
+                        {% if quiz_instance.computer_allowed %}
+                            checked
+                        {% endif %}
+                    >
+                </div>
+                <div class = "form_element_wrapper">
+                    <span class = "form_label">Internet Allowed: </span>
+                    <input type = "checkbox" id = "internet_allowed"
+                        {% if quiz_instance.internet_allowed %}
+                            checked
+                        {% endif %}
+                    >
+                </div>
+                <div class = "form_element_wrapper">
+                    <span class = "form_label">Book Allowed: </span>
+                    <input type = "checkbox" id = "book_allowed"
+                        {% if quiz_instance.book_allowed %}
+                            checked
+                        {% endif %}
+                    >
+                </div>
+                <div class = "form_element_wrapper">
+                    <span class = "form_label">Volume: </span>
+                    <select id="volume" name="volume">
+                        {% for volume in volumes %}
+                            <option value="{{volume.volume_id}}"
+                            {% if quiz_instance.volume.volume_id == volume.volume_id %}
+                                selected
+                            {% endif %}
+                            >{{volume.volume_id}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class = "form_element_wrapper">
+                    <span class = "form_label">Chapter: </span>
+                    <select id = "chapter" name = "chapter">
+                        {% for chapter in chapters %}
+                            <option value="{{chapter.chapter_id}}"
+                            {% if quiz_instance.chapter.chapter_id == chapter.chapter_id %}
+                                selected
+                            {% endif %}
+                            >{{chapter.chapter_id}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
             </form>
 
         </div>
@@ -153,43 +213,16 @@
         <script type = "text/javascript">
 
             $(document).ready(function() {
-                const form = document.getElementById("form");
 
-                // TODO use ajax for submit
-                /* override submit button action
-                $("#form").submit( function(){
-                    request =  $.ajax({
-                        type: "POST",
-                        url: "/make_quiz/{{quiz_instance.quiz_id}}",
-                        dataType: 'json',
-                        data:{
-                            csrfmiddlewaretoken: "{{csrf_token}}",
-                            form: $(this).val()
-                        }, 
-
-                        success:function(response){
-                            console.log("response");
-                        if(response.success) {
-                            console.log("success");
-                        } else {
-                            console.log("failure");
-                        }
-                        }   
-                    });
-                });
-                */
-
-                // TODO modify when add question page is added
-                // function to save
+                // Function to handle saving
                 $('#save_button').on('click', function(event){
                     var list = document.getElementById("quiz_questions_list").children;
-                    var orderings = []
                     var ids = []
 
                     for(var i = 0; i < list.length; ++i){
                         ids.push(list[i].id);
-                        orderings.push(i);
                     }
+                    
 
                     var request = $.ajax({
                         type: "POST",
@@ -198,8 +231,15 @@
                         data:{
                             csrfmiddlewaretoken: "{{csrf_token}}",
                             command: "save",
-                            orderings: JSON.stringify(orderings),
-                            ids: JSON.stringify(ids)
+                            ids: JSON.stringify(ids),
+                            conceptual_difficulty: document.getElementById("conceptual_difficulty").value,
+                            time_required_mins: document.getElementById("time_required_mins").value,
+                            calculator_allowed: document.getElementById("calculator_allowed").checked,
+                            computer_allowed: document.getElementById("computer_allowed").checked,
+                            internet_allowed: document.getElementById("internet_allowed").checked,
+                            book_allowed: document.getElementById("book_allowed").checked,
+                            volume: document.getElementById("volume").value,
+                            chapter: document.getElementById("chapter").value
                         }
                     });
 
@@ -256,10 +296,8 @@
                         list[index + 1].getElementsByClassName("question_ordering")[0].innerHTML = (index).toString();
                         list[index].parentNode.insertBefore(list[index+1], list[index]);   
                         list[index + 1].scrollIntoView();
-
                     }
                 });
-
 
                 // Function to handle decreasing order
                 $('.decrease_order').on('click', function(event){

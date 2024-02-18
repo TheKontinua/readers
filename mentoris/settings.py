@@ -77,9 +77,6 @@ WSGI_APPLICATION = "mentoris.wsgi.application"
 
 
 
-
-
-
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
