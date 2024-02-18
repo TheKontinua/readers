@@ -62,7 +62,7 @@
         <div id = "quiz_content" class = "bordered" background="red">
             <ul id = "quiz_questions_list" style="list-style-type:none;">
                 {% for question_Loc_and_quiz in questions_Loc_and_quiz %}
-                    <li>
+                    <li id = "{{question_Loc_and_quiz.0.question.question_id}}">
                         <div class="bordered">
 
                                 <p class="bold_font question_support_label" >
