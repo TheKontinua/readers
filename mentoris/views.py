@@ -1,6 +1,7 @@
 import json, os, random
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
+from django.core.files.storage import FileSystemStorage
 from mentapp.models import (
     User,
     Email,
@@ -13,6 +14,7 @@ from mentapp.models import (
     Quiz_Question,
     Question,
     Verification,
+    Question_Attachment
 )
 from mentoris.forms import UserForm, LatexForm, QuizForm
 from django.shortcuts import render, get_object_or_404, redirect
@@ -45,6 +47,8 @@ def latex(request):
         volume_id = request.POST.get("volume")
         volume_id = int(volume_id)
         chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
+        
+    
 
         chapter_locs = Chapter_Loc.objects.filter(
             chapter__chapter_id__in=chapters
@@ -57,6 +61,7 @@ def latex(request):
         if "submit-question" in request.POST:
             question_object = Question()
             question_loc = Question_Loc()
+            
 
             # TODO: question_object.creator = CURRENT USER
 
@@ -78,6 +83,27 @@ def latex(request):
             question_loc.rubric_latex = grading
             # TODO: question_loc.creator = CURRENT USER
             question_loc.save()
+
+            question_attachments = request.FILES.getlist('attachments')
+            
+            for attachment in question_attachments:
+
+                blob = Blob(
+                    file = attachment,
+                    content_type = attachment.content_type,
+                    filename = attachment.name
+                )
+                blob.save()
+
+                question_attachment_instance = Question_Attachment(
+                    question=question_loc,
+                    lang_code = question_loc.lang_code,
+                    dialect_code = question_loc.dialect_code,
+                    filename=blob.file,
+                    blob_key = blob
+                )
+                question_attachment_instance.save()
+
 
             return main(request)
 
