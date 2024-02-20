@@ -1,5 +1,7 @@
 from django import forms
 from mentapp.models import User, Quiz
+from multiupload.fields import MultiFileField
+
 
 
 class LatexForm(forms.Form):
@@ -12,6 +14,9 @@ class LatexForm(forms.Form):
     latex_grading = forms.CharField(
         widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False
     )
+    latex_support = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False
+    )
 
     time_required = forms.IntegerField(initial=0)
     volume = forms.IntegerField(initial=1)
@@ -19,6 +24,8 @@ class LatexForm(forms.Form):
     difficulty = forms.IntegerField(initial=0)
     points = forms.IntegerField(initial=0)
     pages_required = forms.DecimalField(initial=0.0)
+    title = forms.CharField(max_length=50, initial="", required=True)
+    attachments = MultiFileField(min_num=1, max_num=10, max_file_size=1024*1024*5)
 
 
 class UserForm(forms.ModelForm):

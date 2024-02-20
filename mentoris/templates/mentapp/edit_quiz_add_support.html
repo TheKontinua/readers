@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Add Support To Quiz {{quiz_id}}</title>
+
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/css/colors.css'%}">
+    <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
+
+    <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
+    <script>
+        customElements.define("latex-js", latexjs.LaTeXJSComponent);
+    </script>
+
+    <style>
+        .filter_label {
+            display: inline-block;
+            width: 7em;
+        }
+
+        .filter_wrapper {
+            margin: 5px;
+        }
+
+        .add_support_button {
+            border: 2px solid Black;
+            border-radius: 25px;
+            margin: 5px;
+            width: 8em;
+            height: 2em;
+        }
+
+        .add_support_add_state {
+            background: green;
+        }
+
+        .add_support_do_not_add_state {
+            background: var(--KontinuaRed);
+        }
+
+        #quiz_content {
+            width: 35em;
+            padding: 10px;
+            margin-bottom: 0px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!--Include AJAX-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <!--Include Header-->
+    <iframe src="header.html" width="100%" height="95px" frameBorder="0"
+        style="display: block; padding: 0px; margin: 0px;"></iframe>
+
+    <div id="left_panel">
+        <button id="back_button" onclick="location.href='/edit_quiz/{{quiz_id}}'" type="button">Back</button>
+        <div id="quiz_content" class="bordered">
+            <ul id="supports_list" style="list-style-type:none;">
+            </ul>
+        </div>
+    </div>
+
+    <!--Div for filters-->
+    <div id="right_panel" style="width: 25em;">
+        <div class="bordered" id="meta_data">
+            <div>
+                <div class="filter_wrapper">
+                    <span class="filter_label">Volume: </span>
+                    <select id="volume_value" name="volume_value">
+                        <option value="">Any Volume</option>
+                        {% for volume in volumes %}
+                        <option value="{{volume.volume_id}}">{{volume.volume_id}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter_wrapper">
+                    <span class="filter_label">Creator: </span>
+                    <select id="creator_value" name="creator_value">
+                        <option value="">Any Creator</option>
+                        {% for creator in creators %}
+                        <option value="{{creator.user_id}}">{{creator.full_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter_wrapper">
+                    <span class="filter_label">Title: </span>
+                    <input id="title" name="title"></input>
+                </div>
+
+            </div>
+        </div>
+        <button id="save_changes_button">Save Additions</button>
+        <button id="filter_button">Search</button>
+        <div id="save_status" class="bordered"></div>
+    </div>
+
+    <iframe src="footer.html" width="100%" frameBorder="0"></iframe>
+
+
+    <script type="text/javascript">
+
+        // Toggle add button between two states, indicated by label 
+        // and class
+        function toggle_add(button) {
+            if ($(button).hasClass("add_support_do_not_add_state")) {
+                $(button).text("Add");
+                $(button).removeClass("add_support_do_not_add_state")
+                $(button).addClass("add_support_add_state")
+            } else if ($(button).hasClass("add_support_add_state")) {
+                $(button).text("Do Not Add");
+                $(button).addClass("add_support_do_not_add_state")
+                $(button).removeClass("add_support_add_state")
+            }
+        }
+
+        // Make attribute label with a given name, associated
+        // class and value
+        function make_attribute_label(name, value_class, value) {
+            var p = document.createElement("p");
+            $(p).addClass("small_margin");
+
+            var span_title = document.createElement("span");
+            $(span_title).addClass("bold_font");
+            span_title.innerHTML = name;
+
+            var span_value = document.createElement("span");
+            span_value.innerHTML = value;
+            $(span_value).addClass(value_class)
+
+            p.appendChild(span_title);
+            p.appendChild(span_value);
+            return p;
+        }
+
+
+        $(document).ready(function () {
+
+            $('.add_support_button').on('click', function (event) {
+                toggle_add(this);
+            });
+
+            // Dynamicly create each question when filter is pressed
+            $('#filter_button').on('click', function (event) {
+                console.log(document.getElementById('volume_value').value);
+                volume_value = document.getElementById('volume_value').value;
+                creator_value = document.getElementById('creator_value').value;
+                title = document.getElementById('title').value;
+
+                var request;
+
+                if (title != "") {
+                    request = $.ajax({
+                        type: "GET",
+                        url: "/edit_quiz_add_support/{{quiz_id}}",
+                        dataType: 'json',
+                        data: {
+                            csrfmiddlewaretoken: "{{csrf_token}}",
+                            command: "filter",
+                            volume: volume_value,
+                            creator: creator_value,
+                            title: title
+                        }
+                    });
+                }
+                else {
+                    request = $.ajax({
+                        type: "GET",
+                        url: "/edit_quiz_add_support/{{quiz_id}}",
+                        dataType: 'json',
+                        data: {
+                            csrfmiddlewaretoken: "{{csrf_token}}",
+                            command: "filter",
+                            volume: volume_value,
+                            creator: creator_value,
+                        }
+                    });
+                }
+                request.done(function (data) {
+                    document.getElementById("supports_list").innerHTML = "";
+                    for (const i in data) {
+                        var list_item = document.createElement("li");
+                        list_item.id = data[i]["support_id"];
+
+                        var border_wrapper = document.createElement("div");
+                        $(border_wrapper).addClass("bordered");
+
+
+                        var question_wrapper = document.createElement("div");
+                        question_wrapper.style.float = "left";
+                        question_wrapper.appendChild(make_attribute_label("Volume: ", "volume", data[i]["volume"]));
+                        question_wrapper.appendChild(make_attribute_label("Creator: ", "creator", data[i]["creator"]));
+                        border_wrapper.appendChild(question_wrapper);
+
+                        var button_wrapper = document.createElement("div");
+                        button_wrapper.style.float = "right";
+
+                        var add_button = document.createElement("button");
+                        add_button.innerHTML = "Add";
+                        add_button.addEventListener('click', function (event) {
+                            toggle_add(event.target);
+                        });
+
+                        $(add_button).addClass("add_support_button");
+                        $(add_button).addClass("add_support_add_state");
+                        $(add_button).addClass("bold_font");
+                        button_wrapper.appendChild(add_button);
+                        border_wrapper.appendChild(button_wrapper);
+
+                        var latex_wrapper = document.createElement("div");
+                        latex_wrapper.style.clear = "both";
+
+                        var latex = document.createElement("latex-js");
+                        latex.innerHTML = data[i]["support_latex"]
+                        latex_wrapper.appendChild(latex);
+                        border_wrapper.appendChild(latex_wrapper);
+
+                        list_item.appendChild(border_wrapper);
+                        document.getElementById("supports_list").appendChild(list_item);
+                    }
+                });
+
+                request.fail(function () {
+                    document.getElementById("supports_list").innerHTML = "Search failed, try again";
+                });
+            });
+
+            $('#save_changes_button').on('click', function (event) {
+                var list = document.getElementById("supports_list").children;
+                var question_id_list = [];
+                for (var i = 0; i < list.length; ++i) {
+                    let add_button = list[i].getElementsByClassName("add_support_button")[0];
+                    if ($(add_button).hasClass("add_support_do_not_add_state")) {
+                        support_id_list.push($(list[i]).attr("id"));
+                    }
+                }
+
+                var request = $.ajax({
+                    type: "POST",
+                    url: "/edit_quiz_add_support/{{quiz_id}}",
+                    dataType: 'json',
+                    data: {
+                        csrfmiddlewaretoken: "{{csrf_token}}",
+                        command: "save_changes",
+                        supports_to_add_ids: JSON.stringify(support_id_list),
+                    }
+                });
+
+                request.done(function () {
+                    const save_status = document.getElementById("save_status");
+                    const save_date = new Date();
+                    save_status.innerHTML = "Additions Saved at " + save_date.toString();
+                });
+
+                request.fail(function () {
+                    const save_status = document.getElementById("save_status");
+                    const save_date = new Date();
+                    save_status.innerHTML = "Oh no! There was an error making additions at: " + save_date.toString();
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -58,22 +58,28 @@
                             </a>
                         </td>
                         <td style="width: 20%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Conceptual Difficulty: {{ quiz.conceptual_difficulty }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Conceptual Difficulty: {{
+                                quiz.conceptual_difficulty }}</p>
                         </td>
                         <td style="width: 10%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Time: {{ quiz.time_required_mins }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Time: {{
+                                quiz.time_required_mins }}</p>
                         </td>
                         <td style="width: 15%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Calculator: {{ quiz.calculator_allowed }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Calculator: {{
+                                quiz.calculator_allowed }}</p>
                         </td>
                         <td style="width: 14%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Internet: {{ quiz.internet_allowed }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Internet: {{
+                                quiz.internet_allowed }}</p>
                         </td>
                         <td style="width: 10%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Book: {{ quiz.book_allowed }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Book: {{ quiz.book_allowed }}
+                            </p>
                         </td>
                         <td style="padding-left: 0%; padding-right: 0%">
-                            <button id="downloadPDF" type="button" class="btn" style="background-color: transparent; float: right;">
+                            <button id="downloadPDF" type="button" class="btn"
+                                style="background-color: transparent; float: right;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-download" viewBox="0 0 16 16">
                                     <path
@@ -95,7 +101,7 @@
                     </tr>
                     {% endfor %}
                 </tbody>
-            </table>            
+            </table>
         </div>
         <div class="col-md-2">
             <form action="{% url 'create_quiz' volume.volume_id chapter.chapter_id%}" method="post">
@@ -103,7 +109,7 @@
                 <button type="submit" class="btn btn-primary">
                     Make a quiz
                 </button>
-            </form>            
+            </form>
         </div>
     </div>
     <div class="container" style="position: absolute; bottom: 0">
@@ -123,7 +129,7 @@
         crossorigin="anonymous"></script>
     <script>
         document.getElementById('downloadPDF').addEventListener('click', function () {
-            var blobKey = '0'; //whatever the QuizRedering blob_key is
+            var blobKey = '1'; //whatever the QuizRedering blob_key is
 
             fetch(`/download_pdf/${blobKey}/`)
                 .then(response => response.blob())
@@ -138,45 +144,7 @@
                 });
         });
     </script>
-    <script>
-        document.getElementById('uploadPDF').addEventListener('click', function () {
-            const pdfPath = 'mentoris/dummy.pdf';
 
-            fetch(`/upload_pdf/${pdfPath}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),  // Include CSRF token for Django
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);  // Log the response from the server
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        });
-
-        // Function to get CSRF token from cookies
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    // Check if this cookie name is the one we are looking for
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-
-    </script>
 </body>
 
 </html>

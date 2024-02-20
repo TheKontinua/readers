@@ -36,9 +36,12 @@ urlpatterns = [
     path("main/<int:volume_id>/<chapter_id>/", views.chapter, name="chapter"),
     path("edit_quiz/<int:quiz_id>", views.edit_quiz, name="edit_quiz"),
     path("edit_quiz_add_question/<int:quiz_id>", views.edit_quiz_add_question, name="edit_quiz_add_question"),
+    path("edit_quiz_add_support/<int:quiz_id>", views.edit_quiz_add_support, name="edit_quiz_add_support"),
     path("<str:page>/header.html/", views.header, name="header"),
     path("<str:page>/footer.html/", views.footer, name="footer"),
     path("download_pdf/<int:blob_key>/", views.download_pdf, name='download_pdf'),
     path("upload_pdf/<path:pdf_path>/", views.upload_pdf, name='upload_pdf'),
+    path("create_support/", views.create_support, name="create_support"),
+
     path('quiz/create/<int:volume_id>/<chapter_id>', views.create_quiz, name='create_quiz'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
