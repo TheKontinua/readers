@@ -1,7 +1,9 @@
+import base64
 import json, os, random
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from mentapp.models import (
+    Question_Attachment,
     User,
     Email,
     Volume,
@@ -460,23 +462,30 @@ def user_info(request, user_id):
 def edit_quiz(request, quiz_id):
     chapters = Chapter.objects.all()
     volumes = Volume.objects.all()
+
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
     quiz_questions = (
         Quiz_Question.objects.all()
         .filter(quiz=quiz_instance.quiz_id)
         .order_by("ordering")
     )
-    questions_Loc = list()
+    questions_Loc_quiz_attatchments = list()
 
     for quiz_question in quiz_questions:
         # Display question only with ENG lang code and US dialect code for editing 
-        questions_Loc_local = Question_Loc.objects.all().filter(
+        question_Loc = Question_Loc.objects.all().filter(
             question=quiz_question.question,
             lang_code="ENG", dialect_code="US",
-        )
+        ).first()
 
-        for question_Loc in questions_Loc_local:
-            questions_Loc.append((question_Loc, quiz_question))
+        question_attachments = Question_Attachment.objects.filter(question = question_Loc)
+
+        files = list()
+        for question_attachment in question_attachments:
+            file = question_attachment.blob.file
+            files.append(file)
+
+        questions_Loc_quiz_attatchments.append((question_Loc, quiz_question, files))
 
     if request.method == "POST":
         if request.POST.get("command") == "save":
@@ -506,7 +515,6 @@ def edit_quiz(request, quiz_id):
             internet_allowed_str = request.POST.get("internet_allowed")
             book_allowed_str = request.POST.get("book_allowed")
 
-
             if calculator_allowed_str == "true":
                 quiz_instance.calculator_allowed = True
             else:
@@ -535,7 +543,7 @@ def edit_quiz(request, quiz_id):
         "mentapp/edit_quiz.html",
         {
             "quiz_instance": quiz_instance,
-            "questions_Loc_and_quiz": questions_Loc,
+            "questions_Loc_and_quiz": questions_Loc_quiz_attatchments ,
             "volumes": volumes,
             "chapters": chapters
         },
@@ -614,6 +622,14 @@ def edit_quiz_add_question(request, quiz_id):
                 )
                 .first()
             )
+
+            question_attachments = Question_Attachment.objects.filter(question = question_Loc)
+
+            attachment_urls = list()
+            for question_attachment in question_attachments:
+                attachment_url = question_attachment.blob.file.url
+                attachment_urls.append(attachment_url)
+
             question_values = dict()
             question_values["question_id"] = question.question_id
 
@@ -633,6 +649,7 @@ def edit_quiz_add_question(request, quiz_id):
             question_values["time_required_mins"] = question.time_required_mins
             question_values["point_value"] = question.point_value
             question_values["question_latex"] = question_Loc.question_latex
+            question_values["attachment_urls"] = attachment_urls
             questions_list.append(question_values)
         return JsonResponse(questions_list, safe=False)
 
