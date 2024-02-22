@@ -12,6 +12,9 @@ class LatexForm(forms.Form):
     latex_grading = forms.CharField(
         widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False
     )
+    latex_support = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False
+    )
 
     time_required = forms.IntegerField(initial=0)
     volume = forms.IntegerField(initial=1)

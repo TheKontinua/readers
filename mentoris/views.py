@@ -14,7 +14,10 @@ from mentapp.models import (
     Quiz_Question,
     Question,
     Verification,
-    Question_Attachment
+    Question_Attachment,
+    Support,
+    Support_Loc,
+    Support_Attachment
 )
 from mentoris.forms import UserForm, LatexForm, QuizForm
 from django.shortcuts import render, get_object_or_404, redirect
@@ -99,7 +102,7 @@ def latex(request):
                     question=question_loc,
                     lang_code = question_loc.lang_code,
                     dialect_code = question_loc.dialect_code,
-                    filename=blob.file,
+                    filename=blob.filename,
                     blob_key = blob
                 )
                 question_attachment_instance.save()
@@ -793,3 +796,78 @@ def upload_pdf(request, pdf_path):
         )
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
+    
+
+def create_support(request):
+
+    form = LatexForm(request.POST)
+    
+    volumes = (
+        Volume.objects.values_list("volume_id", flat=True)
+        .distinct()
+        .order_by("volume_id")
+    )
+
+    if request.method == "POST":
+
+        support_content = request.POST.get("latex_support")
+        support_title = request.POST.get("title")
+        print(support_content)
+
+        if "submit-support" in request.POST:
+            volume_id = int(request.POST.get("volume"))
+            volume = get_object_or_404(Volume, volume_id=volume_id)
+            support = Support(volume_id = volume)
+            support.save()
+            print(support.volume_id)
+            
+            support_loc = Support_Loc(
+            support=support,
+            title_latex=support_title,
+            content_latex=support_content,
+            creator_id="e79c167f-6900-4525-9aa6-bd7263c1fbb3",
+            approver_id="e79c167f-6900-4525-9aa6-bd7263c1fbb3"
+            )
+
+            support_loc.save()
+
+            support_attachments = request.FILES.getlist('attachments')
+
+            for attachment in support_attachments:
+
+                blob = Blob(
+                    file = attachment,
+                    content_type = attachment.content_type,
+                    filename = attachment.name
+                )
+                blob.save()
+
+                support_attachment_instance = Support_Attachment(
+                    support=support,
+                    lang_code = support_loc.lang_code,
+                    dialect_code = support_loc.dialect_code,
+                    filename=blob.filename,
+                    blob_key = blob
+                )
+                support_attachment_instance.save()
+
+                return main(request)
+
+        return render(
+            request, 
+            "mentapp/create_support.html",
+            {
+                "form": form,
+                "volumes": volumes,
+                "support_content": support_content
+                }
+            )
+    else:
+        return render(
+            request, 
+            "mentapp/create_support.html",
+            {
+                "form": form,
+                "volumes": volumes,
+                }
+            )
