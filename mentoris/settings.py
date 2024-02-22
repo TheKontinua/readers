@@ -76,6 +76,7 @@ WSGI_APPLICATION = "mentoris.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -124,6 +125,10 @@ STATIC_URL = "static/"
 STATIC_ROOT = "static"
 STATICFILES_DIRS = ["mentoris/static"]
 
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -132,4 +137,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = "django_ses.SESBackend"
 
 # Allows Iframes to display from pages hosted by this server
-X_FRAME_OPTIONS = 'SAMEORIGIN'
+X_FRAME_OPTIONS = "SAMEORIGIN"

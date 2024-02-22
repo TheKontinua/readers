@@ -5,6 +5,7 @@
         "prettier": "^2.8.8"
     },
     "dependencies": {
-        "bootstrap-select": "^1.13.18"
+        "bootstrap-select": "^1.13.18",
+        "latex.js": "^0.12.6"
     }
 }

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        />
+        <link rel="stylesheet" type="text/css" />
+        {% load static %}
+        <link rel="stylesheet" href="{% static "/css/colors.css"%}">
+    </head>
+    <body>
+        <iframe src="header.html" width="100%" height="95px" frameBorder="0" style="display: block; padding: 0px; margin: 0px;"></iframe>
+        <div class="row mb-3" style="margin-top: 2%; align-items: center">
+            <div class="col-md-3">
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    onclick="window.location.href='/main/'"
+                    style="margin-left: 10%"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        class="bi bi-arrow-left"
+                        viewBox="0 0 16 16"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+                        />
+                    </svg>
+                    Back
+                </button>
+            </div>
+            <div class="col-md-6">
+                <h2 style="text-align: center">User Directory</h2>
+            </div>
+        </div>
+        <div
+            class="container"
+            style="width: 100%; overflow-y: scroll"
+        >
+            <div>
+                <div style="width: 100%; height: 100%; overflow-y: auto">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Search" id="advanced-search-input" aria-label="Username" aria-describedby="basic-addon1">
+                        <span class="input-group-text">
+                            <button type="button" class="btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                                </svg>
+                            </button>
+                        </span>
+                    </div>
+                    <table class="table table-bordered" id="entire-table-body">
+                        <tbody>
+                            {% for newbie in newbies %}
+                            <tr class="user">
+                                <td>
+                                    <b class="user-email">{{ newbie.1 }}</b>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-secondary"
+                                            disabled
+                                            id="status"
+                                        >
+                                            <b>Newbie</b>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-secondary">
+                                        Endorsements: {{ newbie.2 }}, {{ newbie.3 }}
+                                    </p>
+                                </td>
+                                <td style="width: 15%">
+                                    <div class="d-flex justify-content-center">
+                                        <button class="btn btn-danger">
+                                            Disable
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tbody>
+                            {% for mentor in mentors %}
+                            <tr class="user">
+                                <td>
+                                    <b class="user-email">{{ mentor.1 }}</b>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-info"
+                                            disabled
+                                            id="status"
+                                        >
+                                            <b>Mentor</b>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-secondary">
+                                        Endorsements: {{ mentor.2 }}, {{ mentor.3 }}
+                                    </p>
+                                </td>
+                                <td style="width: 15%">
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            class="demote-btn btn btn-warning me-1"
+                                        >
+                                            Demote
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            Disable
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tbody>
+                            {% for quiz_maker in quiz_makers %}
+                            <tr class="user">
+                                <td>
+                                    <b class="user-email">{{ quiz_maker.1 }}</b>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-warning"
+                                            disabled
+                                            id="status"
+                                        >
+                                            <b>Quiz Maker</b>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-secondary">
+                                        Endorsements: {{ quiz_maker.2 }}, {{ quiz_maker.3 }}
+                                    </p>
+                                </td>
+                                <td style="width: 15%">
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            class="demote-btn btn btn-warning me-1"
+                                        >
+                                            Demote
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            Disable
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tbody>
+                            {% for admin in admins %}
+                            <tr class="user">
+                                <td>
+                                    <b class="user-email">{{ admin.1 }}</b>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-primary"
+                                            disabled
+                                            id="status"
+                                        >
+                                            <b>Admin</b>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-secondary">
+                                        Endorsements: {{ admin.2 }}, {{ admin.3 }}
+                                    </p>
+                                </td>
+                                <td style="width: 15%">
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            class="demote-btn btn btn-warning me-1"
+                                        >
+                                            Demote
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            Disable
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <iframe src="footer.html" width="100%" frameBorder="0" style="margin-top: -200px; position: fixed; bottom: 0;"></iframe>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"
+        ></script>
+        <script>
+            var searchBar = document.getElementById("advanced-search-input");
+            var entireTableBody = document.getElementById("entire-table-body");
+            var originalTableData = entireTableBody.innerHTML;
+            var rows = document.getElementsByTagName("tr");
+            // search bar function
+            function search() {
+                entireTableBody.innerHTML = originalTableData;
+                if (searchBar.value.length < 1) {
+                    return;
+                }
+
+                let filteredRows = "";
+                let searchText = searchBar.value.toLowerCase();
+
+                for (let i = 0; i < rows.length; i++) {
+                    const currRowText = rows[i].children[0].innerText.toLowerCase();                    
+                    if (currRowText.indexOf(searchText) > -1) {
+                        filteredRows += rows[i].outerHTML;
+                    }
+                }
+                entireTableBody.innerHTML = filteredRows;
+            }
+            searchBar.addEventListener("input", search)
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // function to demote/disable users
+                $("tr").click(function (e) {
+                    var btn = e.target;
+                    table_cell = this.innerText;
+                    cell_data = this.innerText.split("\t");
+
+                    if (btn.innerHTML.search("Demote") >= 0) {
+                        var request = $.ajax({
+                            type: "POST",
+                            url: "/user_directory/",
+                            dataType: "json",
+                            data: {
+                                csrfmiddlewaretoken: "{{csrf_token}}",
+                                command: "demote",
+                                email: cell_data[0],
+                            },
+                        });
+
+                        request.done(function (data) {
+                            var row = btn.parentNode.parentNode.parentNode;
+                            var status = row.querySelector("button");
+                            status.className = data.color;
+                            status.innerHTML = data.status;
+                            status.style.fontWeight = "bold";
+                            window.location.reload();
+                        });
+                    } else {
+                        var request = $.ajax({
+                            type: "POST",
+                            url: "/user_directory/",
+                            dataType: "json",
+                            data: {
+                                csrfmiddlewaretoken: "{{csrf_token}}",
+                                command: "disable",
+                                email: cell_data[0],
+                            },
+                        });
+
+                        request.done(function () {
+                            var row = btn.parentNode.parentNode.parentNode;
+                            row.parentNode.removeChild(row);
+                        });
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

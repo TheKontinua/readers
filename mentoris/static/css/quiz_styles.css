@@ -1,0 +1,49 @@
+li {
+    font-size: .9em;
+    padding: 0px;
+}
+
+.form_label {
+    display: inline-block;
+    width: 10em;
+}
+
+.form_element_wrapper {
+    margin: 5px;
+}
+
+.small_margin {
+    margin: .1em;
+}
+
+.bordered {
+    border: 3px solid LightGray;
+    border-radius: 25px;
+    padding: 25px;
+    margin: 10px;
+    overflow: hidden;
+}
+
+.bold_font {
+    font-weight: bold;
+}
+
+#right_panel {
+    float: right;
+    width: 35em;
+}
+#left_panel {
+    float: left;
+}
+
+button {
+    border: 2px solid Black;
+    border-radius: 25px;
+    margin: 5px;
+    width: 8em;
+    min-height: 2em;
+}
+
+button:hover {
+    background: grey;
+}

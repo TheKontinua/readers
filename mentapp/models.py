@@ -21,13 +21,14 @@ class User(models.Model):
     country_code = models.CharField(max_length=10, default="code")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, default=0)
+    promotion_requested = models.BooleanField(default=False)
     primary_lang_code = models.CharField(max_length=20, default="EN")
     primary_dialect_code = models.CharField(max_length=20, default="US")
 
     is_verified = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_quizmaker = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     def set_password(self, raw_password):
         return make_password(password=raw_password)
@@ -42,7 +43,7 @@ class User(models.Model):
 
 
 class Volume(models.Model):
-    volume_id = models.AutoField(default=0, primary_key=True)
+    volume_id = models.AutoField(primary_key=True)
 
 
 class Chapter(models.Model):
@@ -129,13 +130,11 @@ class Question_Attachment(models.Model):
     question = models.ForeignKey(Question_Loc, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
-    filename = models.FileField(
-        upload_to="question_attachments/",
-    )
-    blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
+    filename = models.CharField(max_length=255)
+    blob = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question", "lang_code", "dialect_code")
+        unique_together = ("question", "filename", "lang_code", "dialect_code")
         indexes = [
             models.Index(
                 fields=["question", "lang_code", "dialect_code"],
@@ -143,9 +142,13 @@ class Question_Attachment(models.Model):
             )
         ]
 
+class Support(models.Model):
+    support_id = models.AutoField(primary_key=True, default=0, editable=False)
+    volume_id = models.ForeignKey(Volume, null=True, on_delete=models.CASCADE)
+    
 
 class Support_Attachment(models.Model):
-    question = models.ForeignKey(Question_Loc, on_delete=models.CASCADE)
+    support = models.ForeignKey(Support, null=True, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5)
     dialect_code = models.CharField(max_length=5)
     filename = models.FileField(
@@ -154,10 +157,10 @@ class Support_Attachment(models.Model):
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question", "lang_code", "dialect_code")
+        unique_together = ("support", "lang_code", "dialect_code")
         indexes = [
             models.Index(
-                fields=["question", "lang_code", "dialect_code"],
+                fields=["support", "lang_code", "dialect_code"],
                 name="support_attachment_comp_pkey",
             )
         ]
@@ -313,13 +316,6 @@ class Language(models.Model):
             )
         ]
 
-
-class Support(models.Model):
-    support_id = models.AutoField(primary_key=True, default=0, editable=False)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
-    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
-
-
 class Support_Loc(models.Model):
     support = models.ForeignKey(Support, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
@@ -349,3 +345,12 @@ class Quiz_Support(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     support = models.ForeignKey(Support, on_delete=models.CASCADE)
     ordering = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ("quiz", "support")
+        indexes = [
+            models.Index(
+                fields=["quiz", "support"],
+                name="quiz_support_comp_pkey",
+            )
+        ]
