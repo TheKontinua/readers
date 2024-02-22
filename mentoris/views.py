@@ -369,9 +369,9 @@ def upload_pdf(request, pdf_path):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
-def create_quiz(request):
+def create_quiz(request, volume_id, chapter_id):
     if request.method == 'POST':
-        print("Request: ", request.POST.get('volume_id'), request.POST.get('chapter_id'))
+        print("This is the volume_id passed: ", volume_id, "This is the title passed: ", chapter_id)
         # Create a new Quiz instance
         quiz = Quiz.objects.create(
             conceptual_difficulty=1,
@@ -380,8 +380,8 @@ def create_quiz(request):
             computer_allowed=False,
             internet_allowed=False,
             book_allowed=False,
-            volume_id=request.POST.get('volume_id'),
-            chapter_id=request.POST.get('chapter_id'),
+            volume_id=volume_id,
+            chapter_id=chapter_id,
         )
 
         # Redirect to the edit page for the new quiz
