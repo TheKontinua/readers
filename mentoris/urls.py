@@ -40,4 +40,5 @@ urlpatterns = [
     path("<str:page>/footer.html/", views.footer, name="footer"),
     path("download_pdf/<int:blob_key>/", views.download_pdf, name='download_pdf'),
     path("upload_pdf/<path:pdf_path>/", views.upload_pdf, name='upload_pdf'),
+    path('quiz/create/<int:volume_id>/<chapter_id>', views.create_quiz, name='create_quiz'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

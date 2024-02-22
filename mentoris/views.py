@@ -266,11 +266,16 @@ def chapter(request, volume_id, chapter_id):
         title = chapter_loc.title
     except Chapter_Loc.DoesNotExist:
         title = None
-
+    try:
+        quizzes = Quiz.objects.filter(chapter=chapter_id, volume=volume_id)
+    except Quiz.DoesNotExist:
+        quizzes = None
+    print("this is quizzes: ", quizzes, "this is volume_id: ",
+           volume_id.volume_id, "this is chapter_id: ", chapter_id)
     return render(
         request,
         "mentapp/chapter.html",
-        {"volume": volume_id, "chapter": chapter_id, "title": title},
+        {"volume": volume_id, "chapter": chapter_id, "title": title, "quizzes": quizzes},
     )
 
 
@@ -751,4 +756,22 @@ def upload_pdf(request, pdf_path):
             {"status": "success", "message": "File uploaded successfully"}
         )
     except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)})
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+def create_quiz(request, volume_id, chapter_id):
+    if request.method == 'POST':
+        print("This is the volume_id passed: ", volume_id, "This is the title passed: ", chapter_id)
+        # Create a new Quiz instance
+        quiz = Quiz.objects.create(
+            conceptual_difficulty=1,
+            time_required_mins=10,
+            calculator_allowed=False,
+            computer_allowed=False,
+            internet_allowed=False,
+            book_allowed=False,
+            volume_id=volume_id,
+            chapter_id=chapter_id,
+        )
+
+        # Redirect to the edit page for the new quiz
+        return redirect('/edit_quiz/{}'.format(quiz.quiz_id))
