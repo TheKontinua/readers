@@ -160,9 +160,6 @@ def chapter(request, volume_id, chapter_id):
         quizzes = Quiz.objects.filter(chapter=chapter_id, volume=volume_id)
     except Quiz.DoesNotExist:
         quizzes = None
-    quizdebug = Quiz.objects.all()
-    for quizd in quizdebug:
-        print("Stored in quiz object in DB", quizd.chapter.chapter_id)
     print("this is quizzes: ", quizzes, "this is volume_id: ",
            volume_id.volume_id, "this is chapter_id: ", chapter_id)
     return render(
@@ -371,3 +368,21 @@ def upload_pdf(request, pdf_path):
         return JsonResponse({'status': 'success', 'message': 'File uploaded successfully'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+
+def create_quiz(request):
+    if request.method == 'POST':
+        print("Request: ", request.POST.get('volume_id'), request.POST.get('chapter_id'))
+        # Create a new Quiz instance
+        quiz = Quiz.objects.create(
+            conceptual_difficulty=1,
+            time_required_mins=10,
+            calculator_allowed=False,
+            computer_allowed=False,
+            internet_allowed=False,
+            book_allowed=False,
+            volume_id=request.POST.get('volume_id'),
+            chapter_id=request.POST.get('chapter_id'),
+        )
+
+        # Redirect to the edit page for the new quiz
+        return redirect('/edit_quiz/{}'.format(quiz.quiz_id))

@@ -48,35 +48,32 @@
     </div>
     <div class="row mb-12">
         <div class="col-md-10">
-            <table class="table border" >
+            <table class="table border">
                 <tbody>
                     {% for quiz in quizzes %}
                     <tr>
-                        <th scope="row" style="width: 20%">
+                        <td style="width: 15%">
                             <a href="" class="text-dark">
-                                <p style="
-                                            margin-top: 2%;
-                                            margin-bottom: 0px;
-                                        ">
-                                    Quiz ID: {{ quiz.quiz_id }}
-                                </p>
+                                <p style="margin-top: 3%; margin-bottom: 0px">Quiz ID: {{ quiz.quiz_id }}</p>
                             </a>
-                        </th>
-                        <td class="text-secondary" style="width: 25%">
-                            <p class="text-secondary" style="margin-top: 2%; margin-bottom: 0px">
-                                Conceptual Difficulty: {{ quiz.conceptual_difficulty }}
-                            </p>
                         </td>
                         <td style="width: 20%">
-                            <p class="text-secondary" style="margin-top: 3%; margin-bottom: 0px">
-                                Time Required: {{ quiz.time_required_mins }}
-                            </p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Conceptual Difficulty: {{ quiz.conceptual_difficulty }}</p>
                         </td>
-                        <td style="padding-left: 30%; padding-right: 0%">
-                            <button id="downloadPDF" type="button" class="btn" style="
-                                        background-color: transparent;
-                                        float: right;
-                                    ">
+                        <td style="width: 10%">
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Time: {{ quiz.time_required_mins }}</p>
+                        </td>
+                        <td style="width: 15%">
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Calculator: {{ quiz.calculator_allowed }}</p>
+                        </td>
+                        <td style="width: 14%">
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Internet: {{ quiz.internet_allowed }}</p>
+                        </td>
+                        <td style="width: 10%">
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Book: {{ quiz.book_allowed }}</p>
+                        </td>
+                        <td style="padding-left: 0%; padding-right: 0%">
+                            <button id="downloadPDF" type="button" class="btn" style="background-color: transparent; float: right;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-download" viewBox="0 0 16 16">
                                     <path
@@ -87,10 +84,7 @@
                             </button>
                         </td>
                         <td style="padding-left: 0px">
-                            <button type="button" class="btn" style="
-                                        background-color: transparent;
-                                        float: right;
-                                    ">
+                            <button type="button" class="btn" style="background-color: transparent; float: right;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
                                     <path
@@ -101,12 +95,15 @@
                     </tr>
                     {% endfor %}
                 </tbody>
-            </table>
+            </table>            
         </div>
         <div class="col-md-2">
-            <button id="uploadPDF" type="submit" class="btn btn-primary">
-                Submit a new Quiz Question
-            </button>
+            <form action="{% url 'create_quiz' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    Make a quiz
+                </button>
+            </form>            
         </div>
     </div>
     <div class="container" style="position: absolute; bottom: 0">
