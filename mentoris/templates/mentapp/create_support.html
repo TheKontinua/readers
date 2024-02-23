@@ -69,10 +69,11 @@
             <form method="POST" action="{% url 'create_support' %}" enctype="multipart/form-data">
                 {% csrf_token %}
 
+                <div class="container" style="margin-top: 10px"></div>
+
                 <div class="row">
                     <div class="col-4">
                         <label for="latex-input">Enter support here in LaTeX:</label>
-                        <div class="container" style="margin-top: 10px"></div>
                         {{ form.latex_support }}
                         <input type="hidden" value="{{ support_content }}" name="support_hidden" />
                     </div>
@@ -97,10 +98,13 @@
 
                 <div class="container" style="margin-top: 50px"></div>
 
-                <div style="margin-bottom: 10px">
-                    <label class="btn btn-primary" for="attachments">Add Attachment(s)</label>
-                    <input style="display: none;" name="attachments" type="file" id="attachments"
+                <div class="form-group" style="margin-bottom: 10px">
+                    <label style="margin-bottom: 5px;" class="btn btn-primary" for="attachments">Add
+                        Attachment(s)</label>
+                    <input style="display: none; " class="form-control" name="attachments" type="file" id="attachments"
                         accept=".pdf, .png, .jpg" multiple />
+                    <br>
+
                 </div>
 
                 <div id="selectedFiles"></div>
@@ -119,7 +123,7 @@
                                 <div class="col">
                                     <div class="form-group required">
                                         <input type="input" class="form-control" style="margin-bottom: 10px;" id="title"
-                                            name="title" value="{{ form.title.value }}" />
+                                            name="title" value="{{ form.title.value }}" required />
                                     </div>
                                 </div>
                                 <div class="col">
@@ -157,6 +161,7 @@
     </div>
 
     <script>
+
         document.getElementById('attachments').addEventListener('change', function (event) {
             const files = event.target.files;
             const selectedFilesDiv = document.getElementById('selectedFiles');
@@ -170,6 +175,7 @@
             }
         });
     </script>
+
 </body>
 
 </html>

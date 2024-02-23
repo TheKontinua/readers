@@ -157,10 +157,10 @@ class Support_Attachment(models.Model):
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("support", "lang_code", "dialect_code")
+        unique_together = ("support", "lang_code", "dialect_code","blob_key")
         indexes = [
             models.Index(
-                fields=["support", "lang_code", "dialect_code"],
+                fields=["support", "lang_code", "dialect_code","blob_key"],
                 name="support_attachment_comp_pkey",
             )
         ]
@@ -219,7 +219,6 @@ class Quiz_Feedback(models.Model):
     dialect_code = models.CharField(max_length=5, default="US")
     date_created = models.DateTimeField(default=now)
     date_completed = models.DateTimeField(default=now)
-    date_viewed = models.DateTimeField(default=now)
     status = models.CharField(max_length=300, null=True)
     creator_id = models.CharField(max_length=50, null=True)
     viewer_id = models.CharField(max_length=50, null=True)

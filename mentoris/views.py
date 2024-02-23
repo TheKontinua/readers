@@ -799,8 +799,6 @@ def upload_pdf(request, pdf_path):
     
 
 def create_support(request):
-
-    form = LatexForm(request.POST)
     
     volumes = (
         Volume.objects.values_list("volume_id", flat=True)
@@ -808,18 +806,23 @@ def create_support(request):
         .order_by("volume_id")
     )
 
-    if request.method == "POST":
+    volume_id = 1
 
+    if request.method == "POST":
+        form = LatexForm(request.POST, request.FILES)
         support_content = request.POST.get("latex_support")
         support_title = request.POST.get("title")
-        print(support_content)
+        volume_id = int(request.POST.get("volume"))
+        volume = get_object_or_404(Volume, volume_id=volume_id)
+        support_attachments = request.FILES.getlist('attachments')
+        print(support_attachments)
+
+        
 
         if "submit-support" in request.POST:
-            volume_id = int(request.POST.get("volume"))
-            volume = get_object_or_404(Volume, volume_id=volume_id)
+            
             support = Support(volume_id = volume)
             support.save()
-            print(support.volume_id)
             
             support_loc = Support_Loc(
             support=support,
@@ -831,10 +834,8 @@ def create_support(request):
 
             support_loc.save()
 
-            support_attachments = request.FILES.getlist('attachments')
 
             for attachment in support_attachments:
-
                 blob = Blob(
                     file = attachment,
                     content_type = attachment.content_type,
@@ -851,15 +852,16 @@ def create_support(request):
                 )
                 support_attachment_instance.save()
 
-                return main(request)
-
+            return redirect('main')
+            
         return render(
             request, 
             "mentapp/create_support.html",
             {
                 "form": form,
                 "volumes": volumes,
-                "support_content": support_content
+                "volume_id": volume_id,
+                "support_content": support_content,
                 }
             )
     else:
@@ -867,7 +869,7 @@ def create_support(request):
             request, 
             "mentapp/create_support.html",
             {
-                "form": form,
-                "volumes": volumes,
+                "form": LatexForm(),
+                "volumes": volumes
                 }
             )
