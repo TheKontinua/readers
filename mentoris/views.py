@@ -710,6 +710,17 @@ def edit_quiz_add_question(request, quiz_id):
     )
 
 
+def edit_quiz_add_support(request, quiz_id):
+
+    return render(request,
+        "mentapp/edit_quiz_add_support.html/",
+        {
+            "quiz_id": quiz_id
+        }
+    )
+
+
+
 def header(request, page):
     return render(
         request,
@@ -805,6 +816,9 @@ def create_support(request):
         .distinct()
         .order_by("volume_id")
     )
+    creators = (
+        User.objects.values_list("user_id")
+    )
 
     volume_id = 1
 
@@ -828,8 +842,8 @@ def create_support(request):
             support=support,
             title_latex=support_title,
             content_latex=support_content,
-            creator_id="e79c167f-6900-4525-9aa6-bd7263c1fbb3",
-            approver_id="e79c167f-6900-4525-9aa6-bd7263c1fbb3"
+            creator_id=creators.first()[0],
+            approver_id=creators.first()[0]
             )
 
             support_loc.save()
