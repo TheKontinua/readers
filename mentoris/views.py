@@ -3,6 +3,7 @@ import json, os, random
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage
 from mentapp.models import (
     Question_Attachment,
     User,
@@ -711,6 +712,17 @@ def edit_quiz_add_support(request, quiz_id):
 
 
 
+def edit_quiz_add_support(request, quiz_id):
+
+    return render(request,
+        "mentapp/edit_quiz_add_support.html/",
+        {
+            "quiz_id": quiz_id
+        }
+    )
+
+
+
 def header(request, page):
     return render(
         request,
@@ -894,3 +906,4 @@ def create_support(request):
                 "volumes": volumes
                 }
             )
+

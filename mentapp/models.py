@@ -92,6 +92,7 @@ class Question_Loc(models.Model):
     answer_latex = models.TextField()
     rubric_latex = models.TextField()
     date_created = models.DateTimeField(default=now)
+    date_created = models.DateTimeField(default=now)
     date_approved = models.DateTimeField(null=True, blank=True)
     creator = models.ForeignKey(
         User,
@@ -131,10 +132,10 @@ class Question_Attachment(models.Model):
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     filename = models.CharField(max_length=255)
-    blob = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
+    blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question", "filename", "lang_code", "dialect_code")
+        unique_together = ("question","filename", "lang_code", "dialect_code")
         indexes = [
             models.Index(
                 fields=["question", "filename", "lang_code", "dialect_code"],
