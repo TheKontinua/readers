@@ -148,23 +148,7 @@ class Support(models.Model):
     volume_id = models.ForeignKey(Volume, null=True, on_delete=models.CASCADE)
     
 
-class Support_Attachment(models.Model):
-    support = models.ForeignKey(Support, null=True, on_delete=models.CASCADE)
-    lang_code = models.CharField(max_length=5)
-    dialect_code = models.CharField(max_length=5)
-    filename = models.FileField(
-        upload_to="support_attachments/",
-    )
-    blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
-    class Meta:
-        unique_together = ("support", "lang_code", "dialect_code","blob_key")
-        indexes = [
-            models.Index(
-                fields=["support", "lang_code", "dialect_code","blob_key"],
-                name="support_attachment_comp_pkey",
-            )
-        ]
 
 
 class Quiz(models.Model):
@@ -338,6 +322,24 @@ class Support_Loc(models.Model):
             models.Index(
                 fields=["support", "lang_code", "dialect_code"],
                 name="support_loc_comp_pkey",
+            )
+        ]
+
+class Support_Attachment(models.Model):
+    support = models.ForeignKey(Support_Loc, null=True, on_delete=models.CASCADE)
+    lang_code = models.CharField(max_length=5)
+    dialect_code = models.CharField(max_length=5)
+    filename = models.FileField(
+        upload_to="support_attachments/",
+    )
+    blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        unique_together = ("support", "lang_code", "dialect_code","blob_key")
+        indexes = [
+            models.Index(
+                fields=["support", "lang_code", "dialect_code","blob_key"],
+                name="support_attachment_comp_pkey",
             )
         ]
 
