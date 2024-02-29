@@ -146,7 +146,6 @@ def latex(request):
             },
         )
     else:
-        print(chapters)
         return render(
             request,
             "mentapp/latex_question.html",
@@ -301,8 +300,7 @@ def chapter(request, volume_id, chapter_id):
         quizzes = Quiz.objects.filter(chapter=chapter_id, volume=volume_id)
     except Quiz.DoesNotExist:
         quizzes = None
-    print("this is quizzes: ", quizzes, "this is volume_id: ",
-           volume_id.volume_id, "this is chapter_id: ", chapter_id)
+    
     return render(
         request,
         "mentapp/chapter.html",
@@ -820,10 +818,8 @@ def footer(request, page):
 
 def user_edit(request, user_id):
     user = get_object_or_404(User, user_id=user_id)
-    # print("user items", user)
-    # print("request items", request.POST)
+    
     for key, value in request.POST.items():
-        # print("KEY", key, "VALUE", value)
         if key == "primary_email":
             Email.objects.filter(user_id=user_id, is_primary=True).update(
                 email_address=value
@@ -838,7 +834,6 @@ def user_edit(request, user_id):
                 emailObject.save()
         # Check if the user object has this field and the value is not empty
         if hasattr(user, key) and value.strip():
-            # print("USERKEY", key, "USERVAL", value)
             setattr(user, key, value)
     user.save()
     return redirect(f"/profile/{user.user_id}")
@@ -893,7 +888,6 @@ def upload_pdf(request, pdf_path):
 
 def create_quiz(request, volume_id, chapter_id):
     if request.method == 'POST':
-        print("This is the volume_id passed: ", volume_id, "This is the title passed: ", chapter_id)
         # Create a new Quiz instance
         quiz = Quiz.objects.create(
             conceptual_difficulty=1,
@@ -929,9 +923,7 @@ def create_support(request):
         volume_id = int(request.POST.get("volume"))
         volume = get_object_or_404(Volume, volume_id=volume_id)
         support_attachments = request.FILES.getlist('attachments')
-        print(support_attachments)
 
-        
 
         if "submit-support" in request.POST:
             
