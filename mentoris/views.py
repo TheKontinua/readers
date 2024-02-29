@@ -92,9 +92,9 @@ def latex(request):
             question_loc.save()
 
             question_attachments = request.FILES.getlist('attachments')
-            
-            for attachment in question_attachments:
 
+            for attachment in question_attachments:
+                
                 blob = Blob(
                     file = attachment,
                     content_type = attachment.content_type,
@@ -738,7 +738,7 @@ def edit_quiz_add_support(request, quiz_id):
 
         if volume_filter:
             support_instances = support_instances.filter(
-                support__volume__volume_id=volume_filter
+                support__volume_id__volume_id=volume_filter
             )
 
         if creator_filter:
