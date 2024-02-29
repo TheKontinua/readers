@@ -92,7 +92,6 @@ class Question_Loc(models.Model):
     answer_latex = models.TextField()
     rubric_latex = models.TextField()
     date_created = models.DateTimeField(default=now)
-    date_created = models.DateTimeField(default=now)
     date_approved = models.DateTimeField(null=True, blank=True)
     creator = models.ForeignKey(
         User,
