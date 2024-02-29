@@ -109,6 +109,9 @@
         </div>
         <button id="save_changes_button">Save Additions</button>
         <button id="filter_button">Search</button>
+        <br>
+        <button id="create_question" style="width: 200px;"
+        onclick="location.href='/latex/'">Create New Question</button>
         <div id="save_status" class="bordered"></div>        
     </div>
 
@@ -265,7 +268,8 @@
                         }
                     });
  
-                    request.fail(function(){
+                    request.fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log("Request failed:", textStatus, errorThrown);
                         document.getElementById("questions_list").innerHTML = "Search failed, try again";
                     });
                 });

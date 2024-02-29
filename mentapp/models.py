@@ -91,7 +91,8 @@ class Question_Loc(models.Model):
     question_latex = models.TextField()
     answer_latex = models.TextField()
     rubric_latex = models.TextField()
-    date_created = models.DateField(default=now)
+    date_created = models.DateTimeField(default=now)
+    date_created = models.DateTimeField(default=now)
     date_approved = models.DateTimeField(null=True, blank=True)
     creator = models.ForeignKey(
         User,
@@ -131,39 +132,23 @@ class Question_Attachment(models.Model):
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
     filename = models.CharField(max_length=255)
-    blob = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
+    blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question", "filename", "lang_code", "dialect_code")
+        unique_together = ("question","filename", "lang_code", "dialect_code")
         indexes = [
             models.Index(
-                fields=["question", "lang_code", "dialect_code"],
+                fields=["question", "filename", "lang_code", "dialect_code"],
                 name="question_attachment_comp_pkey",
             )
         ]
 
 class Support(models.Model):
-    support_id = models.AutoField(primary_key=True, default=0, editable=False)
+    support_id = models.AutoField(primary_key=True, editable=False)
     volume_id = models.ForeignKey(Volume, null=True, on_delete=models.CASCADE)
     
 
-class Support_Attachment(models.Model):
-    support = models.ForeignKey(Support, null=True, on_delete=models.CASCADE)
-    lang_code = models.CharField(max_length=5)
-    dialect_code = models.CharField(max_length=5)
-    filename = models.FileField(
-        upload_to="support_attachments/",
-    )
-    blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
-    class Meta:
-        unique_together = ("support", "lang_code", "dialect_code")
-        indexes = [
-            models.Index(
-                fields=["support", "lang_code", "dialect_code"],
-                name="support_attachment_comp_pkey",
-            )
-        ]
 
 
 class Quiz(models.Model):
@@ -176,6 +161,7 @@ class Quiz(models.Model):
     book_allowed = models.BooleanField(default=False)
     volume = models.ForeignKey(Volume, on_delete=models.SET_NULL, null=True)
     chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
 
 class Quiz_Question(models.Model):
@@ -198,7 +184,7 @@ class Quiz_Rendering(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     lang_code = models.CharField(default="EN", max_length=5)
     dialect_code = models.CharField(default="US", max_length=5)
-    date_created = models.DateField(default=now)
+    date_created = models.DateTimeField(default=now)
     paper_size = models.CharField(default="8x11", max_length=50)
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
@@ -216,9 +202,8 @@ class Quiz_Feedback(models.Model):
     quiz = models.ForeignKey(Quiz_Rendering, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
-    date_created = models.DateField(default=now)
-    date_completed = models.DateField(default=now)
-    date_viewed = models.DateField(default=now)
+    date_created = models.DateTimeField(default=now)
+    date_completed = models.DateTimeField(default=now)
     status = models.CharField(max_length=300, null=True)
     creator_id = models.CharField(max_length=50, null=True)
     viewer_id = models.CharField(max_length=50, null=True)
@@ -281,7 +266,7 @@ class Chapter_Feedback(models.Model):
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
-    date_created = models.DateField(default=now)
+    date_created = models.DateTimeField(default=now)
     status = models.CharField(max_length=300, null=True)
     creator = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="created_chapter_feedback"
@@ -322,10 +307,10 @@ class Support_Loc(models.Model):
     dialect_code = models.CharField(max_length=5, default="US")
     title_latex = models.CharField(max_length=100, null=True)
     content_latex = models.CharField(max_length=500, null=True)
-    date_created = models.DateField(default=now)
-    date_approved = models.DateTimeField(null=True, blank=True)
+    date_created = models.DateTimeField(default=now)
+    date_approved = models.DateTimeField(default=now)
     creator = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="created_support_loc"
+        User, on_delete=models.CASCADE, related_name="created_support_loc", 
     )
     approver = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="approved_support_loc"
@@ -337,6 +322,24 @@ class Support_Loc(models.Model):
             models.Index(
                 fields=["support", "lang_code", "dialect_code"],
                 name="support_loc_comp_pkey",
+            )
+        ]
+
+class Support_Attachment(models.Model):
+    support = models.ForeignKey(Support_Loc, null=True, on_delete=models.CASCADE)
+    lang_code = models.CharField(max_length=5)
+    dialect_code = models.CharField(max_length=5)
+    filename = models.FileField(
+        upload_to="support_attachments/",
+    )
+    blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        unique_together = ("support", "lang_code", "dialect_code","blob_key")
+        indexes = [
+            models.Index(
+                fields=["support", "lang_code", "dialect_code","blob_key"],
+                name="support_attachment_comp_pkey",
             )
         ]
 

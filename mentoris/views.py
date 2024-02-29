@@ -2,6 +2,8 @@ import base64
 import json, os, random
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
+from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage
 from mentapp.models import (
     Question_Attachment,
     User,
@@ -15,6 +17,11 @@ from mentapp.models import (
     Quiz_Question,
     Question,
     Verification,
+    Question_Attachment,
+    Support,
+    Support_Loc,
+    Support_Attachment,
+    Quiz_Support
 )
 from mentoris.forms import UserForm, LatexForm, QuizForm
 from django.shortcuts import render, get_object_or_404, redirect
@@ -47,6 +54,8 @@ def latex(request):
         volume_id = request.POST.get("volume")
         volume_id = int(volume_id)
         chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
+        
+    
 
         chapter_locs = Chapter_Loc.objects.filter(
             chapter__chapter_id__in=chapters
@@ -59,6 +68,7 @@ def latex(request):
         if "submit-question" in request.POST:
             question_object = Question()
             question_loc = Question_Loc()
+            
 
             # TODO: question_object.creator = CURRENT USER
 
@@ -80,6 +90,27 @@ def latex(request):
             question_loc.rubric_latex = grading
             # TODO: question_loc.creator = CURRENT USER
             question_loc.save()
+
+            question_attachments = request.FILES.getlist('attachments')
+
+            for attachment in question_attachments:
+                
+                blob = Blob(
+                    file = attachment,
+                    content_type = attachment.content_type,
+                    filename = attachment.name
+                )
+                blob.save()
+
+                question_attachment_instance = Question_Attachment(
+                    question=question_loc,
+                    lang_code = question_loc.lang_code,
+                    dialect_code = question_loc.dialect_code,
+                    filename=blob.filename,
+                    blob_key = blob
+                )
+                question_attachment_instance.save()
+
 
             return main(request)
 
@@ -487,7 +518,7 @@ def edit_quiz(request, quiz_id):
 
         files = list()
         for question_attachment in question_attachments:
-            file = question_attachment.blob.file
+            file = question_attachment.blob_key.file
             files.append(file)
 
         questions_Loc_quiz_attatchments.append((question_Loc, quiz_question, files))
@@ -632,7 +663,7 @@ def edit_quiz_add_question(request, quiz_id):
 
             attachment_urls = list()
             for question_attachment in question_attachments:
-                attachment_url = question_attachment.blob.file.url
+                attachment_url = question_attachment.blob_key.file.url
                 attachment_urls.append(attachment_url)
 
             question_values = dict()
@@ -665,6 +696,108 @@ def edit_quiz_add_question(request, quiz_id):
             "quiz_id": quiz_id,
             "questions_Locs": questions_Locs,
             "chapters": chapters,
+            "volumes": volumes,
+            "creators": creators,
+        },
+    )
+
+
+def edit_quiz_add_support(request, quiz_id):
+
+    support_Locs = Support_Loc.objects.all()
+    volumes = Volume.objects.all()
+    creators = User.objects.all()
+
+    if request.method == "POST":
+        quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
+        if request.POST.get("command") == "save_changes":
+            quiz_supports = (
+                Quiz_Support.objects.all().filter(quiz=quiz_id).order_by("ordering")
+            )
+            supports_to_add_id_str = json.loads(
+                request.POST.get("supports_to_add_ids")
+            )
+
+            for support_id in supports_to_add_id_str:
+                if quiz_supports.filter(support_id=support_id).count() == 0:
+                    support_instance = get_object_or_404(
+                        Support, support_id=support_id
+                    )
+                    Quiz_Support.objects.create(
+                        quiz=quiz_instance,
+                        support=support_instance,
+                        ordering=quiz_supports.count(),
+                    )
+
+            return JsonResponse({"success": True})
+    elif request.method == "GET" and request.GET.get("command") == "filter":
+        creator_filter = request.GET.get("creator")
+        volume_filter = request.GET.get("volume")
+        title_filter = request.GET.get("title")
+        support_instances = Support_Loc.objects.all()
+
+        if volume_filter:
+            support_instances = support_instances.filter(
+                support__volume_id__volume_id=volume_filter
+            )
+
+        if creator_filter:
+            support_instances = support_instances.filter(
+                creator=creator_filter)
+
+        if title_filter:
+            support_instances = support_instances.filter(
+                title_latex=title_filter)
+
+        supports_list = list()
+
+        for support in support_instances:
+            support_Loc = (
+                # Display question only with ENG lang code and US dialect code for editing 
+                Support_Loc.objects.all()
+                .filter(
+                    lang_code="ENG", dialect_code="US", support=support.support
+                )
+                .first()
+            )
+
+            support_attachments = Support_Attachment.objects.filter(support = support_Loc)
+
+            attachment_urls = list()
+            for support_attachment in support_attachments:
+                attachment_url = support_attachment.blob_key.file.url
+                attachment_urls.append(attachment_url)
+
+            support_values = dict()
+            support_values["support_id"] = support.support_id
+
+            if support.support.volume_id.volume_id is not None:
+                support_values["volume"] = support.support.volume_id.volume_id
+            else:
+                support_values["volume"] = ""
+
+            if support.title_latex is not None:
+                support_values["title"] = support.title_latex
+            else:
+                support_values["title"] = ""
+
+            if support.creator is not None:
+                support_values["creator"] = support_Loc.creator.full_name
+            else:
+                support_values["creator"] = ""
+
+           
+            support_values["support_latex"] = support_Loc.content_latex
+            support_values["attachment_urls"] = attachment_urls
+            supports_list.append(support_values)
+        return JsonResponse(supports_list, safe=False)
+
+    return render(
+        request,
+        "mentapp/edit_quiz_add_support.html/",
+        {
+            "quiz_id": quiz_id,
+            "questions_Locs": support_Locs,
             "volumes": volumes,
             "creators": creators,
         },
@@ -775,3 +908,83 @@ def create_quiz(request, volume_id, chapter_id):
 
         # Redirect to the edit page for the new quiz
         return redirect('/edit_quiz/{}'.format(quiz.quiz_id))
+
+def create_support(request):
+    
+    volumes = (
+        Volume.objects.values_list("volume_id", flat=True)
+        .distinct()
+        .order_by("volume_id")
+    )
+    creators = (
+        User.objects.values_list("user_id")
+    )
+
+    volume_id = 1
+
+    if request.method == "POST":
+        form = LatexForm(request.POST, request.FILES)
+        support_content = request.POST.get("latex_support")
+        support_title = request.POST.get("title")
+        volume_id = int(request.POST.get("volume"))
+        volume = get_object_or_404(Volume, volume_id=volume_id)
+        support_attachments = request.FILES.getlist('attachments')
+        print(support_attachments)
+
+        
+
+        if "submit-support" in request.POST:
+            
+            support = Support(volume_id = volume)
+            support.save()
+            
+            support_loc = Support_Loc(
+            support=support,
+            title_latex=support_title,
+            content_latex=support_content,
+            creator_id=creators.first()[0],
+            approver_id=creators.first()[0]
+            )
+
+            support_loc.save()
+
+
+            for attachment in support_attachments:
+                blob = Blob(
+                    file = attachment,
+                    content_type = attachment.content_type,
+                    filename = attachment.name
+                )
+                blob.save()
+
+                support_attachment_instance = Support_Attachment(
+                    support=support,
+                    lang_code = support_loc.lang_code,
+                    dialect_code = support_loc.dialect_code,
+                    filename=blob.filename,
+                    blob_key = blob
+                )
+                support_attachment_instance.save()
+
+            return redirect('main')
+            
+        return render(
+            request, 
+            "mentapp/create_support.html",
+            {
+                "form": form,
+                "volumes": volumes,
+                "volume_id": volume_id,
+                "support_content": support_content,
+                }
+            )
+    else:
+        return render(
+            request, 
+            "mentapp/create_support.html",
+            {
+                "form": LatexForm(),
+                "volumes": volumes
+                }
+            )
+
