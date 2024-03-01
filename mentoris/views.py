@@ -21,13 +21,15 @@ from mentapp.models import (
     Support,
     Support_Loc,
     Support_Attachment,
-    Quiz_Support
+    Quiz_Support,
 )
 from mentoris.forms import UserForm, LatexForm, QuizForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.files.base import ContentFile
+
+from mentoris.latex_to_pdf import latex_to_pdf
 
 
 def latex(request):
@@ -44,7 +46,7 @@ def latex(request):
         chapter__chapter_id__in=chapters
     ).distinct()
 
-    chapter = chapter_locs[0]
+    chapter_object = chapter_locs[0]
 
     if request.method == "POST":
         form = LatexForm(request.POST)
@@ -54,8 +56,6 @@ def latex(request):
         volume_id = request.POST.get("volume")
         volume_id = int(volume_id)
         chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
-        
-    
 
         chapter_locs = Chapter_Loc.objects.filter(
             chapter__chapter_id__in=chapters
@@ -68,12 +68,11 @@ def latex(request):
         if "submit-question" in request.POST:
             question_object = Question()
             question_loc = Question_Loc()
-            
 
             # TODO: question_object.creator = CURRENT USER
 
-            chapter = request.POST.get("chapter")
-            chapter_string = chapter.split("_")
+            chapter_object = request.POST.get("chapter")
+            chapter_string = chapter_object.split("_")
             chapter_title = chapter_string[0]
             chapter_loc = get_object_or_404(Chapter_Loc, title=chapter_title)
             question_object.chapter = chapter_loc.chapter
@@ -91,28 +90,29 @@ def latex(request):
             # TODO: question_loc.creator = CURRENT USER
             question_loc.save()
 
-            question_attachments = request.FILES.getlist('attachments')
+            question_attachments = request.FILES.getlist("attachments")
 
             for attachment in question_attachments:
-                
+
                 blob = Blob(
-                    file = attachment,
-                    content_type = attachment.content_type,
-                    filename = attachment.name
+                    file=attachment,
+                    content_type=attachment.content_type,
+                    filename=attachment.name,
                 )
                 blob.save()
 
                 question_attachment_instance = Question_Attachment(
                     question=question_loc,
-                    lang_code = question_loc.lang_code,
-                    dialect_code = question_loc.dialect_code,
+                    lang_code=question_loc.lang_code,
+                    dialect_code=question_loc.dialect_code,
                     filename=blob.filename,
-                    blob_key = blob
+                    blob_key=blob,
                 )
                 question_attachment_instance.save()
 
+            chapter_id = chapter_loc.chapter.chapter_id
 
-            return main(request)
+            return redirect(f"../main/{volume_id}/{chapter_id}")
 
         if "question-button" in request.POST:
             answer = hidden_answer
@@ -124,12 +124,12 @@ def latex(request):
             question = hidden_question
             answer = hidden_answer
         if "volume-button" not in request.POST:
-            chapter = request.POST.get("chapter")
-            chapter_string = chapter.split("_")
+            chapter_object = request.POST.get("chapter")
+            chapter_string = chapter_object.split("_")
             chapter_title = chapter_string[0]
-            chapter = get_object_or_404(Chapter_Loc, title=chapter_title)
+            chapter_object = get_object_or_404(Chapter_Loc, title=chapter_title)
         else:
-            chapter = chapters[0]
+            chapter_object = chapters[0]
 
         return render(
             request,
@@ -142,7 +142,7 @@ def latex(request):
                 "volume_id": volume_id,
                 "volumes": volumes,
                 "chapters": chapter_locs,
-                "chapter": chapter,
+                "chapter": chapter_object,
             },
         )
     else:
@@ -154,7 +154,7 @@ def latex(request):
                 "volumes": volumes,
                 "volume_id": volume_id,
                 "chapters": chapter_locs,
-                "chapter": chapter,
+                "chapter": chapter_object,
             },
         )
 
@@ -300,11 +300,16 @@ def chapter(request, volume_id, chapter_id):
         quizzes = Quiz.objects.filter(chapter=chapter_id, volume=volume_id)
     except Quiz.DoesNotExist:
         quizzes = None
-    
+
     return render(
         request,
         "mentapp/chapter.html",
-        {"volume": volume_id, "chapter": chapter_id, "title": title, "quizzes": quizzes},
+        {
+            "volume": volume_id,
+            "chapter": chapter_id,
+            "title": title,
+            "quizzes": quizzes,
+        },
     )
 
 
@@ -506,13 +511,14 @@ def edit_quiz(request, quiz_id):
     questions_Loc_quiz_attatchments = list()
 
     for quiz_question in quiz_questions:
-        # Display question only with ENG lang code and US dialect code for editing 
+        # Display question only with ENG lang code and US dialect code for editing
         question_Loc = Question_Loc.objects.all().filter(
             question=quiz_question.question,
-            lang_code="ENG", dialect_code="US",
-        ).first()
+            lang_code="ENG",
+            dialect_code="US",
+        )
 
-        question_attachments = Question_Attachment.objects.filter(question = question_Loc)
+        question_attachments = Question_Attachment.objects.filter(question=question_Loc)
 
         files = list()
         for question_attachment in question_attachments:
@@ -539,10 +545,18 @@ def edit_quiz(request, quiz_id):
                         quiz_question.ordering = count
                         quiz_question.save()
 
-            quiz_instance.conceptual_difficulty = float(request.POST.get("conceptual_difficulty"))
-            quiz_instance.time_required_mins = int(request.POST.get("time_required_mins"))
-            quiz_instance.volume = get_object_or_404(Volume, volume_id = request.POST.get("volume"))
-            quiz_instance.chapter = get_object_or_404(Chapter, chapter_id = request.POST.get("chapter"))
+            quiz_instance.conceptual_difficulty = float(
+                request.POST.get("conceptual_difficulty")
+            )
+            quiz_instance.time_required_mins = int(
+                request.POST.get("time_required_mins")
+            )
+            quiz_instance.volume = get_object_or_404(
+                Volume, volume_id=request.POST.get("volume")
+            )
+            quiz_instance.chapter = get_object_or_404(
+                Chapter, chapter_id=request.POST.get("chapter")
+            )
 
             calculator_allowed_str = request.POST.get("calculator_allowed")
             computer_allowed_str = request.POST.get("computer_allowed")
@@ -572,14 +586,46 @@ def edit_quiz(request, quiz_id):
             quiz_instance.save()
             return JsonResponse({"success": True})
 
+        elif request.POST.get("command") == "download":
+            ids_str = json.loads(request.POST.get("ids"))
+
+            ids = list()
+            for id_str in ids_str:
+                ids.append(int(id_str))
+
+            tex_file = open("docs\latex\example_quiz.tex", "r")
+            tex_file.close()
+
+            question_list = []
+
+            for id in ids:
+                for quiz_question in quiz_questions:
+                    if quiz_question.question.question_id == id:
+                        question_meta = quiz_question.question
+                        question_content = get_object_or_404(
+                            Question_Loc, question=question_meta
+                        )
+                        question_list.append(question_content)
+
+            # pdfl = PDFLaTeX.from_texfile("docs\latex\example_quiz.tex")
+            # pdf, log, completed_process = pdfl.create_pdf(
+            #     keep_pdf_file=True, keep_log_file=True
+            # )
+
+            # os.system("pdflatex docs\latex\example_quiz.tex")
+
+            latex_to_pdf(question_list, quiz_instance)
+
+            return JsonResponse({"success": True})
+
     return render(
         request,
         "mentapp/edit_quiz.html",
         {
             "quiz_instance": quiz_instance,
-            "questions_Loc_and_quiz": questions_Loc_quiz_attatchments ,
+            "questions_Loc_and_quiz": questions_Loc_quiz_attatchments,
             "volumes": volumes,
-            "chapters": chapters
+            "chapters": chapters,
         },
     )
 
@@ -649,7 +695,7 @@ def edit_quiz_add_question(request, quiz_id):
 
         for question in question_instances:
             question_Loc = (
-                # Display question only with ENG lang code and US dialect code for editing 
+                # Display question only with ENG lang code and US dialect code for editing
                 Question_Loc.objects.all()
                 .filter(
                     lang_code="ENG", dialect_code="US", question=question.question_id
@@ -657,7 +703,9 @@ def edit_quiz_add_question(request, quiz_id):
                 .first()
             )
 
-            question_attachments = Question_Attachment.objects.filter(question = question_Loc)
+            question_attachments = Question_Attachment.objects.filter(
+                question=question_Loc
+            )
 
             attachment_urls = list()
             for question_attachment in question_attachments:
@@ -712,15 +760,11 @@ def edit_quiz_add_support(request, quiz_id):
             quiz_supports = (
                 Quiz_Support.objects.all().filter(quiz=quiz_id).order_by("ordering")
             )
-            supports_to_add_id_str = json.loads(
-                request.POST.get("supports_to_add_ids")
-            )
+            supports_to_add_id_str = json.loads(request.POST.get("supports_to_add_ids"))
 
             for support_id in supports_to_add_id_str:
                 if quiz_supports.filter(support_id=support_id).count() == 0:
-                    support_instance = get_object_or_404(
-                        Support, support_id=support_id
-                    )
+                    support_instance = get_object_or_404(Support, support_id=support_id)
                     Quiz_Support.objects.create(
                         quiz=quiz_instance,
                         support=support_instance,
@@ -740,26 +784,22 @@ def edit_quiz_add_support(request, quiz_id):
             )
 
         if creator_filter:
-            support_instances = support_instances.filter(
-                creator=creator_filter)
+            support_instances = support_instances.filter(creator=creator_filter)
 
         if title_filter:
-            support_instances = support_instances.filter(
-                title_latex=title_filter)
+            support_instances = support_instances.filter(title_latex=title_filter)
 
         supports_list = list()
 
         for support in support_instances:
             support_Loc = (
-                # Display question only with ENG lang code and US dialect code for editing 
+                # Display question only with ENG lang code and US dialect code for editing
                 Support_Loc.objects.all()
-                .filter(
-                    lang_code="ENG", dialect_code="US", support=support.support
-                )
+                .filter(lang_code="ENG", dialect_code="US", support=support.support)
                 .first()
             )
 
-            support_attachments = Support_Attachment.objects.filter(support = support_Loc)
+            support_attachments = Support_Attachment.objects.filter(support=support_Loc)
 
             attachment_urls = list()
             for support_attachment in support_attachments:
@@ -784,7 +824,6 @@ def edit_quiz_add_support(request, quiz_id):
             else:
                 support_values["creator"] = ""
 
-           
             support_values["support_latex"] = support_Loc.content_latex
             support_values["attachment_urls"] = attachment_urls
             supports_list.append(support_values)
@@ -818,7 +857,7 @@ def footer(request, page):
 
 def user_edit(request, user_id):
     user = get_object_or_404(User, user_id=user_id)
-    
+
     for key, value in request.POST.items():
         if key == "primary_email":
             Email.objects.filter(user_id=user_id, is_primary=True).update(
@@ -884,10 +923,11 @@ def upload_pdf(request, pdf_path):
             {"status": "success", "message": "File uploaded successfully"}
         )
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+        return JsonResponse({"status": "error", "message": str(e)})
+
 
 def create_quiz(request, volume_id, chapter_id):
-    if request.method == 'POST':
+    if request.method == "POST":
         # Create a new Quiz instance
         quiz = Quiz.objects.create(
             conceptual_difficulty=1,
@@ -901,18 +941,17 @@ def create_quiz(request, volume_id, chapter_id):
         )
 
         # Redirect to the edit page for the new quiz
-        return redirect('/edit_quiz/{}'.format(quiz.quiz_id))
+        return redirect("/edit_quiz/{}".format(quiz.quiz_id))
+
 
 def create_support(request):
-    
+
     volumes = (
         Volume.objects.values_list("volume_id", flat=True)
         .distinct()
         .order_by("volume_id")
     )
-    creators = (
-        User.objects.values_list("user_id")
-    )
+    creators = User.objects.values_list("user_id")
 
     volume_id = 1
 
@@ -922,61 +961,55 @@ def create_support(request):
         support_title = request.POST.get("title")
         volume_id = int(request.POST.get("volume"))
         volume = get_object_or_404(Volume, volume_id=volume_id)
-        support_attachments = request.FILES.getlist('attachments')
-
+        support_attachments = request.FILES.getlist("attachments")
 
         if "submit-support" in request.POST:
-            
-            support = Support(volume_id = volume)
+
+            support = Support(volume_id=volume)
             support.save()
-            
+
             support_loc = Support_Loc(
-            support=support,
-            title_latex=support_title,
-            content_latex=support_content,
-            creator_id=creators.first()[0],
-            approver_id=creators.first()[0]
+                support=support,
+                title_latex=support_title,
+                content_latex=support_content,
+                creator_id=creators.first()[0],
+                approver_id=creators.first()[0],
             )
 
             support_loc.save()
 
-
             for attachment in support_attachments:
                 blob = Blob(
-                    file = attachment,
-                    content_type = attachment.content_type,
-                    filename = attachment.name
+                    file=attachment,
+                    content_type=attachment.content_type,
+                    filename=attachment.name,
                 )
                 blob.save()
 
                 support_attachment_instance = Support_Attachment(
                     support=support,
-                    lang_code = support_loc.lang_code,
-                    dialect_code = support_loc.dialect_code,
+                    lang_code=support_loc.lang_code,
+                    dialect_code=support_loc.dialect_code,
                     filename=blob.filename,
-                    blob_key = blob
+                    blob_key=blob,
                 )
                 support_attachment_instance.save()
 
-            return redirect('main')
-            
+            return redirect("main")
+
         return render(
-            request, 
+            request,
             "mentapp/create_support.html",
             {
                 "form": form,
                 "volumes": volumes,
                 "volume_id": volume_id,
                 "support_content": support_content,
-                }
-            )
+            },
+        )
     else:
         return render(
-            request, 
+            request,
             "mentapp/create_support.html",
-            {
-                "form": LatexForm(),
-                "volumes": volumes
-                }
-            )
-
+            {"form": LatexForm(), "volumes": volumes},
+        )
