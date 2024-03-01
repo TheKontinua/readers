@@ -20,6 +20,8 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.files.base import ContentFile
 
+from mentoris.latex_to_pdf import latex_to_pdf
+
 
 def latex(request):
     volumes = (
@@ -35,7 +37,7 @@ def latex(request):
         chapter__chapter_id__in=chapters
     ).distinct()
 
-    chapter = chapter_locs[0]
+    chapter_object = chapter_locs[0]
 
     if request.method == "POST":
         form = LatexForm(request.POST)
@@ -60,8 +62,8 @@ def latex(request):
 
             # TODO: question_object.creator = CURRENT USER
 
-            chapter = request.POST.get("chapter")
-            chapter_string = chapter.split("_")
+            chapter_object = request.POST.get("chapter")
+            chapter_string = chapter_object.split("_")
             chapter_title = chapter_string[0]
             chapter_loc = get_object_or_404(Chapter_Loc, title=chapter_title)
             question_object.chapter = chapter_loc.chapter
@@ -79,7 +81,9 @@ def latex(request):
             # TODO: question_loc.creator = CURRENT USER
             question_loc.save()
 
-            return main(request)
+            chapter_id = chapter_loc.chapter.chapter_id
+
+            return redirect(f"../main/{volume_id}/{chapter_id}")
 
         if "question-button" in request.POST:
             answer = hidden_answer
@@ -91,12 +95,12 @@ def latex(request):
             question = hidden_question
             answer = hidden_answer
         if "volume-button" not in request.POST:
-            chapter = request.POST.get("chapter")
-            chapter_string = chapter.split("_")
+            chapter_object = request.POST.get("chapter")
+            chapter_string = chapter_object.split("_")
             chapter_title = chapter_string[0]
-            chapter = get_object_or_404(Chapter_Loc, title=chapter_title)
+            chapter_object = get_object_or_404(Chapter_Loc, title=chapter_title)
         else:
-            chapter = chapters[0]
+            chapter_object = chapters[0]
 
         return render(
             request,
@@ -109,11 +113,10 @@ def latex(request):
                 "volume_id": volume_id,
                 "volumes": volumes,
                 "chapters": chapter_locs,
-                "chapter": chapter,
+                "chapter": chapter_object,
             },
         )
     else:
-        print(chapters)
         return render(
             request,
             "mentapp/latex_question.html",
@@ -122,7 +125,29 @@ def latex(request):
                 "volumes": volumes,
                 "volume_id": volume_id,
                 "chapters": chapter_locs,
-                "chapter": chapter,
+                "chapter": chapter_object,
+            },
+        )
+
+
+def test_latex(request):
+    if request.method == "POST":
+        form = LatexForm(request.POST)
+        question = request.POST.get("latex_question")
+        return render(
+            request,
+            "mentapp/latex_test.html",
+            {
+                "form": form,
+                "question": question,
+            },
+        )
+    else:
+        return render(
+            request,
+            "mentapp/latex_test.html",
+            {
+                "form": LatexForm(),
             },
         )
 
@@ -264,6 +289,16 @@ def chapter(request, volume_id, chapter_id):
         title = chapter_loc.title
     except Chapter_Loc.DoesNotExist:
         title = None
+
+    if request.method == "POST" and "makeNewQuiz" in request.POST:
+        quizObject = Quiz()
+        quizObject.conceptual_difficulty = 0
+        quizObject.time_required_mins = 0
+        quizObject.volume = volume_id
+        quizObject.chapter = chapter_id
+        quizObject.save()
+        quiz_id = quizObject.quiz_id
+        return redirect(f"../../../edit_quiz/{quiz_id}")
 
     return render(
         request,
@@ -469,10 +504,11 @@ def edit_quiz(request, quiz_id):
     questions_Loc = list()
 
     for quiz_question in quiz_questions:
-        # Display question only with ENG lang code and US dialect code for editing 
+        # Display question only with ENG lang code and US dialect code for editing
         questions_Loc_local = Question_Loc.objects.all().filter(
             question=quiz_question.question,
-            lang_code="ENG", dialect_code="US",
+            lang_code="ENG",
+            dialect_code="US",
         )
 
         for question_Loc in questions_Loc_local:
@@ -496,16 +532,23 @@ def edit_quiz(request, quiz_id):
                         quiz_question.ordering = count
                         quiz_question.save()
 
-            quiz_instance.conceptual_difficulty = float(request.POST.get("conceptual_difficulty"))
-            quiz_instance.time_required_mins = int(request.POST.get("time_required_mins"))
-            quiz_instance.volume = get_object_or_404(Volume, volume_id = request.POST.get("volume"))
-            quiz_instance.chapter = get_object_or_404(Chapter, chapter_id = request.POST.get("chapter"))
+            quiz_instance.conceptual_difficulty = float(
+                request.POST.get("conceptual_difficulty")
+            )
+            quiz_instance.time_required_mins = int(
+                request.POST.get("time_required_mins")
+            )
+            quiz_instance.volume = get_object_or_404(
+                Volume, volume_id=request.POST.get("volume")
+            )
+            quiz_instance.chapter = get_object_or_404(
+                Chapter, chapter_id=request.POST.get("chapter")
+            )
 
             calculator_allowed_str = request.POST.get("calculator_allowed")
             computer_allowed_str = request.POST.get("computer_allowed")
             internet_allowed_str = request.POST.get("internet_allowed")
             book_allowed_str = request.POST.get("book_allowed")
-
 
             if calculator_allowed_str == "true":
                 quiz_instance.calculator_allowed = True
@@ -530,6 +573,38 @@ def edit_quiz(request, quiz_id):
             quiz_instance.save()
             return JsonResponse({"success": True})
 
+        elif request.POST.get("command") == "download":
+            ids_str = json.loads(request.POST.get("ids"))
+
+            ids = list()
+            for id_str in ids_str:
+                ids.append(int(id_str))
+
+            tex_file = open("docs\latex\example_quiz.tex", "r")
+            tex_file.close()
+
+            question_list = []
+
+            for id in ids:
+                for quiz_question in quiz_questions:
+                    if quiz_question.question.question_id == id:
+                        question_meta = quiz_question.question
+                        question_content = get_object_or_404(
+                            Question_Loc, question=question_meta
+                        )
+                        question_list.append(question_content)
+
+            # pdfl = PDFLaTeX.from_texfile("docs\latex\example_quiz.tex")
+            # pdf, log, completed_process = pdfl.create_pdf(
+            #     keep_pdf_file=True, keep_log_file=True
+            # )
+
+            # os.system("pdflatex docs\latex\example_quiz.tex")
+
+            latex_to_pdf(question_list, quiz_instance)
+
+            return JsonResponse({"success": True})
+
     return render(
         request,
         "mentapp/edit_quiz.html",
@@ -537,7 +612,7 @@ def edit_quiz(request, quiz_id):
             "quiz_instance": quiz_instance,
             "questions_Loc_and_quiz": questions_Loc,
             "volumes": volumes,
-            "chapters": chapters
+            "chapters": chapters,
         },
     )
 
@@ -551,6 +626,12 @@ def edit_quiz_add_question(request, quiz_id):
     if request.method == "POST":
         quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
         if request.POST.get("command") == "save_changes":
+            quiz_questions = (
+                Quiz_Question.objects.all().filter(quiz=quiz_id).order_by("ordering")
+            )
+            questions_to_add_id_str = json.loads(
+                request.POST.get("questions_to_add_ids")
+            )
             quiz_questions = (
                 Quiz_Question.objects.all().filter(quiz=quiz_id).order_by("ordering")
             )
@@ -578,7 +659,18 @@ def edit_quiz_add_question(request, quiz_id):
         time_filter = request.GET.get("time")
         difficulty_filter = request.GET.get("difficulty")
         question_instances = Question.objects.all()
+        chapter_filter = request.GET.get("chapter")
+        creator_filter = request.GET.get("creator")
+        volume_filter = request.GET.get("volume")
+        point_filter = request.GET.get("point")
+        time_filter = request.GET.get("time")
+        difficulty_filter = request.GET.get("difficulty")
+        question_instances = Question.objects.all()
 
+        if volume_filter:
+            question_instances = question_instances.filter(
+                chapter__volume__volume_id=volume_filter
+            )
         if volume_filter:
             question_instances = question_instances.filter(
                 chapter__volume__volume_id=volume_filter
@@ -586,7 +678,14 @@ def edit_quiz_add_question(request, quiz_id):
 
         if chapter_filter:
             question_instances = question_instances.filter(chapter=chapter_filter)
+        if chapter_filter:
+            question_instances = question_instances.filter(chapter=chapter_filter)
 
+        if creator_filter:
+            question_instances = question_instances.filter(creator=creator_filter)
+
+        if point_filter:
+            question_instances = question_instances.filter(point_value=point_filter)
         if creator_filter:
             question_instances = question_instances.filter(creator=creator_filter)
 
@@ -597,7 +696,15 @@ def edit_quiz_add_question(request, quiz_id):
             question_instances = question_instances.filter(
                 conceptual_difficulty=difficulty_filter
             )
+        if difficulty_filter:
+            question_instances = question_instances.filter(
+                conceptual_difficulty=difficulty_filter
+            )
 
+        if time_filter:
+            question_instances = question_instances.filter(
+                time_required_mins=time_filter
+            )
         if time_filter:
             question_instances = question_instances.filter(
                 time_required_mins=time_filter
@@ -607,7 +714,18 @@ def edit_quiz_add_question(request, quiz_id):
 
         for question in question_instances:
             question_Loc = (
-                # Display question only with ENG lang code and US dialect code for editing 
+                # Display question only with ENG lang code and US dialect code for editing
+                Question_Loc.objects.all()
+                .filter(
+                    lang_code="ENG", dialect_code="US", question=question.question_id
+                )
+                .first()
+            )
+            question_values = dict()
+            question_values["question_id"] = question.question_id
+        questions_list = list()
+        for question in question_instances:
+            question_Loc = (
                 Question_Loc.objects.all()
                 .filter(
                     lang_code="ENG", dialect_code="US", question=question.question_id
@@ -617,6 +735,17 @@ def edit_quiz_add_question(request, quiz_id):
             question_values = dict()
             question_values["question_id"] = question.question_id
 
+            if question.chapter is not None:
+                question_values["chapter"] = question.chapter.chapter_id
+                question_values["volume"] = question.chapter.volume.volume_id
+            else:
+                question_values["chapter"] = ""
+                question_values["volume"] = ""
+
+            if question.creator is not None:
+                question_values["creator"] = question_Loc.creator.full_name
+            else:
+                question_values["creator"] = ""
             if question.chapter is not None:
                 question_values["chapter"] = question.chapter.chapter_id
                 question_values["volume"] = question.chapter.volume.volume_id
@@ -640,6 +769,7 @@ def edit_quiz_add_question(request, quiz_id):
         request,
         "mentapp/edit_quiz_add_question.html/",
         {
+            "quiz_id": quiz_id,
             "quiz_id": quiz_id,
             "questions_Locs": questions_Locs,
             "chapters": chapters,
