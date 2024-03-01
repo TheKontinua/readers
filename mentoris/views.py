@@ -512,20 +512,24 @@ def edit_quiz(request, quiz_id):
 
     for quiz_question in quiz_questions:
         # Display question only with ENG lang code and US dialect code for editing
-        question_Loc = Question_Loc.objects.all().filter(
+        questions_Loc_local = Question_Loc.objects.all().filter(
             question=quiz_question.question,
             lang_code="ENG",
             dialect_code="US",
         )
 
-        question_attachments = Question_Attachment.objects.filter(question=question_Loc)
+        question_attachments = Question_Attachment.objects.filter(
+            question=questions_Loc_local
+        )
 
         files = list()
         for question_attachment in question_attachments:
             file = question_attachment.blob_key.file
             files.append(file)
 
-        questions_Loc_quiz_attatchments.append((question_Loc, quiz_question, files))
+        questions_Loc_quiz_attatchments.append(
+            (questions_Loc_local, quiz_question, files)
+        )
 
     if request.method == "POST":
         if request.POST.get("command") == "save":
@@ -671,7 +675,6 @@ def edit_quiz_add_question(request, quiz_id):
             question_instances = question_instances.filter(
                 chapter__volume__volume_id=volume_filter
             )
-
         if chapter_filter:
             question_instances = question_instances.filter(chapter=chapter_filter)
 
