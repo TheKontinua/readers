@@ -512,14 +512,14 @@ def edit_quiz(request, quiz_id):
 
     for quiz_question in quiz_questions:
         # Display question only with ENG lang code and US dialect code for editing
-        questions_Loc_local = Question_Loc.objects.all().filter(
+        questions_Loc = Question_Loc.objects.all().filter(
             question=quiz_question.question,
             lang_code="ENG",
             dialect_code="US",
-        )
+        ).first()
 
         question_attachments = Question_Attachment.objects.filter(
-            question=questions_Loc_local
+            question=questions_Loc
         )
 
         files = list()
@@ -527,9 +527,7 @@ def edit_quiz(request, quiz_id):
             file = question_attachment.blob_key.file
             files.append(file)
 
-        questions_Loc_quiz_attatchments.append(
-            (questions_Loc_local, quiz_question, files)
-        )
+        questions_Loc_quiz_attatchments.append((questions_Loc, quiz_question, files))
 
     if request.method == "POST":
         if request.POST.get("command") == "save":
@@ -597,9 +595,6 @@ def edit_quiz(request, quiz_id):
             for id_str in ids_str:
                 ids.append(int(id_str))
 
-            tex_file = open("docs\latex\example_quiz.tex", "r")
-            tex_file.close()
-
             question_list = []
 
             for id in ids:
@@ -610,13 +605,6 @@ def edit_quiz(request, quiz_id):
                             Question_Loc, question=question_meta
                         )
                         question_list.append(question_content)
-
-            # pdfl = PDFLaTeX.from_texfile("docs\latex\example_quiz.tex")
-            # pdf, log, completed_process = pdfl.create_pdf(
-            #     keep_pdf_file=True, keep_log_file=True
-            # )
-
-            # os.system("pdflatex docs\latex\example_quiz.tex")
 
             latex_to_pdf(question_list, quiz_instance)
 

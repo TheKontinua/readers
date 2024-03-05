@@ -1,7 +1,8 @@
+import os
 import subprocess
 from django.shortcuts import get_object_or_404
 
-from mentapp.models import Chapter_Loc
+from mentapp.models import Chapter, Chapter_Loc
 
 
 # Converts quiz object to volume string (just the number)
@@ -15,14 +16,34 @@ def quizToDataString(quiz, type):
     return strObject[start + 1 : end]
 
 
+def getChapterNum(volume, chapter):
+    chapters = Chapter.objects.filter(volume__volume_id=volume).distinct()
+
+    chapter_locs = Chapter_Loc.objects.filter(
+        chapter__chapter_id__in=chapters
+    ).distinct()
+
+    numChapters = len(chapter_locs)
+    chapterNum = -1
+    for i in range(numChapters):
+        if chapter_locs[i] == chapter:
+            chapterNum = i
+            break
+    if chapterNum != -1:
+        return "(" + str(chapterNum) + "/" + str(numChapters) + ")"
+    else:
+        print("Error: chapter not found")
+        return "(X/X)"
+
+
 # Converts page size to vspace
-# TODO: Calculate VSpace based on number of pages
 def pagesRequiredToSpacing(pages):
-    return "6cm"
+    centimeters = round(pages * 29.7, 2)
+    return str(centimeters) + "cm"
 
 
 """
-Takes in latex information and returns a pdf quiz
+Takes in latex information and saves a pdf quiz in the latex folder
 
 latex_question_list: list of question objects
 quiz_data: quiz object
@@ -47,11 +68,19 @@ def latex_to_pdf(latex_question_list, quiz_data):
         r"\firstpagefooter{}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}"
         + "\n"
     )
-    volume_id = quizToDataString(quiz_data, "volume")
+    volume_id_str = quizToDataString(quiz_data, "volume")
+    volume_id_num = int(volume_id_str)
+
+    chapter_obj = get_object_or_404(Chapter_Loc, chapter=quiz_data.chapter)
+    chapter_name = chapter_obj.title
+    chapterFraction = getChapterNum(volume_id_num, chapter_obj)
+
     output_file.write(
         r"\runningfooter{\fontfamily{phv}\selectfont Kontinua "
-        + volume_id
-        + r" (X/X)}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}"
+        + volume_id_str
+        + " "
+        + chapterFraction
+        + r"}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}"
         + "\n\n\n"
     )
 
@@ -63,9 +92,9 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.write(r"Date:\ \hrulefill" + "\n\n")
     output_file.write(r"\vspace{1.0cm}" + "\n\n\n\n")
 
-    output_file.write(r"\textbf{Kontinua " + volume_id + r" (X/X)}" + "\n\n")
-
-    chapter_name = get_object_or_404(Chapter_Loc, chapter=quiz_data.chapter).title
+    output_file.write(
+        r"\textbf{Kontinua " + volume_id_str + " " + chapterFraction + r"}" + "\n\n"
+    )
     output_file.write(r"\Large \textbf{" + chapter_name + r"}" + "\n\n" + r"}" + "\n")
 
     output_file.write(r"\parbox{0.35\textwidth}{" + "\n\n")
@@ -121,8 +150,16 @@ def latex_to_pdf(latex_question_list, quiz_data):
     for question_loc in latex_question_list:
         latex_question = question_loc.question_latex
         point = int(question_loc.question.point_value)
+        print(point)
+        plural = "" if point == 1 else "s"
         output_file.write(
-            r"\item (" + str(point) + r" points) " + latex_question + "\n\n"
+            r"\item ("
+            + str(point)
+            + r" point"
+            + plural
+            + r") "
+            + latex_question
+            + "\n\n"
         )
         pages_required = question_loc.question.pages_required
         spacingString = pagesRequiredToSpacing(pages_required)
@@ -133,13 +170,21 @@ def latex_to_pdf(latex_question_list, quiz_data):
 
     output_file.close()
 
+    script_path = os.path.dirname(__file__)
+
     # Path to pdflatex command
-    pdflatex_path = r"C:\tools\TinyTeX\bin\windows\pdflatex"
+    temp_path = os.path.join(script_path, r"..\tex-live\bin\windows\pdflatex")
+    pdflatex_path = os.path.abspath(temp_path)
 
     # Path to LaTeX file
-    latex_file_path = (
-        r"C:\Users\nrave\OneDrive\Documents\GitHub\mentoris\docs\latex\output_quiz.tex"
-    )
+    temp_path = os.path.join(script_path, r"..\docs\latex\output_quiz.tex")
+    latex_file_path = os.path.abspath(temp_path)
+
+    # set current process running directory to latex folder
+    temp_path = os.path.join(script_path, "..\docs\latex")
+    process_path = os.path.abspath(temp_path)
+
+    os.chdir(process_path)
 
     # Run pdflatex command
     process = subprocess.Popen(
