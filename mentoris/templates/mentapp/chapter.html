@@ -7,6 +7,29 @@
     <link rel="stylesheet" type="text/css" />
 </head>
 
+<style>
+    .optionButton1, .optionButton2{
+        background-color: white; 
+        border-radius: 5px;
+    }
+
+    .optionButton1:hover{
+        background-color: yellow;
+    }
+    .optionButton2:hover{
+        background-color: red;
+        color: white;
+    }
+
+    .options{
+        display: none; 
+        position: fixed; 
+        flex-direction: column; 
+        margin: -10px 0px 0px 20px; 
+    }
+
+</style>
+
 <body style="padding-left: 100px; padding-right: 100px">
     <div class="bg-info container" style="
                 height: 130px;
@@ -45,6 +68,14 @@
                 Quizzes for Vol {{ volume.volume_id }} Chapter: {{ title }}
             </h2>
         </div>
+        <div class="col-md-2 ms-auto">
+            <form action="{% url 'create_quiz' volume.volume_id chapter.chapter_id%}" method="post">
+                {% csrf_token %}
+                <button style="right: 0;" type="submit" class="btn btn-primary">
+                    Create a new quiz
+                </button>
+            </form>
+        </div>
     </div>
     <div class="row mb-12">
         <div class="col-md-10">
@@ -54,27 +85,29 @@
                     <tr>
                         <td style="width: 15%">
                             <a href="" class="text-dark">
-                                <p style="margin-top: 3%; margin-bottom: 0px">Quiz ID: {{ quiz.quiz_id }}</p>
+                                <p style="margin-top: 3%; margin-bottom: 0px">
+                                    Quiz ID: {{ quiz.quiz_id }}</p>
                             </a>
                         </td>
                         <td style="width: 20%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Conceptual Difficulty: {{
-                                quiz.conceptual_difficulty }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">
+                                Conceptual Difficulty: {{ quiz.conceptual_difficulty }}</p>
                         </td>
                         <td style="width: 10%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Time: {{
-                                quiz.time_required_mins }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">
+                                Time: {{ quiz.time_required_mins }}m</p>
                         </td>
                         <td style="width: 15%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Calculator: {{
-                                quiz.calculator_allowed }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">
+                                Calculator: {{ quiz.calculator_allowed }}</p>
                         </td>
                         <td style="width: 14%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Internet: {{
-                                quiz.internet_allowed }}</p>
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">
+                                Internet: {{ quiz.internet_allowed }}</p>
                         </td>
                         <td style="width: 10%">
-                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">Book: {{ quiz.book_allowed }}
+                            <p class="text-secondary" style="margin: 0; margin-top: 3%;">
+                                Book: {{ quiz.book_allowed }}
                             </p>
                         </td>
                         <td style="padding-left: 0%; padding-right: 0%">
@@ -90,7 +123,7 @@
                             </button>
                         </td>
                         <td style="padding-left: 0px">
-                            <button type="button" class="btn" style="background-color: transparent; float: right;">
+                            <button type="button" onclick = "openOptions('{{quiz.quiz_id}}')" class="btn" style="background-color: transparent; float: right;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
                                     <path
@@ -98,19 +131,26 @@
                                 </svg>
                             </button>
                         </td>
+                        <td>
+                            <div class="options" class="options" 
+                                id="menu_{{quiz.quiz_id}}">
+                                <button id="edit_quiz_{{quiz.quiz_id}}" 
+                                onclick="edit_quiz('{{quiz.quiz_id}}')" class="optionButton1">Edit Quiz</button>
+                                <form method="post" action="{% url 'delete_quiz' quiz.quiz_id %}">
+                                    {% csrf_token %}
+                                    <button id="delete_quiz_{{quiz.quiz_id}}" 
+                                    onclick="delete_quiz('{{quiz.quiz_id}}')" class="optionButton2">DeleteQuiz</button>
+                                </form>
+                                
+                            </div>
+
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <div class="col-md-2">
-            <form action="{% url 'create_quiz' volume.volume_id chapter.chapter_id%}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">
-                    Make a quiz
-                </button>
-            </form>
-        </div>
+        
     </div>
     <div class="container" style="position: absolute; bottom: 0">
         <hr />
@@ -145,6 +185,24 @@
         });
     </script>
 
+    <script>
+        function openOptions(id){
+            var menu = document.getElementById('menu_'+id);
+            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function edit_quiz(id){
+            window.location.href="/edit_quiz/"+id;
+        }
+
+        function delete_quiz(id){
+            var result = confirm("Are you sure you want to delete this quiz?");
+            if (result) {
+                console.log("Deleting quiz with ID: " + quizId);
+            } 
+        }
+        
+    </script>
 </body>
 
 </html>

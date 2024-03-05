@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import FileSystemStorage
+from django.urls import resolve
 from mentapp.models import (
     Question_Attachment,
     User,
@@ -865,26 +866,6 @@ def download_pdf(request, blob_key):
     return response
 
 
-def upload_pdf(request, pdf_path):
-    try:
-        with open(pdf_path, "rb") as pdf_file:
-            pdf_content = pdf_file.read()
-
-        # Use Django's ContentFile to create a file-like object
-        content_file = ContentFile(pdf_content, name=os.path.basename(pdf_path))
-
-        blob_instance = Blob(
-            file=content_file,
-            content_type="application/pdf",
-            filename=os.path.basename(pdf_path),
-        )
-        blob_instance.save()
-
-        return JsonResponse(
-            {"status": "success", "message": "File uploaded successfully"}
-        )
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
 
 def create_quiz(request, volume_id, chapter_id):
     if request.method == 'POST':
@@ -902,6 +883,17 @@ def create_quiz(request, volume_id, chapter_id):
 
         # Redirect to the edit page for the new quiz
         return redirect('/edit_quiz/{}'.format(quiz.quiz_id))
+    
+def delete_quiz(request, quiz_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    url = request.path
+
+    if request.method == 'POST':
+        quiz.delete()
+        
+        
+    return redirect(request.META.get('HTTP_REFERER', '/')) 
+
 
 def create_support(request):
     
