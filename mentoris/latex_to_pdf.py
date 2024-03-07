@@ -1,8 +1,14 @@
 import os
 import subprocess
+import string
+import random
 from django.shortcuts import get_object_or_404
+from mentapp.models import Chapter, Chapter_Loc, Quiz_Rendering, Blob
 
-from mentapp.models import Chapter, Chapter_Loc
+
+def generateRandomString(hashId):
+    random.seed(hashId)
+    return "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
 
 # Converts quiz object to volume string (just the number)
@@ -51,7 +57,10 @@ quiz_data: quiz object
 
 
 def latex_to_pdf(latex_question_list, quiz_data):
-    output_file = open("docs\latex\output_quiz.tex", "w")
+    path = os.path.dirname(__file__)
+    file_location = os.path.join(path, r"..\docs\latex\output_quiz.tex")
+    abs_file_location = os.path.abspath(file_location)
+    output_file = open(abs_file_location, "w")
     output_file.write(r"\documentclass[letterpaper,12pt,addpoints]{exam}" + "\n")
     output_file.write(r"\usepackage[utf8]{inputenc}" + "\n")
     output_file.write(r"\usepackage[english]{babel}" + "\n\n")
@@ -64,8 +73,12 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.write(r"\usepackage{graphicx}" + "\n\n")
     output_file.write(r"\pagestyle{headandfoot}" + "\n")
     output_file.write(r"\firstpageheader{}{}{}" + "\n")
+
+    string_id = generateRandomString(quiz_data.quiz_id)
     output_file.write(
-        r"\firstpagefooter{}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}"
+        r"\firstpagefooter{}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont "
+        + string_id
+        + r"}"
         + "\n"
     )
     volume_id_str = quizToDataString(quiz_data, "volume")
@@ -80,7 +93,9 @@ def latex_to_pdf(latex_question_list, quiz_data):
         + volume_id_str
         + " "
         + chapterFraction
-        + r"}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}"
+        + r"}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont "
+        + string_id
+        + r"}"
         + "\n\n\n"
     )
 
@@ -171,6 +186,7 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.close()
 
     script_path = os.path.dirname(__file__)
+    success_flag = 0  # will be set to 2 if both generations succeed
 
     # Path to pdflatex command
     temp_path = os.path.join(script_path, r"..\tex-live\bin\windows\pdflatex")
@@ -198,6 +214,7 @@ def latex_to_pdf(latex_question_list, quiz_data):
         print(error.decode("utf-8"))
     else:
         print("PDF 1 generated successfully.")
+        success_flag += 1
 
     # Run twice to get the page numbers to load correctly
     process = subprocess.Popen(
@@ -210,3 +227,32 @@ def latex_to_pdf(latex_question_list, quiz_data):
         print(error.decode("utf-8"))
     else:
         print("PDF 2 generated successfully.")
+        success_flag += 1
+    if success_flag == 2:
+        blob = save_pdf_blob(string_id)
+        save_rendering(blob, quiz_data)
+
+
+def save_pdf_blob(string_id):
+    # rename output_quiz.pdf to new file_name
+    script_path = os.path.dirname(__file__)
+
+    temp_path = os.path.join(script_path, "..\docs\latex")
+    file_temp = os.path.join(temp_path, "output_quiz.pdf")
+    file_path = os.path.abspath(file_temp)
+
+    new_name = r"..\..\media\pdfs" + "\\" + string_id + ".pdf"
+    pdf_temp = os.path.join(temp_path, new_name)
+    pdf_path = os.path.abspath(pdf_temp)
+
+    os.rename(file_path, pdf_path)
+
+    blob = Blob(file=pdf_path, content_type="pdf", filename=string_id + ".pdf")
+    blob.save()
+
+    return blob
+
+
+def save_rendering(blob, quiz):
+    rendering = Quiz_Rendering(quiz=quiz, blob_key=blob)
+    rendering.save()
