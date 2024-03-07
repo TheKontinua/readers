@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from . import views
 from django.conf.urls.static import static
 from django.conf import settings
@@ -37,8 +37,8 @@ urlpatterns = [
     path("edit_quiz/<int:quiz_id>", views.edit_quiz, name="edit_quiz"),
     path("edit_quiz_add_question/<int:quiz_id>", views.edit_quiz_add_question, name="edit_quiz_add_question"),
     path("edit_quiz_add_support/<int:quiz_id>", views.edit_quiz_add_support, name="edit_quiz_add_support"),
-    path("<str:page>/header.html/", views.header, name="header"),
-    path("<str:page>/footer.html/", views.footer, name="footer"),
+    re_path(r".*/header.html/", views.header, name="header"),
+    re_path(r".*/footer.html/", views.footer, name="footer"),
     path("download_pdf/<int:blob_key>/", views.download_pdf, name='download_pdf'),
     path("upload_pdf/<path:pdf_path>/", views.upload_pdf, name='upload_pdf'),
     path("create_support/", views.create_support, name="create_support"),
