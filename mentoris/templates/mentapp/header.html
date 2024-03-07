@@ -6,20 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Header</title>
         {% load static %}
-        <link rel="stylesheet" href="{% static "/css/colors.css"%}">
-        <style>
-
-            body {
-                margin: 0px;
-            }
-
-            .container{
-                background-color: var(--KontinuaBlue);
-                padding: 10px;
-                margin: 0px;
-            }
-
-        </style>
+        <link rel="stylesheet" href="{% static '/css/colors.css'%}">
+        <link rel="stylesheet" href="{% static '/css/header.css'%}">
+        
     </head>
 
     <body>
@@ -28,9 +17,33 @@
                 <img
                     src="{% static 'kontinua_foundation_logo.png' %}"
                     alt="Responsive image"
-                    style="border: 10px; border-color: white; border-style: solid; border-radius: 5%;"
+                    class="kontinua-logo"
                     height="45"
                 />
+                <div class="nav-container">
+                    <div id="my-profile-button">
+                    <button id="my-profile" class="my-profile">My Profile</button>
+                    <img class="nav-logo" src="{% static 'profile_icon.svg' %}"/>
+                    </div>
+
+                    <div id="quizzes-button">
+                    <button id="quizzes" class="quizzes">Quizzes</button>
+                    <img class="nav-logo" src="{% static 'quizzes_icon.svg' %}" />
+                    </div>
+                </div>
+                
         </div>
+
+        <script>
+            document.getElementById("my-profile-button").addEventListener('click', function(){
+                var user = '88141a47-00ba-4838-afed-e4afe7b3c04f';
+                window.top.location.href="/profile/"+user;
+            })
+
+            document.getElementById("quizzes-button").addEventListener('click', function () {
+                    window.top.location.href = "/main/";
+                })
+
+        </script>
     </body>
 </html>
