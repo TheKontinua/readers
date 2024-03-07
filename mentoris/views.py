@@ -832,14 +832,14 @@ def edit_quiz_add_support(request, quiz_id):
     )
 
 
-def header(request, page):
+def header(request):
     return render(
         request,
         "mentapp/header.html",
     )
 
 
-def footer(request, page):
+def footer(request):
     return render(
         request,
         "mentapp/footer.html",
