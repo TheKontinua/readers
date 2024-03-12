@@ -71,16 +71,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "mentoris.wsgi.application"
 
-DATABASES = {
-}
+# DATABASES = {
+# }
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mentoris',
+        'USER': 'walden',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -145,3 +149,5 @@ EMAIL_BACKEND = "django_ses.SESBackend"
 
 # Allows Iframes to display from pages hosted by this server
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+AUTH_USER_MODEL = "mentapp.User"
