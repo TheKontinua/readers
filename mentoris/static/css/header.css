@@ -25,7 +25,7 @@ body {
     margin-right: 30px;
 }
 
-.my-profile, .quizzes {
+.my-profile, .quizzes, .sign-in {
     background-color: transparent;
     color: white;
     border: none;
@@ -35,22 +35,23 @@ body {
     line-height: 1;
 }
 
-.my-profile:hover, .quizzes:hover {
+.my-profile:hover, .quizzes:hover, .sign-in:hover {
     color: var(--KontinuaYellow);
     cursor: pointer;
 }
 
 .nav-logo{
-    width: 20px;
+    width: 18px;
     margin-bottom: -2px;
 }
 
-#my-profile-button, #quizzes-button{
+#my-profile-button, #quizzes-button, #sign-in-button{
     margin-right: 30px;
 }
 
-#my-profile-button:hover, #quizzes-button:hover{
+#my-profile-button:hover, #quizzes-button:hover, #sign-in-button:hover{
     cursor: pointer;
+    color: var(--KontinuaYellow);
 }
 
 #my-profile-button:hover .my-profile {
@@ -58,5 +59,9 @@ body {
 }
 
 #quizzes-button:hover .quizzes {
+    color: var(--KontinuaYellow);
+}
+
+#sign-in-button:hover .sign-in {
     color: var(--KontinuaYellow);
 }

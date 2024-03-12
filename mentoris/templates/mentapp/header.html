@@ -23,13 +23,18 @@
                 <div class="nav-container">
 
                     <div id="quizzes-button">
-                    <button id="quizzes" class="quizzes">Quizzes</button>
-                    <img class="nav-logo" src="{% static 'quizzes_icon.svg' %}" />
+                        <button id="quizzes" class="quizzes">Quizzes</button>
+                        <img class="nav-logo" src="{% static 'quizzes_icon.svg' %}" />
                     </div>
 
                     <div id="my-profile-button">
                         <button id="my-profile" class="my-profile">My Profile</button>
                         <img class="nav-logo" src="{% static 'profile_icon.svg' %}" />
+                    </div>
+
+                    <div id="sign-in-button">
+                        <button id="sign-in" class="sign-in">Sign In</button>
+                        <img class="nav-logo" src="{% static 'sign-in.svg' %}" />
                     </div>
                 </div>
                 
@@ -39,11 +44,15 @@
             document.getElementById("my-profile-button").addEventListener('click', function(){
                 var user = '88141a47-00ba-4838-afed-e4afe7b3c04f';
                 window.top.location.href="/profile/"+user;
-            })
+            });
 
             document.getElementById("quizzes-button").addEventListener('click', function () {
-                    window.top.location.href = "/main/";
-                })
+                window.top.location.href = "/main/";
+            });
+
+            document.getElementById("sign-in-button").addEventListener('click', function () {
+                window.top.location.href = "/login/";
+            });
 
         </script>
     </body>
