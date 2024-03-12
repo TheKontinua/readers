@@ -42,6 +42,7 @@ body {
 
 .nav-logo{
     width: 20px;
+    margin-bottom: -2px;
 }
 
 #my-profile-button, #quizzes-button{
