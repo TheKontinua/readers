@@ -54,7 +54,7 @@
     <iframe src="header.html" width="100%" height="95px" frameBorder="0"
         style="display: block; padding: 0px; margin: 0px;"></iframe>
 
-    <button id="back_button" onclick="location.href='/main/'" type="button">Back to Quizzes</button>
+    <button id="back_button" onclick="confirmLeave()" type="button">Back to Quizzes</button>
     <br>
 
     <div id="quiz_content" class="bordered" background="red">
@@ -208,6 +208,15 @@
             </div>
         </div>
 
+        <div id="customModal" class="modal">
+            <div class="modal-content">
+                <p>Are you sure you want to leave this page?</p>
+                <button class="modalButton" onclick="saveChanges()">Save Changes before leaving</button>
+                <button class="modalButton" onclick="leaveWithoutSaving()">Leave Without Saving</button>
+                <button class="modalButton" onclick="cancelLeave()">Cancel</button>
+            </div>
+        </div>
+
         <iframe src="footer.html" width="40%" style="position: absolute; bottom: 0; left:0" frameBorder="0"></iframe>
 
         <script type="text/javascript">
@@ -329,6 +338,31 @@
                     list[index - 1].scrollIntoView();
                 }
             });
+
+            function confirmLeave() {
+                const modal = document.getElementById('customModal');
+                modal.style.display = 'inline-block';
+            }
+
+            function saveChanges() {
+                document.getElementById('save_button').click();
+                location.href = '/main'
+                closeModal();
+            }
+
+            function leaveWithoutSaving() {
+                location.href = '/main'
+                closeModal();
+            }
+
+            function cancelLeave() {
+                closeModal();
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('customModal');
+                modal.style.display = 'none';
+            }
         </script>
 
 </body>

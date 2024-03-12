@@ -68,7 +68,7 @@
     <div class="content">
         <iframe src="header.html" width="100%" height="95px" frameBorder="0"
             style="display: block; padding: 0px; margin: 0px;"></iframe>
-        <button id="back_button" onclick="window.history.back()" type="button">Back</button>
+        <button id="back_button" onclick="confirmLeave()" type="button">Back</button>
 
         <div class="container">
 
@@ -164,6 +164,15 @@
             </form>
         </div>
     </div>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <p>Are you sure you want to leave this page?</p>
+            <button class="modalButton" onclick="leaveWithoutSaving()">Leave Without Saving</button>
+            <button class="modalButton" onclick="cancelLeave()">Cancel</button>
+        </div>
+    </div>
+
     <iframe src="footer.html" width="100%" frameborder="0"></iframe>
 
 
@@ -181,6 +190,25 @@
                 selectedFilesDiv.appendChild(fileNameDiv);
             }
         });
+
+        function confirmLeave() {
+            const modal = document.getElementById('customModal');
+            modal.style.display = 'inline-block';
+        }
+
+        function leaveWithoutSaving() {
+            window.history.back();
+            closeModal();
+        }
+
+        function cancelLeave() {
+            closeModal();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            modal.style.display = 'none';
+        }
     </script>
 
 </body>
