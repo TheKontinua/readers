@@ -2,8 +2,15 @@ import os
 import subprocess
 import string
 import random
+import shutil
 from django.shortcuts import get_object_or_404
-from mentapp.models import Chapter, Chapter_Loc, Quiz_Rendering, Blob
+from mentapp.models import (
+    Chapter,
+    Chapter_Loc,
+    Quiz_Rendering,
+    Blob,
+    Question_Attachment,
+)
 
 
 def generateRandomString(hashId):
@@ -57,8 +64,8 @@ quiz_data: quiz object
 
 
 def latex_to_pdf(latex_question_list, quiz_data):
-    path = os.path.dirname(__file__)
-    file_location = os.path.join(path, r"..\docs\latex\output_quiz.tex")
+    script_path = os.path.dirname(__file__)
+    file_location = os.path.join(script_path, r"..\docs\latex\output_quiz.tex")
     abs_file_location = os.path.abspath(file_location)
     output_file = open(abs_file_location, "w")
     output_file.write(r"\documentclass[letterpaper,12pt,addpoints]{exam}" + "\n")
@@ -179,6 +186,26 @@ def latex_to_pdf(latex_question_list, quiz_data):
             + latex_question
             + "\n\n"
         )
+
+        attachment_list = Question_Attachment.objects.filter(question=question_loc)
+        for attachment in attachment_list:
+            blob = attachment.blob_key
+            temp_path = os.path.join(script_path, r"..\media", str(blob.file))
+            blob_path = os.path.abspath(temp_path)
+
+            final_path = os.path.join(script_path, blob.filename)
+
+            shutil.copy(blob_path, final_path)
+
+            output_file.write(r"\vspace{0.2cm}" + "\n")
+            output_file.write(r"\begin{center}" + "\n")
+            output_file.write(
+                r"\includegraphics[width=2cm]{" + blob.filename + r"}" + "\n"
+            )
+            output_file.write(r"\end{center}" + "\n")
+
+            os.remove(final_path)
+
         pages_required = question_loc.question.pages_required
         spacingString = pagesRequiredToSpacing(pages_required)
         output_file.write(r"\vspace{" + spacingString + r"}" + "\n\n")
@@ -188,7 +215,6 @@ def latex_to_pdf(latex_question_list, quiz_data):
 
     output_file.close()
 
-    script_path = os.path.dirname(__file__)
     success_flag = 0  # will be set to 2 if both generations succeed
 
     # Path to pdflatex command
