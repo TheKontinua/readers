@@ -74,7 +74,12 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.write(r"\pagestyle{headandfoot}" + "\n")
     output_file.write(r"\firstpageheader{}{}{}" + "\n")
 
-    string_id = generateRandomString(quiz_data.quiz_id)
+    # TODO: Why isn't rendering id being updated to not 0?
+    rendering = Quiz_Rendering()
+    recent_id = Quiz_Rendering.objects.latest("date_created").rendering_id
+    rendering.rendering_id = recent_id + 1
+
+    string_id = generateRandomString(rendering.rendering_id)
     output_file.write(
         r"\firstpagefooter{}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont "
         + string_id
@@ -165,7 +170,6 @@ def latex_to_pdf(latex_question_list, quiz_data):
     for question_loc in latex_question_list:
         latex_question = question_loc.question_latex
         point = int(question_loc.question.point_value)
-        print(point)
         plural = "" if point == 1 else "s"
         output_file.write(
             r"\item ("
@@ -230,7 +234,9 @@ def latex_to_pdf(latex_question_list, quiz_data):
         success_flag += 1
     if success_flag == 2:
         blob = save_pdf_blob(string_id)
-        save_rendering(blob, quiz_data)
+        rendering.quiz = quiz_data
+        rendering.blob_key = blob
+        rendering.save()
 
 
 def save_pdf_blob(string_id):
@@ -245,14 +251,12 @@ def save_pdf_blob(string_id):
     pdf_temp = os.path.join(temp_path, new_name)
     pdf_path = os.path.abspath(pdf_temp)
 
+    if os.path.isfile(pdf_path):
+        os.remove(pdf_path)
+
     os.rename(file_path, pdf_path)
 
     blob = Blob(file=pdf_path, content_type="pdf", filename=string_id + ".pdf")
     blob.save()
 
     return blob
-
-
-def save_rendering(blob, quiz):
-    rendering = Quiz_Rendering(quiz=quiz, blob_key=blob)
-    rendering.save()

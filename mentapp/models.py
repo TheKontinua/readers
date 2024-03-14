@@ -187,15 +187,6 @@ class Quiz_Rendering(models.Model):
     paper_size = models.CharField(default="8x11", max_length=50)
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
-    class Meta:
-        unique_together = ("quiz", "lang_code", "dialect_code")
-        indexes = [
-            models.Index(
-                fields=["quiz", "lang_code", "dialect_code"],
-                name="quiz_rendering_comp_pkey",
-            )
-        ]
-
 
 class Quiz_Feedback(models.Model):
     quiz = models.ForeignKey(Quiz_Rendering, on_delete=models.CASCADE)
