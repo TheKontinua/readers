@@ -3,7 +3,6 @@ from mentapp.models import User, Quiz
 from multiupload.fields import MultiFileField
 
 
-
 class LatexForm(forms.Form):
     latex_question = forms.CharField(
         widget=forms.Textarea(attrs={"class": "latex-input-field"}), required=False
@@ -25,7 +24,7 @@ class LatexForm(forms.Form):
     points = forms.IntegerField(initial=0)
     pages_required = forms.DecimalField(initial=0.0)
     title = forms.CharField(max_length=50, initial="", required=True)
-    attachments = MultiFileField(min_num=1, max_num=10, max_file_size=1024*1024*5)
+    attachments = MultiFileField(min_num=1, max_num=10, max_file_size=1024 * 1024 * 5)
 
 
 class UserForm(forms.ModelForm):

@@ -263,12 +263,6 @@
                         const save_date = new Date();
                         save_status.innerHTML = "Oh no! There was an error saving at: " + save_date.toString();
                     });
-                    request.fail(function () {
-                        const save_status = document.getElementById("save_status");
-                        const save_date = new Date();
-                        save_status.innerHTML = "Oh no! There was an error saving at: " + save_date.toString();
-                    });
-
                 });
             });
 

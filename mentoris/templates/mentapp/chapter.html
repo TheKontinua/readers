@@ -99,6 +99,7 @@
                         <td style="width: 14%">
                             <p class="text-secondary" style="margin: 0; margin-top: 3%;">
                                 Internet: {{ quiz.internet_allowed }}</p>
+
                         </td>
                         <td style="width: 10%">
                             <p class="text-secondary" style="margin: 0; margin-top: 3%;">
@@ -106,8 +107,9 @@
                             </p>
                         </td>
                         <td style="padding-left: 0%; padding-right: 0%">
-                            <button id="downloadPDF" type="button" class="btn"
-                                style="background-color: transparent; float: right;">
+                            <button id="downloadPDF{{ quiz.quiz_id }}" type="button" class="btn"
+                                style="background-color: transparent; float: right;"
+                                onclick="downloadPDF('{{ quiz.quiz_id }}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-download" viewBox="0 0 16 16">
                                     <path
@@ -155,21 +157,19 @@
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
     <script>
-        document.getElementById('downloadPDF').addEventListener('click', function () {
-            var blobKey = '1'; //whatever the QuizRedering blob_key is
-
-            fetch(`/download_pdf/${blobKey}/`)
+        function downloadPDF(quizId) {
+            fetch(`/download_pdf/${quizId}/`)
                 .then(response => response.blob())
                 .then(blob => {
                     var fileBlob = new Blob([blob], { type: 'application/pdf' });
                     var link = document.createElement('a');
                     link.href = URL.createObjectURL(fileBlob);
-                    link.download = 'downloaded.pdf';
+                    link.download = `quiz${quizId}.pdf`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                 });
-        });
+        };
     </script>
 
     <script>
