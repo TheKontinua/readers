@@ -19,12 +19,6 @@
             rel="canonical"
             href="https://getbootstrap.com/docs/4.0/examples/sticky-footer/"
         />
-        <style>
-            .form-group.required .control-label:after {
-                content: "*";
-                color: red;
-            }
-        </style>
     </head>
 
     <body>
@@ -104,11 +98,7 @@
         <script>
             (function () {
                 "use strict";
-
-                // Fetch all the forms we want to apply custom Bootstrap validation styles to
                 var forms = document.querySelectorAll(".needs-validation");
-
-                // Loop over them and prevent submission
                 Array.prototype.slice.call(forms).forEach(function (form) {
                     form.addEventListener(
                         "submit",

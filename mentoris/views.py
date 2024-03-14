@@ -17,6 +17,8 @@ from mentapp.models import (
     Question_Loc,
     Quiz,
     Quiz_Question,
+    Quiz_Rendering,
+    Quiz_Feedback,
     Question,
     Verification,
     Question_Attachment,
@@ -30,6 +32,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.files.base import ContentFile
+from datetime import date
 
 from mentoris.latex_to_pdf import latex_to_pdf
 
@@ -319,6 +322,141 @@ def chapter(request, volume_id, chapter_id):
     )
 
 
+def quiz(request, volume_id, chapter_id, quiz_id):
+    volume_id = get_object_or_404(Volume, volume_id=volume_id)
+    chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
+    quiz_id = get_object_or_404(Quiz, quiz_id=quiz_id)
+
+    if request.method == "POST":
+        if request.POST.get("command") == "viewer_publish":
+            feedback = Quiz_Feedback()
+            feedback.rendering_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            feedback.creator_id = quiz_id.creator_id
+            feedback.viewer_id = (
+                quiz_id.creator_id
+            )  # change this later when we can log in a user
+            feedback.challenge_rating = int(request.POST.get("challenge_rating"))
+            feedback.time_rating = int(request.POST.get("time_rating"))
+            feedback.viewer_comment = request.POST.get("viewer_comment")
+
+            feedback.save()
+            return JsonResponse({"success": True})
+        elif request.POST.get("command") == "delete":
+            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            feedback = Quiz_Feedback.objects.get(
+                rendering_id=render_id,
+                feedback_id=request.POST.get("feedback_id"),
+            )
+            feedback.delete()
+            return JsonResponse({"success": True})
+    else:
+        avg_rating = quiz_id.conceptual_difficulty
+        avg_time = quiz_id.time_required_mins
+
+        try:
+            reviews = []
+            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            review_objects = Quiz_Feedback.objects.filter(
+                rendering_id=render_id,
+                date_completed__isnull=True,
+            ).distinct()
+
+            challenge_ratings = 0
+            time_ratings = 0
+
+            for review in review_objects:
+                challenge_ratings += review.challenge_rating
+                time_ratings += review.time_rating
+                email = Email.objects.get(user=review.viewer_id, is_primary=True)
+                reviews.append([email, review])
+
+            avg_rating = challenge_ratings / len(review_objects)
+            avg_time = time_ratings / len(review_objects)
+        except:
+            reviews = []
+
+        creator = User.objects.get(user_id=quiz_id.creator_id.user_id)
+        creator_email = Email.objects.get(user=creator, is_primary=True)
+
+        return render(
+            request,
+            "mentapp/quiz.html",
+            {
+                "volume": volume_id,
+                "chapter": chapter_id,
+                "quiz": quiz_id,
+                "reviews": reviews,
+                "creator": creator_email,
+                "avg_rating": int(avg_rating),
+                "avg_time": int(avg_time),
+            },
+        )
+
+
+def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
+    volume_id = get_object_or_404(Volume, volume_id=volume_id)
+    chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
+    quiz_id = get_object_or_404(Quiz, quiz_id=quiz_id)
+
+    if request.method == "POST":
+        render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+        feedback = Quiz_Feedback.objects.get(
+            rendering_id=render_id,
+            feedback_id=request.POST.get("feedback_id"),
+        )
+        if request.POST.get("command") == "resolve":
+            feedback.date_completed = date.today()
+            feedback.save()
+        elif request.POST.get("command") == "delete":
+            feedback.delete()
+        elif request.POST.get("command") == "publish":
+            feedback.creator_comment = request.POST.get("creator_comment")
+            feedback.save()
+        return JsonResponse({"success": True})
+    else:
+        avg_rating = quiz_id.conceptual_difficulty
+        avg_time = quiz_id.time_required_mins
+
+        try:
+            reviews = []
+            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            review_objects = Quiz_Feedback.objects.filter(
+                rendering_id=render_id,
+                date_completed__isnull=True,
+            ).distinct()
+
+            challenge_ratings = 0
+            time_ratings = 0
+
+            for review in review_objects:
+                challenge_ratings += review.challenge_rating
+                time_ratings += review.time_rating
+                email = Email.objects.get(user=review.viewer_id, is_primary=True)
+                reviews.append([email, review])
+
+            avg_rating = challenge_ratings / len(review_objects)
+            avg_time = time_ratings / len(review_objects)
+        except:
+            reviews = []
+
+        creator = User.objects.get(user_id=quiz_id.creator_id.user_id)
+        creator_email = Email.objects.get(user=creator, is_primary=True)
+
+        return render(
+            request,
+            "mentapp/quiz_maker_view.html",
+            {
+                "volume": volume_id,
+                "chapter": chapter_id,
+                "quiz": quiz_id,
+                "reviews": reviews,
+                "creator": creator_email,
+                "avg_rating": int(avg_rating),
+                "avg_time": int(avg_time),
+            },
+        )
+
+
 def promotion(request):
     if request.method == "POST":
         email_object = Email.objects.get(
@@ -339,14 +477,13 @@ def promotion(request):
         user.save()
         return JsonResponse({"success": True})
     else:
-        users = grab_users(True)
         return render(
             request,
             "mentapp/promotion.html",
             {
-                "newbies": users["newbies"],
-                "mentors": users["mentors"],
-                "quiz_makers": users["quiz_makers"],
+                "newbies": grab_users(False, False, False, True, True),
+                "mentors": grab_users(True, False, False, True, True),
+                "quiz_makers": grab_users(True, True, False, True, True),
             },
         )
 
@@ -378,89 +515,36 @@ def user_directory(request):
         user.save()
         return JsonResponse({"success": True, "status": status, "color": color})
     else:
-        users = grab_users(False)
         return render(
             request,
             "mentapp/user_directory.html",
             {
-                "newbies": users["newbies"],
-                "mentors": users["mentors"],
-                "quiz_makers": users["quiz_makers"],
-                "admins": users["admins"],
+                "newbies": grab_users(False, False, False, True, False),
+                "mentors": grab_users(True, False, False, True, False),
+                "quiz_makers": grab_users(True, True, False, True, False),
+                "admins": grab_users(True, True, True, True, False),
             },
         )
 
 
-def grab_users(get_promotion):
+def grab_users(verified, quiz_maker, admin, active, get_promotion):
     try:
-        newbie_ids = (
+        user_ids = (
             User.objects.filter(
-                is_verified=False,
-                is_quizmaker=False,
-                is_admin=False,
-                is_active=True,
+                is_verified=verified,
+                is_quizmaker=quiz_maker,
+                is_admin=admin,
+                is_active=active,
                 promotion_requested=get_promotion,
             )
             .values_list("user_id", flat=True)
             .distinct()
         )
-        newbies = grab_verification_info(newbie_ids)
+        users = grab_verification_info(user_ids)
     except:
-        newbies = []
+        users = []
 
-    try:
-        mentor_ids = (
-            User.objects.filter(
-                is_verified=True,
-                is_quizmaker=False,
-                is_admin=False,
-                is_active=True,
-                promotion_requested=get_promotion,
-            )
-            .values_list("user_id", flat=True)
-            .distinct()
-        )
-        mentors = grab_verification_info(mentor_ids)
-    except:
-        mentors = []
-
-    try:
-        quiz_maker_ids = (
-            User.objects.filter(
-                is_verified=True,
-                is_quizmaker=True,
-                is_admin=False,
-                is_active=True,
-                promotion_requested=get_promotion,
-            )
-            .values_list("user_id", flat=True)
-            .distinct()
-        )
-        quiz_makers = grab_verification_info(quiz_maker_ids)
-    except:
-        quiz_makers = []
-
-    try:
-        admin_ids = (
-            User.objects.filter(
-                is_verified=True,
-                is_quizmaker=True,
-                is_admin=True,
-                is_active=True,
-            )
-            .values_list("user_id", flat=True)
-            .distinct()
-        )
-        admins = grab_verification_info(admin_ids)
-    except:
-        admins = []
-
-    return {
-        "newbies": newbies,
-        "mentors": mentors,
-        "quiz_makers": quiz_makers,
-        "admins": admins,
-    }
+    return users
 
 
 def grab_verification_info(user_ids):
