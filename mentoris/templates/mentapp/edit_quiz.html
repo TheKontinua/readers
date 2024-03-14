@@ -201,7 +201,6 @@
                     onclick="location.href='/edit_quiz_add_support/{{quiz_instance.quiz_id}}'">Add Support
                 </button>
                 <button class="question_button" id="save_button">Save</button>
-                <button class="question_button" id="download_button">Download Quiz</button>
                 <div id="save_status" class="bordered"></div>
             </div>
         </div>
@@ -252,41 +251,6 @@
                         const save_date = new Date();
                         save_status.innerHTML = "Oh no! There was an error saving at: " + save_date.toString();
                     });
-
-                });
-
-                $('#download_button').on('click', function(event){
-                    var list = document.getElementById("quiz_questions_list").children;
-                    var orderings = []
-                    var ids = []
-
-                    for(var i = 0; i < list.length; ++i){
-                        ids.push(list[i].id);
-                        orderings.push(i);
-                    }
-
-                    var request = $.ajax({
-                        type: "POST",
-                        url: "/edit_quiz/{{quiz_instance.quiz_id}}",
-                        dataType: 'json',
-                        data:{
-                            csrfmiddlewaretoken: "{{csrf_token}}",
-                            command: "download",
-                            orderings: JSON.stringify(orderings),
-                            ids: JSON.stringify(ids)
-                        }
-                    });
-
-                    request.done(function(){
-                        const save_status = document.getElementById("save_status");
-                        save_status.innerHTML = "Quiz sucessfully downloaded!"
-                    });
-
-                    request.fail(function () {
-                        const save_status = document.getElementById("save_status");
-                        save_status.innerHTML = "Quiz download failed...";
-                    });
-
                 });
             });
 

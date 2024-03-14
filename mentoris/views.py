@@ -591,14 +591,6 @@ def edit_quiz(request, quiz_id):
                 quiz_instance.book_allowed = False
 
             quiz_instance.save()
-            return JsonResponse({"success": True})
-
-        elif request.POST.get("command") == "download":
-            ids_str = json.loads(request.POST.get("ids"))
-
-            ids = list()
-            for id_str in ids_str:
-                ids.append(int(id_str))
 
             question_list = []
 
@@ -894,7 +886,7 @@ def request_translation(request, user_id):
 
 def download_pdf(request, quiz_id_str):
     quiz_instance = get_object_or_404(Quiz, quiz_id=int(quiz_id_str))
-    quiz_rendering_instance = get_object_or_404(Quiz_Rendering, quiz=quiz_instance)
+    quiz_rendering_instance = Quiz_Rendering.objects.filter(quiz=quiz_instance).latest("date_created")
     blob_instance = quiz_rendering_instance.blob_key
 
     response = HttpResponse(blob_instance.file, content_type="application/pdf")
