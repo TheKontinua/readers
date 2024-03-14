@@ -74,7 +74,6 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.write(r"\pagestyle{headandfoot}" + "\n")
     output_file.write(r"\firstpageheader{}{}{}" + "\n")
 
-    # TODO: Why isn't rendering id being updated to not 0?
     rendering = Quiz_Rendering()
     recent_id = Quiz_Rendering.objects.latest("date_created").rendering_id
     rendering.rendering_id = recent_id + 1
