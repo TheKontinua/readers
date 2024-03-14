@@ -61,7 +61,7 @@
         style="display: block; padding: 0px; margin: 0px;"></iframe>
 
     <div id="left_panel">
-        <button id="back_button" onclick="location.href='/edit_quiz/{{quiz_id}}'" type="button">Back</button>
+        <button id="back_button" onclick="confirmLeave()" type="button">Back</button>
         <div id="quiz_content" class="bordered">
             <ul id="supports_list" style="list-style-type:none;">
             </ul>
@@ -106,8 +106,17 @@
         <div id="save_status" class="bordered"></div>
     </div>
 
-    <iframe src="footer.html" width="100%" frameBorder="0"></iframe>
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <p>Are you sure you want to leave this page?</p>
+            <button class="modalButton" onclick="saveChanges()">Save Changes before leaving</button>
+            <button class="modalButton" onclick="leaveWithoutSaving()">Leave Without Saving</button>
+            <button class="modalButton" onclick="cancelLeave()">Cancel</button>
+        </div>
+    </div>
 
+
+    <iframe src="footer.html" style="width: 100%;" frameborder="0"></iframe>
 
     <script type="text/javascript">
 
@@ -258,8 +267,35 @@
                 });
             });
         });
+
+
+        function confirmLeave() {
+            const modal = document.getElementById('customModal');
+            modal.style.display = 'inline-block';
+        }
+
+        function saveChanges() {
+            document.getElementById('save_changes_button').click();
+            location.href = '/edit_quiz/{{quiz_id}}'
+            closeModal();
+        }
+
+        function leaveWithoutSaving() {
+            location.href = '/edit_quiz/{{quiz_id}}'
+            closeModal();
+        }
+
+        function cancelLeave() {
+            closeModal();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            modal.style.display = 'none';
+        }
     </script>
 
 </body>
+
 
 </html>

@@ -11,21 +11,11 @@
       }
     </style>
 </head>
-<body style="padding-left: 100px; padding-right: 100px;">
-    <div class="bg-info container" style="height: 130px; margin-top: 20px; margin-bottom: 30px; padding: 10px;">
-        <div class="row mb-5">
-          <div class="col-md-6">
-            {% load static %}
-            <img src="{% static 'kontinua_foundation_logo.png' %}" alt="Responsive image" style="width: 450px;">
-          </div>
-          <div class="col-md-6" style="margin-top: 20px;">
-                {% load static %}
-                <img src="{% static 'default-profile.png' %}" alt="Responsive image" style="float: right; padding: 10px; width: 100px;">
-          </div>
-        </div>
-      </div>
+<body >
+    <iframe src="header.html" width="100%" height="95px" frameBorder="0"
+      style="display: block; padding: 0px; margin: 0px;"></iframe>
     
-      <div class="container-fluid">
+      <div style="padding: 40px 100px 0px 100px;" class="container-fluid">
         <form
         class="needs-validation"
         novalidate
@@ -41,21 +31,6 @@
                   <input type="text" name="full_name" class="form-control" id="full-name" value = "{{ user_profile.full_name }}" required>
                   <div class="invalid-feedback">
                     Please enter your full name.
-                  </div>
-                </div>
-                  
-                <div class="form-group required mb-3">
-                  <label for="user-password" class="control-label">Password</label>
-                  <input
-                        type="password"
-                        class="form-control"
-                        id="user-password"
-                        name="password_hash"
-                        value = "{{ user_profile.password_hash }}"
-                        required
-                    />
-                  <div class="invalid-feedback">
-                    Please enter your password.
                   </div>
                 </div>
                   
@@ -77,19 +52,7 @@
                     </div>
                 </div> 
           </div>
-          <div class="col-md-6">
-              <button type="button" class="btn btn-primary">Edit Handles</button>
-              <div class="row gy-2">
-              <div class="col-6">
-                <div class="p-2"></div>
-              </div>
-          </div>
-              <button type="button" class="btn btn-primary">Request Authentication</button>
-              <div class="row gy-2">
-                  <div class="col-6">
-                    <div class="p-4"></div>
-                  </div>
-              </div>
+          <div class="col-md-6" style="margin-top: 23px;">
               
               <div class="form-group required">
                   <div class="input-group mb-3">
@@ -120,11 +83,18 @@
                     </select>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="margin-left: 585px;">Save</button>
+                <div class="button-container" style="display: flex; margin-top: 43px; justify-content: space-between;">
+                <button type="button" onclick="window.location.href='/reset_password'" class="btn btn-primary">Reset Password</button>
+                <button type="button" class="btn btn-primary">Edit Handles</button>
+                <button type="button" class="btn btn-primary">Request Authentication</button>
+                <button type="submit" class="btn btn-primary" style="margin-left: 100px;">Save</button>
+                </div>
           </div>
           </div>
         </div>
     </form>
+    <iframe src="footer.html" width="100%" height="50px" style="position: absolute; bottom: 0;" frameborder="0"></iframe>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script>
       (function () {

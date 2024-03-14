@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import FileSystemStorage
+from django.urls import resolve
 from mentapp.models import (
     Question_Attachment,
     Quiz_Rendering,
@@ -232,6 +233,10 @@ def sign_up(request):
 def profile(request):
     template = loader.get_template("mentapp/profile.html")
     return HttpResponse(template.render())
+
+
+def reset_password(request):
+    return render(request, "mentapp/reset_password.html")
 
 
 def login(request):
@@ -978,6 +983,7 @@ def download_pdf(request, quiz_id_str):
     return response
 
 
+
 def upload_pdf(request, pdf_path):
     try:
         with open(pdf_path, "rb") as pdf_file:
@@ -1015,7 +1021,18 @@ def create_quiz(request, volume_id, chapter_id):
         )
 
         # Redirect to the edit page for the new quiz
-        return redirect("/edit_quiz/{}".format(quiz.quiz_id))
+        return redirect('/edit_quiz/{}'.format(quiz.quiz_id))
+    
+def delete_quiz(request, quiz_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    url = request.path
+
+    if request.method == 'POST':
+        quiz.delete()
+        
+        
+    return redirect(request.META.get('HTTP_REFERER', '/')) 
+
 
 
 def create_support(request):
