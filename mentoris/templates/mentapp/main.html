@@ -25,7 +25,7 @@
         <h2>Select a Chapter to get started!</h2>
     </div>
 
-    <div style="padding: 0px 140px;" class="input-group mb-3">
+    <div style="padding: 0px 540px;" class="input-group mb-3">
         <label class="input-group-text control-label">Volume</label>
         <select class="form-select" id="volume" name="volume">
             {% for v in volumes %} {% if v == volume_id %}
@@ -50,7 +50,7 @@
             </tbody>
         </table>
     </div>
-        <iframe src="footer.html" width="100%" height="50px" frameborder="0"></iframe>
+        <iframe src="footer.html" style="position: absolute; bottom: 0;" width="100%" height="50px" frameborder="0"></iframe>
     <script>
         var selectedVolume = document.getElementById("volume").value;
         document

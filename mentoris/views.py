@@ -231,6 +231,10 @@ def profile(request):
     return HttpResponse(template.render())
 
 
+def reset_password(request):
+    return render(request, "mentapp/reset_password.html")
+
+
 def login(request):
     if request.method == "POST":
         email = request.POST.get("email")

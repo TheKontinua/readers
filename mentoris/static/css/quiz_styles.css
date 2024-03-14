@@ -70,6 +70,8 @@ width: 30%;
 text-align: center;
 justify-content: center;
 align-items: center;
+border: 2px var(--KontinuaRed) solid;
+
 }
 
 .modalButton{

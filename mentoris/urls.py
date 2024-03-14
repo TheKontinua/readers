@@ -30,6 +30,7 @@ urlpatterns = [
     path("profile/", views.profile, name="profile"),
     path("profile/<uuid:user_id>/", views.user_info, name="user_info"),
     path("profile/edit/<uuid:user_id>/", views.user_edit, name="user_edit"),
+    path("reset_password/", views.reset_password, name="reset_password"),
     path("user_directory/", views.user_directory, name="user_directory"),
     path("promotion/", views.promotion, name="promotion"),
     path("main/", views.main, name="main"),

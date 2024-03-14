@@ -35,21 +35,6 @@
                 </div>
                   
                 <div class="form-group required mb-3">
-                  <label for="user-password" class="control-label">Password</label>
-                  <input
-                        type="password"
-                        class="form-control"
-                        id="user-password"
-                        name="password_hash"
-                        value = "{{ user_profile.password_hash }}"
-                        required
-                    />
-                  <div class="invalid-feedback">
-                    Please enter your password.
-                  </div>
-                </div>
-                  
-                <div class="form-group required mb-3">
                   <label for="org-name" >Organization Name</label>
                   <input type="text" class="form-control" name="org_name" id="organization" value = "{{ user_profile.org_name }}" >  
                 </div>
@@ -67,19 +52,7 @@
                     </div>
                 </div> 
           </div>
-          <div class="col-md-6">
-              <button type="button" class="btn btn-primary">Edit Handles</button>
-              <div class="row gy-2">
-              <div class="col-6">
-                <div class="p-2"></div>
-              </div>
-          </div>
-              <button type="button" class="btn btn-primary">Request Authentication</button>
-              <div class="row gy-2">
-                  <div class="col-6">
-                    <div class="p-4"></div>
-                  </div>
-              </div>
+          <div class="col-md-6" style="margin-top: 23px;">
               
               <div class="form-group required">
                   <div class="input-group mb-3">
@@ -110,7 +83,12 @@
                     </select>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="margin-left: 585px;">Save</button>
+                <div class="button-container" style="display: flex; margin-top: 43px; justify-content: space-between;">
+                <button type="button" onclick="window.location.href='/reset_password'" class="btn btn-primary">Reset Password</button>
+                <button type="button" class="btn btn-primary">Edit Handles</button>
+                <button type="button" class="btn btn-primary">Request Authentication</button>
+                <button type="submit" class="btn btn-primary" style="margin-left: 100px;">Save</button>
+                </div>
           </div>
           </div>
         </div>
