@@ -12,6 +12,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static '/css/colors.css'%}">
     <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
+    <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
     <script>
@@ -119,7 +120,6 @@
     <iframe src="footer.html" style="width: 100%;" frameborder="0"></iframe>
 
     <script type="text/javascript">
-
         // Toggle add button between two states, indicated by label 
         // and class
         function toggle_add(button) {
@@ -213,14 +213,16 @@
                         button_wrapper.appendChild(add_button);
                         border_wrapper.appendChild(button_wrapper);
 
-                        var latex_wrapper = document.createElement("div");
+                        var latex_wrapper =  generate_latex(data[i]["support_latex"], data[i]["attachment_urls"]);
+                        
+                        document.createElement("div");
                         latex_wrapper.style.clear = "both";
 
                         var latex = document.createElement("latex-js");
-                        latex.innerHTML = data[i]["support_latex"]
-                        latex_wrapper.appendChild(latex);
-                        border_wrapper.appendChild(latex_wrapper);
 
+                        //latex.innerHTML = data[i]["support_latex"]
+                        //latex_wrapper.appendChild(latex);
+                        border_wrapper.appendChild(latex_wrapper);
                         list_item.appendChild(border_wrapper);
                         document.getElementById("supports_list").appendChild(list_item);
                     }

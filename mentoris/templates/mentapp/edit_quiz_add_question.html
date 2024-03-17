@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
 
         <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
-        <script src= "{% static '/scripts/toggle_attachments_visible.js' %}"></script>
+        <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
         <script>
             customElements.define("latex-js", latexjs.LaTeXJSComponent);
         </script>
@@ -35,7 +35,7 @@
             }
 
             .add_question_do_not_add_state{
-                background: var(--KontinuaRed); 
+              background: var(--KontinuaRed); 
             }
 
             #quiz_content {
@@ -129,6 +129,7 @@
 
         <script type = "text/javascript">
 
+
             // Toggle add button between two states, indicated by label 
             // and class
             function toggle_add(button){
@@ -142,32 +143,21 @@
                     $(button).removeClass("add_question_add_state")
                 }
             }
-
-            // Make attribute label with a given name, associated
-            // class and value
-            function make_attribute_label(name, value_class, value){
-                var p = document.createElement("p");
-                $(p).addClass("small_margin");
-
-                var span_title = document.createElement("span");
-                $(span_title).addClass("bold_font");
-                span_title.innerHTML = name;
-
-                var span_value = document.createElement("span");
-                span_value.innerHTML = value;
-                $(span_value).addClass(value_class)
-
-                p.appendChild(span_title);
-                p.appendChild(span_value);
-                return p;
+            
+            function create_buttons(button_wrapper){
+                let add_button = document.createElement("button");
+                add_button.innerHTML = "Add";
+                add_button.addEventListener('click', function(event){
+                    toggle_add(event.target);
+                });
+                $(add_button).addClass("add_question_button");
+                $(add_button).addClass("add_question_add_state");
+                $(add_button).addClass("bold_font");
+                button_wrapper.appendChild(add_button);
             }
 
 
             $(document).ready(function() {
-
-                $('.add_question_button').on('click', function(event){
-                    toggle_add(this);
-                });
 
                 // Dynamicly create each question when filter is pressed
                 $('#filter_button').on('click', function(event){
@@ -177,8 +167,8 @@
                     creator_value = document.getElementById('creator_value').value;
                     time_value = document.getElementById('time_value').value;
                     difficulty_value = document.getElementById('difficulty_value').value;
-
-                    var request = $.ajax({
+                    console.log("requested data");
+                    let request = $.ajax({
                         type: "GET",
                         url: "/edit_quiz_add_question/{{quiz_id}}",
                         dataType: 'json',
@@ -193,99 +183,21 @@
                             difficulty: difficulty_value 
                         }
                     });
+
                     request.done(function(data){
-                        document.getElementById("questions_list").innerHTML = "";
-                        for(const i in data){
-                            var list_item = document.createElement("li");
-                            list_item.id = data[i]["question_id"];
-                            
-                            // border for each question
-                            var border_wrapper = document.createElement("div");
-                            $(border_wrapper).addClass("bordered");
-                        
-                            // wrapper containing question meta data
-                            var question_wrapper = document.createElement("div");
-                            question_wrapper.style.float = "left";
-                            question_wrapper.appendChild(make_attribute_label("Difficulty: ", "conceptual_difficulty", data[i]["conceptual_difficulty"]));
-                            question_wrapper.appendChild(make_attribute_label("Volume: ", "volume", data[i]["volume"]));
-                            question_wrapper.appendChild(make_attribute_label("Chapter: ", "chapter", data[i]["chapter"]));
-                            question_wrapper.appendChild(make_attribute_label("Creator: ", "creator", data[i]["creator"]));
-                            question_wrapper.appendChild(make_attribute_label("Point Value: ", "point_value", data[i]["point_value"]));
-                            question_wrapper.appendChild(make_attribute_label("Time (minutes): ", "time_required_mins", data[i]["time_required_mins"]));
-                            border_wrapper.appendChild(question_wrapper);
-
-                            // wrapper for add button
-                            var button_wrapper = document.createElement("div");
-                            button_wrapper.style.float = "right";
-
-                            // add button
-                            var add_button = document.createElement("button");
-                            add_button.innerHTML = "Add";
-                            add_button.addEventListener('click', function(event){
-                                toggle_add(event.target);
-                            });
-                            $(add_button).addClass("add_question_button");
-                            $(add_button).addClass("add_question_add_state");
-                            $(add_button).addClass("bold_font");
-                            button_wrapper.appendChild(add_button);
-                            border_wrapper.appendChild(button_wrapper);
-
-                            // latex wrapper
-                            var latex_wrapper = document.createElement("div");
-                            latex_wrapper.style.clear = "both";
-                            
-                            // latex display
-                            var latex = document.createElement("latex-js");
-                            latex.innerHTML=  data[i]["question_latex"] 
-                            latex_wrapper.appendChild(latex);
-                            border_wrapper.appendChild(latex_wrapper);
-
-                            // show attachments and toggle if at least 1 attachment exists 
-                            if(data[i]["attachment_urls"].length > 0){
-                                var attachment_button_wrapper = document.createElement("div");
-                                attachment_button_wrapper.style.float = "right";
-                                attachment_button = document.createElement("button");
-                                attachment_button.innerHTML = "Show Attachments";
-                                $(attachment_button).addClass("bold_font");
-                                attachment_button_wrapper.appendChild(attachment_button);
-
-                                attachment_button.addEventListener('click', function(event){
-                                    toggle_attachments_visible("questions_list", event.target, "attachments");
-                                });
-
-                                border_wrapper.appendChild(attachment_button_wrapper);
-                            
-                                var attachment_wrapper = document.createElement("div");
-                                $(attachment_wrapper).addClass("bordered")
-                                $(attachment_wrapper).addClass("attachments")
-                                $(attachment_wrapper).addClass("invisible_state")
-                                attachment_wrapper.style.clear = "both";
-                                attachment_wrapper.style.display = "none";
-                                border_wrapper.appendChild(attachment_wrapper);
-
-                                for(const j in data[i]["attachment_urls"]){
-                                    var image = document.createElement("img");
-                                    image.src = data[i]["attachment_urls"][j];
-                                    image.width = "200";
-                                    image.style.position = "relative";
-                                    image.style.left = "25%";
-                                    attachment_wrapper.appendChild(image);
-                                }
-                            }
-                            list_item.appendChild(border_wrapper);
-                            document.getElementById("questions_list").appendChild(list_item);
-                        }
+                        console.log("obtained data");
+                        display_questions(data, "questions_list", create_buttons, false);
                     });
- 
-                    request.fail(function (jqXHR, textStatus, errorThrown) {
-                        console.log("Request failed:", textStatus, errorThrown);
+                    
+                    request.fail(function(){
                         document.getElementById("questions_list").innerHTML = "Search failed, try again";
                     });
                 });
-
+            
+            // Function to handle saving changes to quiz
             $('#save_changes_button').on('click', function(event){
-                var list = document.getElementById("questions_list").children;
-                var question_id_list = [];
+                let list = document.getElementById("questions_list").children;
+                let question_id_list = [];
                 for(var i = 0; i < list.length; ++i){
                     let add_button = list[i].getElementsByClassName("add_question_button")[0];
                     if( $(add_button).hasClass("add_question_do_not_add_state")){
@@ -293,7 +205,7 @@
                     }   
                 }
 
-                var request = $.ajax({
+                let request = $.ajax({
                     type: "POST",
                     url: "/edit_quiz_add_question/{{quiz_id}}",
                     dataType: 'json',

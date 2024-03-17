@@ -75,7 +75,13 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.write(r"\firstpageheader{}{}{}" + "\n")
 
     rendering = Quiz_Rendering()
-    recent_id = Quiz_Rendering.objects.latest("date_created").rendering_id
+   
+    recent_id = 0
+    try:
+        recent_id = Quiz_Rendering.objects.latest("date_created").rendering_id
+    except Quiz_Rendering.DoesNotExist:
+        pass
+
     rendering.rendering_id = recent_id + 1
 
     string_id = generateRandomString(rendering.rendering_id)
