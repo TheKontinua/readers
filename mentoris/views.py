@@ -375,8 +375,14 @@ def quiz(request, volume_id, chapter_id, quiz_id):
         except:
             reviews = []
 
-        creator = User.objects.get(user_id=quiz_id.creator_id.user_id)
-        creator_email = Email.objects.get(user=creator, is_primary=True)
+        creator = User()
+        creator_email = Email()
+        try: 
+            creator = User.objects.get(user_id=quiz_id.creator_id.user_id)
+            creator_email = Email.objects.get(user=creator, is_primary=True)
+        except (User.DoesNotExist, Email.DoesNotExist, User.DoesNotExist, AttributeError) as error:
+            pass
+
 
         return render(
             request,
@@ -587,46 +593,61 @@ def user_info(request, user_id):
         {"user_profile": user_profile, "email": email, "other_email": other_email},
     )
 
+def grab_questions_data_table(questions):
+    questions_list = list()
+    for question in questions:
+        question_Loc = (
+        # Display question only with ENG lang code and US dialect code for editing 
+        Question_Loc.objects.get(
+            question = question.question_id, lang_code="ENG", dialect_code="US"
+        ))
+        question_attachments = Question_Attachment.objects.filter(question = question_Loc)
+
+        attachment_urls = list()
+        for question_attachment in question_attachments:
+            attachment_url = question_attachment.blob_key.file.url
+            attachment_urls.append(attachment_url)
+
+        question_values = dict()
+        question_values["question_id"] = question.question_id
+        question_values["chapter"] = question.chapter.chapter_id
+        question_values["volume"] = question.chapter.volume.volume_id
+
+        if question.creator is not None:
+            question_values["creator"] = question_Loc.creator.full_name
+        else:
+            question_values["creator"] = ""
+
+        question_values["conceptual_difficulty"] = question.conceptual_difficulty
+        question_values["time_required_mins"] = question.time_required_mins
+        question_values["point_value"] = question.point_value
+        question_values["question_latex"] = question_Loc.question_latex
+        question_values["attachment_urls"] = attachment_urls
+        questions_list.append(question_values)
+    return questions_list
+
+def grab_quiz_questions_data_table(quiz_questions):
+    questions = list()
+    for quiz_question in quiz_questions:
+        questions.append(quiz_question.question)
+
+    questionTable = grab_questions_data_table(questions)
+    for question_values, quiz_question in zip(questionTable, quiz_questions):
+        question_values["ordering"] = quiz_question.ordering
+    
+    return questionTable
+
 
 def edit_quiz(request, quiz_id):
-    chapters = Chapter.objects.all()
-    volumes = Volume.objects.all()
-
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
     quiz_questions = (
         Quiz_Question.objects.all()
         .filter(quiz=quiz_instance.quiz_id)
         .order_by("ordering")
     )
-    questions_Loc_quiz_attatchments = list()
-
-    for quiz_question in quiz_questions:
-        # Display question only with ENG lang code and US dialect code for editing
-        questions_Loc = (
-            Question_Loc.objects.all()
-            .filter(
-                question=quiz_question.question,
-                lang_code="ENG",
-                dialect_code="US",
-            )
-            .first()
-        )
-
-        question_attachments = Question_Attachment.objects.filter(
-            question=questions_Loc
-        )
-
-        files = list()
-        for question_attachment in question_attachments:
-            file = question_attachment.blob_key.file
-            files.append(file)
-
-        questions_Loc_quiz_attatchments.append((questions_Loc, quiz_question, files))
-
     if request.method == "POST":
         if request.POST.get("command") == "save":
             ids_str = json.loads(request.POST.get("ids"))
-
             ids = list()
             for id_str in ids_str:
                 ids.append(int(id_str))
@@ -640,20 +661,12 @@ def edit_quiz(request, quiz_id):
                     if quiz_question.question.question_id == id:
                         quiz_question.ordering = count
                         quiz_question.save()
-
-            quiz_instance.conceptual_difficulty = float(
-                request.POST.get("conceptual_difficulty")
-            )
-            quiz_instance.time_required_mins = int(
-                request.POST.get("time_required_mins")
-            )
-            quiz_instance.volume = get_object_or_404(
-                Volume, volume_id=request.POST.get("volume")
-            )
-            quiz_instance.chapter = get_object_or_404(
-                Chapter, chapter_id=request.POST.get("chapter")
-            )
-
+            quiz_instance.label = request.POST.get("label")
+            print(request.POST.get("label"))
+            quiz_instance.conceptual_difficulty = float(request.POST.get("conceptual_difficulty"))
+            quiz_instance.time_required_mins = int(request.POST.get("time_required_mins"))
+            quiz_instance.volume = get_object_or_404(Volume, volume_id = request.POST.get("volume"))    
+            quiz_instance.chapter = get_object_or_404(Chapter, chapter_id = request.POST.get("chapter"))
             calculator_allowed_str = request.POST.get("calculator_allowed")
             computer_allowed_str = request.POST.get("computer_allowed")
             internet_allowed_str = request.POST.get("internet_allowed")
@@ -680,7 +693,7 @@ def edit_quiz(request, quiz_id):
                 quiz_instance.book_allowed = False
 
             quiz_instance.save()
-
+            print(quiz_instance.label)
             question_list = []
 
             for id in ids:
@@ -693,17 +706,20 @@ def edit_quiz(request, quiz_id):
                         question_list.append(question_content)
 
             latex_to_pdf(question_list, quiz_instance)
-
             return JsonResponse({"success": True})
+    else:
+        if request.GET.get("command") == "fetch_quiz_questions":
+            return JsonResponse(grab_quiz_questions_data_table(quiz_questions), safe=False)   
 
+    chapters = Chapter.objects.all()
+    volumes = Volume.objects.all()
     return render(
         request,
         "mentapp/edit_quiz.html",
         {
             "quiz_instance": quiz_instance,
-            "questions_Loc_and_quiz": questions_Loc_quiz_attatchments,
             "volumes": volumes,
-            "chapters": chapters,
+            "chapters": chapters
         },
     )
 
@@ -749,6 +765,7 @@ def edit_quiz_add_question(request, quiz_id):
             question_instances = question_instances.filter(
                 chapter__volume__volume_id=volume_filter
             )
+
         if chapter_filter:
             question_instances = question_instances.filter(chapter=chapter_filter)
 
@@ -768,49 +785,7 @@ def edit_quiz_add_question(request, quiz_id):
                 time_required_mins=time_filter
             )
 
-        questions_list = list()
-
-        for question in question_instances:
-            question_Loc = (
-                # Display question only with ENG lang code and US dialect code for editing
-                Question_Loc.objects.all()
-                .filter(
-                    lang_code="ENG", dialect_code="US", question=question.question_id
-                )
-                .first()
-            )
-
-            question_attachments = Question_Attachment.objects.filter(
-                question=question_Loc
-            )
-
-            attachment_urls = list()
-            for question_attachment in question_attachments:
-                attachment_url = question_attachment.blob_key.file.url
-                attachment_urls.append(attachment_url)
-
-            question_values = dict()
-            question_values["question_id"] = question.question_id
-
-            if question.chapter is not None:
-                question_values["chapter"] = question.chapter.chapter_id
-                question_values["volume"] = question.chapter.volume.volume_id
-            else:
-                question_values["chapter"] = ""
-                question_values["volume"] = ""
-
-            if question.creator is not None:
-                question_values["creator"] = question_Loc.creator.full_name
-            else:
-                question_values["creator"] = ""
-
-            question_values["conceptual_difficulty"] = question.conceptual_difficulty
-            question_values["time_required_mins"] = question.time_required_mins
-            question_values["point_value"] = question.point_value
-            question_values["question_latex"] = question_Loc.question_latex
-            question_values["attachment_urls"] = attachment_urls
-            questions_list.append(question_values)
-        return JsonResponse(questions_list, safe=False)
+        return JsonResponse(grab_questions_data_table(question_instances), safe=False)
 
     return render(
         request,
