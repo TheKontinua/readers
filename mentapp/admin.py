@@ -4,7 +4,7 @@ from mentapp.models import *
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("user_id", "full_name", "org_name")
+    list_display = ("email", "user_id", "is_admin")
 
 
 admin.site.register(Volume)

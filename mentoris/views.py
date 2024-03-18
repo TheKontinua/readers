@@ -26,9 +26,10 @@ from mentapp.models import (
 from mentoris.forms import UserForm, LatexForm, QuizForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.contrib.auth import authenticate, login
 from django.core.mail import send_mail
 from django.core.files.base import ContentFile
-
+from django.contrib.auth.decorators import login_required
 from mentoris.latex_to_pdf import latex_to_pdf
 
 
@@ -163,7 +164,6 @@ def sign_up(request):
     if request.method == "POST":
         # Add to User table
         form = UserForm(request.POST)
-
         if form.is_valid():
             email_exists = False
             other_email_exists = False
@@ -193,7 +193,11 @@ def sign_up(request):
                         "other_emails": request.POST.get("other_emails"),
                     },
                 )
-            user = form.save()
+            user = form.save(commit=False)
+            user.email = request.POST.get("email_address")
+            user.is_active = True
+            user.save()
+
             # Add to Email table
             email = request.POST.get("email_address")
             emailObject = Email()
@@ -203,6 +207,7 @@ def sign_up(request):
             emailObject.save()
 
             other_emails = request.POST.get("other_emails")
+            
             if other_emails is not None and other_emails != "":
                 email_list = other_emails.split(",")
                 for other_email in email_list:
@@ -211,9 +216,10 @@ def sign_up(request):
                     emailObject.user = user
                     emailObject.is_primary = False
                     emailObject.save()
-
+            user = authenticate(username=email, password=user.password_hash)
+            login(request, user)
             return redirect(f"../profile/{user.user_id}")
-
+        print("Form was invalid!")
         return render(
             request,
             "mentapp/sign_up.html",
@@ -230,21 +236,15 @@ def profile(request):
     return HttpResponse(template.render())
 
 
-def login(request):
+def customLogin(request):
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
-
-        try:
-            emailObject = Email.objects.get(email_address=email)
-            user = emailObject.user
-            if not user.check_password(password):
-                user = None
-        except Email.DoesNotExist:
-            user = None
-
+        print("This is email: ", email,"This is password: ", password)
+        user = authenticate(request, username=email, password=password)
+        print("this is user returned by auth", user)
         if user is not None:
-            # TODO: log user in
+            login(request, user)
             return redirect(f"../profile/{user.user_id}")
         else:
             messages.error(
@@ -481,15 +481,22 @@ def grab_verification_info(user_ids):
         )
     return verification_info
 
-
+@login_required
 def user_info(request, user_id):
+    if user_id != request.user.user_id and request.user.is_admin != True:
+        return render(request, "mentapp/login.html")
     user_profile = get_object_or_404(User, user_id=user_id)
+    print("This is the user_id:", user_id)
+    print("This is the user retrieved", user_profile)
+    print("This is the user associated email", user_profile.email)
     try:
-        email = Email.objects.get(user_id=user_id, is_primary=True)
-        other_emails = Email.objects.filter(user_id=user_id, is_primary=False)
+        email = Email.objects.get(user=user_profile, is_primary=True)
+        print("this was the email retrieved: ", email)
+        other_emails = Email.objects.filter(user=user_profile, is_primary=False)
         other_emailss = [obj.email_address for obj in other_emails]
         other_email = ", ".join(other_emailss)
     except Email.DoesNotExist:
+        print("Email doesn't exist")
         email = None
     return render(
         request,

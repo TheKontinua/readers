@@ -31,6 +31,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_admin', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_verified', True)
 
         return self.create_user(email, user_id=user_id, password=password, **extra_fields)
 
@@ -38,7 +39,7 @@ def generate_user_id():
     return str(uuid.uuid4())
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.CharField(max_length=100, primary_key=True, default="email")
+    email = models.CharField(max_length=100, primary_key=True, default="email@default.com")
     user_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     full_name = models.CharField(max_length=50, default="new_user")
     password_hash = models.CharField(max_length=128, default="password")

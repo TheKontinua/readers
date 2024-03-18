@@ -24,7 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("mentapp/", include("mentapp.urls")),
     path("latex/", views.latex, name="latex_question"),
-    path("login/", views.login, name="login"),
+    path("login/", views.customLogin, name="login"),
     path("signUp/", views.sign_up, name="sign_up"),
     path("profile/", views.profile, name="profile"),
     path("profile/<uuid:user_id>/", views.user_info, name="user_info"),

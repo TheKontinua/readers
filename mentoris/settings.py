@@ -151,3 +151,8 @@ EMAIL_BACKEND = "django_ses.SESBackend"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 AUTH_USER_MODEL = "mentapp.User"
+
+AUTHENTICATION_BACKENDS = [
+    'mentoris.emailauth.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
