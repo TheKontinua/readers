@@ -209,7 +209,6 @@
 
              // Function to handle deletions
              function remove(button, questions_list) {
-                console.log(questions_list);
                 let list_element = questions_list;
                 let list = list_element.children;
                 let index = -1;
@@ -272,7 +271,6 @@
             }
 
             $(document).ready(function() {
-                console.log("HELLO");
                 // Fetch questions list
                 let request = $.ajax({
                     type: "GET",
@@ -295,8 +293,6 @@
                     for(var i = 0; i < list.length; ++i){
                         ids.push(list[i].id);
                     }
-                    console.log("LABEL VALUE");
-                    console.log(document.getElementById("label").value);
                     let request = $.ajax({
                         type: "POST",
                         url: "/edit_quiz/{{quiz_instance.quiz_id}}",

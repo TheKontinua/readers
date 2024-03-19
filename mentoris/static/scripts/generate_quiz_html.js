@@ -59,8 +59,6 @@ function generate_latex(text, image_urls){
           return CustomMacros;
         }())
     });
-    console.log(text);
-    //text = "\\\\ \\includegraphics[width=.5\\textwidth]{https://cdn.britannica.com/34/233234-050-1649BFA9/Pug-dog.jpg}";
     generator = latexjs.parse(text, { generator: generator });
     
     // Generate htmlCode by looking for LaTeX.js files in the given directory    
