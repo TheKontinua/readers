@@ -1056,7 +1056,7 @@ def create_support(request):
                 blob.save()
 
                 support_attachment_instance = Support_Attachment(
-                    support=support,
+                    support=support_loc,
                     lang_code=support_loc.lang_code,
                     dialect_code=support_loc.dialect_code,
                     filename=blob.filename,
