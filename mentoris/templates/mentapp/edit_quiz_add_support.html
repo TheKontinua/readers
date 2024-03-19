@@ -162,7 +162,6 @@
 
             // Dynamicly create each support when filter is pressed
             $('#filter_button').on('click', function (event) {
-                console.log(document.getElementById('volume_value').value);
                 volume_value = document.getElementById('volume_value').value;
                 creator_value = document.getElementById('creator_value').value;
                 title = document.getElementById('title').value;
@@ -220,16 +219,13 @@
 
                         var latex = document.createElement("latex-js");
 
-                        //latex.innerHTML = data[i]["support_latex"]
-                        //latex_wrapper.appendChild(latex);
                         border_wrapper.appendChild(latex_wrapper);
                         list_item.appendChild(border_wrapper);
                         document.getElementById("supports_list").appendChild(list_item);
                     }
                 });
 
-                request.fail(function (jqXHR, textStatus, errorThrown) {
-                    console.log("Request failed:", textStatus, errorThrown);
+                request.fail(function () {
                     document.getElementById("supports_list").innerHTML = "Search failed, try again";
                 });
 

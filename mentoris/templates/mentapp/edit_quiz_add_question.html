@@ -167,7 +167,6 @@
                     creator_value = document.getElementById('creator_value').value;
                     time_value = document.getElementById('time_value').value;
                     difficulty_value = document.getElementById('difficulty_value').value;
-                    console.log("requested data");
                     let request = $.ajax({
                         type: "GET",
                         url: "/edit_quiz_add_question/{{quiz_id}}",
@@ -185,7 +184,6 @@
                     });
 
                     request.done(function(data){
-                        console.log("obtained data");
                         display_questions(data, "questions_list", create_buttons, false);
                     });
                     
