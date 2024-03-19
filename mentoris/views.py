@@ -377,12 +377,16 @@ def quiz(request, volume_id, chapter_id, quiz_id):
 
         creator = User()
         creator_email = Email()
-        try: 
+        try:
             creator = User.objects.get(user_id=quiz_id.creator_id.user_id)
             creator_email = Email.objects.get(user=creator, is_primary=True)
-        except (User.DoesNotExist, Email.DoesNotExist, User.DoesNotExist, AttributeError) as error:
+        except (
+            User.DoesNotExist,
+            Email.DoesNotExist,
+            User.DoesNotExist,
+            AttributeError,
+        ) as error:
             pass
-
 
         return render(
             request,
@@ -593,15 +597,17 @@ def user_info(request, user_id):
         {"user_profile": user_profile, "email": email, "other_email": other_email},
     )
 
+
 def grab_questions_data_table(questions):
     questions_list = list()
     for question in questions:
         question_Loc = (
-        # Display question only with ENG lang code and US dialect code for editing 
-        Question_Loc.objects.get(
-            question = question.question_id, lang_code="ENG", dialect_code="US"
-        ))
-        question_attachments = Question_Attachment.objects.filter(question = question_Loc)
+            # Display question only with ENG lang code and US dialect code for editing
+            Question_Loc.objects.get(
+                question=question.question_id, lang_code="ENG", dialect_code="US"
+            )
+        )
+        question_attachments = Question_Attachment.objects.filter(question=question_Loc)
 
         attachment_urls = list()
         for question_attachment in question_attachments:
@@ -626,6 +632,7 @@ def grab_questions_data_table(questions):
         questions_list.append(question_values)
     return questions_list
 
+
 def grab_quiz_questions_data_table(quiz_questions):
     questions = list()
     for quiz_question in quiz_questions:
@@ -634,7 +641,7 @@ def grab_quiz_questions_data_table(quiz_questions):
     questionTable = grab_questions_data_table(questions)
     for question_values, quiz_question in zip(questionTable, quiz_questions):
         question_values["ordering"] = quiz_question.ordering
-    
+
     return questionTable
 
 
@@ -663,10 +670,18 @@ def edit_quiz(request, quiz_id):
                         quiz_question.save()
             quiz_instance.label = request.POST.get("label")
             print(request.POST.get("label"))
-            quiz_instance.conceptual_difficulty = float(request.POST.get("conceptual_difficulty"))
-            quiz_instance.time_required_mins = int(request.POST.get("time_required_mins"))
-            quiz_instance.volume = get_object_or_404(Volume, volume_id = request.POST.get("volume"))    
-            quiz_instance.chapter = get_object_or_404(Chapter, chapter_id = request.POST.get("chapter"))
+            quiz_instance.conceptual_difficulty = float(
+                request.POST.get("conceptual_difficulty")
+            )
+            quiz_instance.time_required_mins = int(
+                request.POST.get("time_required_mins")
+            )
+            quiz_instance.volume = get_object_or_404(
+                Volume, volume_id=request.POST.get("volume")
+            )
+            quiz_instance.chapter = get_object_or_404(
+                Chapter, chapter_id=request.POST.get("chapter")
+            )
             calculator_allowed_str = request.POST.get("calculator_allowed")
             computer_allowed_str = request.POST.get("computer_allowed")
             internet_allowed_str = request.POST.get("internet_allowed")
@@ -709,18 +724,16 @@ def edit_quiz(request, quiz_id):
             return JsonResponse({"success": True})
     else:
         if request.GET.get("command") == "fetch_quiz_questions":
-            return JsonResponse(grab_quiz_questions_data_table(quiz_questions), safe=False)   
+            return JsonResponse(
+                grab_quiz_questions_data_table(quiz_questions), safe=False
+            )
 
     chapters = Chapter.objects.all()
     volumes = Volume.objects.all()
     return render(
         request,
         "mentapp/edit_quiz.html",
-        {
-            "quiz_instance": quiz_instance,
-            "volumes": volumes,
-            "chapters": chapters
-        },
+        {"quiz_instance": quiz_instance, "volumes": volumes, "chapters": chapters},
     )
 
 
@@ -948,15 +961,16 @@ def request_translation(request, user_id):
     )
 
 
-def download_pdf(request, quiz_id_str):
-    quiz_instance = get_object_or_404(Quiz, quiz_id=int(quiz_id_str))
-    quiz_rendering_instance = Quiz_Rendering.objects.filter(quiz=quiz_instance).latest("date_created")
+def download_pdf(request, quiz_id):
+    quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
+    quiz_rendering_instance = Quiz_Rendering.objects.filter(quiz=quiz_instance).latest(
+        "date_created"
+    )
     blob_instance = quiz_rendering_instance.blob_key
 
     response = HttpResponse(blob_instance.file, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{blob_instance.filename}"'
     return response
-
 
 
 def upload_pdf(request, pdf_path):
@@ -996,18 +1010,17 @@ def create_quiz(request, volume_id, chapter_id):
         )
 
         # Redirect to the edit page for the new quiz
-        return redirect('/edit_quiz/{}'.format(quiz.quiz_id))
-    
+        return redirect("/edit_quiz/{}".format(quiz.quiz_id))
+
+
 def delete_quiz(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     url = request.path
 
-    if request.method == 'POST':
+    if request.method == "POST":
         quiz.delete()
-        
-        
-    return redirect(request.META.get('HTTP_REFERER', '/')) 
 
+    return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
 def create_support(request):

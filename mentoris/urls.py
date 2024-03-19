@@ -38,14 +38,28 @@ urlpatterns = [
     path("main/<int:volume_id>/", views.main, name="main_vol_chap"),
     path("main/<int:volume_id>/<chapter_id>/", views.chapter, name="chapter"),
     path("main/<int:volume_id>/<chapter_id>/<int:quiz_id>", views.quiz, name="quiz"),
-    path("main/<int:volume_id>/<chapter_id>/<int:quiz_id>/maker_view", views.quiz_maker_view, name="quiz_maker_view"),
+    path(
+        "main/<int:volume_id>/<chapter_id>/<int:quiz_id>/maker_view",
+        views.quiz_maker_view,
+        name="quiz_maker_view",
+    ),
     path("edit_quiz/<int:quiz_id>", views.edit_quiz, name="edit_quiz"),
-    path("edit_quiz_add_question/<int:quiz_id>", views.edit_quiz_add_question, name="edit_quiz_add_question"),
-    path("edit_quiz_add_support/<int:quiz_id>", views.edit_quiz_add_support, name="edit_quiz_add_support"),
-    path("download_pdf/<int:blob_key>/", views.download_pdf, name='download_pdf'),
+    path(
+        "edit_quiz_add_question/<int:quiz_id>",
+        views.edit_quiz_add_question,
+        name="edit_quiz_add_question",
+    ),
+    path(
+        "edit_quiz_add_support/<int:quiz_id>",
+        views.edit_quiz_add_support,
+        name="edit_quiz_add_support",
+    ),
+    path("download_pdf/<int:quiz_id>/", views.download_pdf, name="download_pdf"),
     path("create_support/", views.create_support, name="create_support"),
-    path('quiz/create/<int:volume_id>/<chapter_id>', views.create_quiz, name='create_quiz'),
-    path('delete_quiz/<int:quiz_id>/', views.delete_quiz, name='delete_quiz'),
-
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
+    path(
+        "quiz/create/<int:volume_id>/<chapter_id>",
+        views.create_quiz,
+        name="create_quiz",
+    ),
+    path("delete_quiz/<int:quiz_id>/", views.delete_quiz, name="delete_quiz"),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
