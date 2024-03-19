@@ -127,8 +127,8 @@ Things an Admin needs to be able to do:
 #### Main page
 
 -   Outline view of volumes/chapters
--   Get test for volume (randomly chosen, 2 PDFS, each to take 45 minutes)
--   Get test for chapter (randomly chosen, 1 PDF to take 45 minutes)
+-   Get quiz for volume (randomly chosen, 2 PDFS, each to take 45 minutes)
+-   Get quiz for chapter (randomly chosen, 1 PDF to take 45 minutes)
 -   Submit question for chapter
 
 #### Edit question page
