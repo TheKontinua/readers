@@ -215,19 +215,12 @@
                                         >
                                             Edit Quiz
                                         </button>
-                                        <form
-                                            method="post"
-                                            action="{% url 'delete_quiz' quiz.quiz_id %}"
-                                        >
+                                        <form id="delete_quiz_form_{{ quiz.quiz_id }}" method="post" action="{% url 'delete_quiz' quiz.quiz_id %}"
+                                            onsubmit="return delete_quiz('{{ quiz.quiz_id }}');">
                                             {% csrf_token %}
-                                            <button
-                                                id="delete_quiz_{{quiz.quiz_id}}"
-                                                onclick="delete_quiz('{{quiz.quiz_id}}')"
-                                                class="optionButton2"
-                                            >
-                                                DeleteQuiz
-                                            </button>
+                                            <button type="submit" id="delete_quiz_{{quiz.quiz_id}}" class="optionButton2">Delete Quiz</button>
                                         </form>
+
                                     </div>
                                 </td>
                             </tr>
@@ -272,13 +265,15 @@
             }
 
             function delete_quiz(id) {
-                var result = confirm(
-                    "Are you sure you want to delete this quiz?"
-                );
-                if (result) {
-                    console.log("Deleting quiz with ID: " + quizId);
+                var result = confirm("Are you sure you want to delete this quiz?");
+                if (!result) {
+                    console.log("Deletion canceled for quiz with ID: " + id);
+                    return false;
                 }
+                console.log("Deleting quiz with ID: " + id);
+                return true; 
             }
+
         </script>
     </body>
 </html>
