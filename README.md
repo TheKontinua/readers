@@ -17,8 +17,9 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwo
     - Run the command `eb init` in the root directory of the project
         - Select 3 `(us-west-2 : US West (Oregon))`
         - Select 2 `(mentoris)`
-        - Select 1 `(mentoris)`
+        - Select 1 `(django-env)`
         - Do not continue with CodeCommit
+    - update the dependencies in requirements.txt (this can be done by running the command `pip freeze > requirements.txt` assuming you are working in a virtual environment with only the minimum packages installed to have Mentoris running, otherwise the dependencies need to be manually added)
     - Use the command `eb deploy` to deploy code into AWS Elastic Beanstalk  when ready
     - The current state of the project after deployment can be viewed here: [django-env.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/main/](http://django-env.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/main/)
     - Github: [GitHub - TheKontinua/mentoris: The web app for mentors](https://github.com/TheKontinua/mentoris)
@@ -32,7 +33,7 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwo
     b. Test the code before making a pull request
 11. Remove the AWS RDS credentials before making a pull request
 12. Make a pull request and wait for it to be approved by another team member
-13. Once the pull request has been merged to main the code is ready to be deployed to Elastic Beanstalk
+13. Once the pull request has been merged to main the code is ready to be deployed to Elastic Beanstalk!
 
 
 
@@ -45,7 +46,7 @@ written in Python using the Django web framework.
 We will be using PostgreSQL as the backend database.
 
 The questions and answers will be stored as LaTeX segments. The complete quiz will
-need to be typeset using TeX. Preview will be done with MathJAX or KaTeX.
+need to be typeset using TeX. Preview will be done with LaTex.js.
 
 We will deploy the system on Amazon Services.
 
