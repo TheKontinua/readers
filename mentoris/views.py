@@ -216,7 +216,7 @@ def sign_up(request):
                     emailObject.user = user
                     emailObject.is_primary = False
                     emailObject.save()
-            user = authenticate(username=email, password=user.password_hash)
+            user = authenticate(username=email, password=request.POST.get("password_hash"))
             login(request, user)
             return redirect(f"../profile/{user.user_id}")
         print("Form was invalid!")
