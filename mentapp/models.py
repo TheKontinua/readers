@@ -6,16 +6,40 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_save
 from datetime import datetime
 import uuid
+from django.contrib.auth.models import AbstractBaseUser,  PermissionsMixin, BaseUserManager
 
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, user_id=None, password=None, **extra_fields):
+        """
+        Creates and saves a User with the given email and password.
+        """
+        if not email:
+            raise ValueError('The Email field must be set')
+        if not user_id:
+            user_id = generate_user_id()
+
+        user = self.model(email=email, user_id=user_id, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, user_id=None, password=None, **extra_fields):
+        """
+        Creates and saves a superuser with the given email and password.
+        """
+        extra_fields.setdefault('is_admin', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_verified', True)
+
+        return self.create_user(email, user_id=user_id, password=password, **extra_fields)
 
 def generate_user_id():
     return str(uuid.uuid4())
 
-
-class User(models.Model):
-    user_id = models.UUIDField(
-        primary_key=True, unique=True, default=uuid.uuid4, editable=False
-    )
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.CharField(max_length=100, primary_key=True, default="email@default.com")
+    user_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     full_name = models.CharField(max_length=50, default="new_user")
     password_hash = models.CharField(max_length=128, default="password")
     org_name = models.CharField(max_length=50, default="org")
@@ -30,12 +54,12 @@ class User(models.Model):
     is_admin = models.BooleanField(default=False)
     is_quizmaker = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
 
-    def set_password(self, raw_password):
-        return make_password(password=raw_password)
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
 
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password_hash)
+    objects = CustomUserManager()
 
     def __str__(self):
         return f"""{self.full_name},

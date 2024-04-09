@@ -71,6 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "mentoris.wsgi.application"
 
+
 DATABASES = {
 
         
@@ -79,6 +80,8 @@ DATABASES = {
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+
+
 
 
 
@@ -143,3 +146,10 @@ EMAIL_BACKEND = "django_ses.SESBackend"
 
 # Allows Iframes to display from pages hosted by this server
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+AUTH_USER_MODEL = "mentapp.User"
+
+AUTHENTICATION_BACKENDS = [
+    'mentoris.emailauth.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
