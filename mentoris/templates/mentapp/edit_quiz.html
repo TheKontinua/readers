@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Edit Quiz</title>
-
-    <link rel="stylesheet" type="text/css"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Edit Quiz</title>
+        
+        <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        />
+        
         {% load static %}
-        <link rel="stylesheet" href="{% static '/css/colors.css'%}">
-        <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
+        <link rel="stylesheet" href="{% static "/css/colors.css"%}">
+        <link rel="stylesheet" href="{% static "/css/quiz_styles.css"%}">
 
+        <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
         <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
-        <script src="{% static '/scripts/toggle_attachments_visible.js'%}"></script>
         <script>
             customElements.define("latex-js", latexjs.LaTeXJSComponent);
         </script>
 
         <style>
+
             .delete {
                 font-weight: bold;
                 background: var(--KontinuaRed);
@@ -32,204 +35,273 @@
                 margin: 0px;
                 width: 100%;
                 height: 2em;
-                background-color: var(--KontinuaBlue);
+                background-color:  var(--KontinuaBlue);
+                
+            }
 
+            #quiz_content {
+                width: 35em;
             }
 
             #quiz_content {
                 padding: 10px;
                 float: left;
                 margin-bottom: 0px;
-                width: 35em;
             }
-        
+
         </style>
 
     </head>
 
-<body>
-    <!--Include AJAX-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-    <!--Include Header-->
-    <iframe src="header.html" width="100%" height="95px" frameBorder="0"
-        style="display: block; padding: 0px; margin: 0px;"></iframe>
+    <body>
+        <!--Include AJAX-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <!--Include Header-->
+        <iframe src="header.html" width="100%" height="95px" frameBorder="0" style="display: block; padding: 0px; margin: 0px;"></iframe>
+        
+        <button id="back_button" onclick="confirmLeave()" type="button">Back to Quizzes</button>
+        <br>
 
-    <div id="quiz_content" class="bordered" background="red">
-        <ul id="quiz_questions_list" style="list-style-type:none;">
-            {% for question_Loc_and_quiz in questions_Loc_and_quiz %}
-            <li id="{{question_Loc_and_quiz.0.question.question_id}}">
-                <div class="bordered">
+        <div id = "quiz_content" class = "bordered">
+            <ul id = "questions_list" style="list-style-type:none;">
+            </ul>
+        </div>
 
-                    <p class="bold_font question_support_label">
-                        Question
-                    </p>
-                    <div style="float: left;">
-                        <p class="small_margin">
-                            <span class="bold_font">Ordering: </span>
-                            <span class="question_ordering">{{question_Loc_and_quiz.1.ordering}}</span>
-                        </p>
-                        <p class="small_margin">
-                            <span class="bold_font">Difficulty: </span>
-                            {{question_Loc_and_quiz.0.question.conceptual_difficulty}}
-                        </p>
-                        <p class="small_margin">
-                            <span class="bold_font">Volume: </span>
-                            {{question_Loc_and_quiz.0.question.chapter.volume.volume_id}}
-                        </p>
-                        <p class="small_margin">
-                            <span class="bold_font">Chapter: </span>
-                            {{question_Loc_and_quiz.0.question.chapter.chapter_id}}
-                        </p>
-                        <p class="small_margin">
-                            <span class="bold_font">Creator: </span>
-                            {{question_Loc_and_quiz.0.question.creator.full_name}}
-                        </p>
-                        <p class="small_margin">
-                            <span class="bold_font">Point Value: </span>
-                            {{question_Loc_and_quiz.0.question.point_value}}
-                        </p>
-                        <p class="small_margin">
-                            <span class="bold_font">Time (minutes): </span>
-                            {{question_Loc_and_quiz.0.question.time_required_mins}}
-                        </p>
+        <div id = "right_panel">
+            <div class="bordered" id = "meta_data">
+                <form action="" method="post">
+                    <div class="form_element_wrapper">
+                        <span class = "form_label">Quiz Label: </span>
+                        <input type = "text" id = "label" value = "{{quiz_instance.label}}">
                     </div>
-                    <div style="float: right;">
-                        <ul style="list-style-type:none;">
-                            <li>
-                                <button class="delete question_button">Delete</button>
-                            </li>
-                            <li>
-                                <button class="decrease_order question_button">
-                                    <img src="{% static 'up_arrow.svg' %}" width="50" />
-                                </button>
-                            </li>
-
-                            <li>
-                                <button class="increase_order question_button">
-                                    <img src="{% static 'down_arrow.svg' %}" width="50" />
-                                </button>
-                            </li>
-                        </ul>
+                    <div class="form_element_wrapper">
+                        <span class = "form_label">Conceptual Difficulty: </span>
+                        <input type = "text" id = "conceptual_difficulty" value = {{quiz_instance.conceptual_difficulty}}>
                     </div>
-                    <div style="clear: both;">
-                        <latex-js>{{question_Loc_and_quiz.0.question_latex}}</latex-js>
-
-                        {% if question_Loc_and_quiz.2 %}
-                        <div style="float: right">
-                            <button class="attachments_button invisible_state bold_font">Show Attatchments</button>
-                        </div>
-                        <div class="bordered attachments" style="clear:both; display: none;">
-                            {% for image in question_Loc_and_quiz.2%}
-                            <img src="{{image.url}}" width="200" style="position:relative; left: 25%">
-                            {% endfor %}
-                        </div>
-                        {% endif %}
+                    <div class="form_element_wrapper">
+                        <span class = "form_label">Time Required (mins): </span>
+                        <input type = "text" id = "time_required_mins" value ={{quiz_instance.time_required_mins}}>
                     </div>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    
-            <div id="right_panel">
-                <div class="bordered" id="meta_data">
-                    <form action="" method="post">
-                        <div class="form_element_wrapper">
-                            <span class="form_label">Conceptual Difficulty: </span>
-                            <input type="text" id="conceptual_difficulty" value={{quiz_instance.conceptual_difficulty}}>
-                        </div>
-                        <div class="form_element_wrapper">
-                            <span class="form_label">Time Required (mins): </span>
-                            <input type="text" id="time_required_mins" value={{quiz_instance.time_required_mins}}>
-                        </div>
-                        <div class="form_element_wrapper">
-                            <span class="form_label">Calculator Allowed: </span>
-                            <input type="checkbox" id="calculator_allowed" {% if quiz_instance.calculator_allowed %}
-                                checked {% endif %}>
-                        </div>
-                        <div class="form_element_wrapper">
-                            <span class="form_label">Computer Allowed: </span>
-                            <input type="checkbox" id="computer_allowed" {% if quiz_instance.computer_allowed %} checked
-                                {% endif %}>
-                        </div>
-                        <div class="form_element_wrapper">
-                            <span class="form_label">Internet Allowed: </span>
-                            <input type="checkbox" id="internet_allowed" {% if quiz_instance.internet_allowed %} checked
-                                {% endif %}>
-                        </div>
-                        <div class="form_element_wrapper">
-                            <span class="form_label">Book Allowed: </span>
-                            <input type="checkbox" id="book_allowed" 
-                            {% if quiz_instance.book_allowed %} 
+                    <div class="form_element_wrapper">
+                        <span class = "form_label">Calculator Allowed: </span>
+                        <input type = "checkbox" id = "calculator_allowed" 
+                            {% if quiz_instance.calculator_allowed %}
                                 checked
-                            {% endif %}>
-                        </div>
-                        <div class="form_element_wrapper">
-                            <span class="form_label">Volume: </span>
-                            <select id="volume" name="volume">
-                                {% for volume in volumes %}
-                            <option value="{{volume.volume_id}}"
-                            {% if quiz_instance.volume.volume_id == volume.volume_id %}
-                                selected
                             {% endif %}
-                            >{{volume.volume_id}}</option>
-                        {% endfor %}
-
-                            </select>
-                        </div>
-                        <div class="form_element_wrapper">
-                            <span class="form_label">Chapter: </span>
-                            <select id="chapter" name="chapter">
-                                {% for chapter in chapters %}
-                                    <option value="{{chapter.chapter_id}}" 
-                                    {% if quiz_instance.chapter.chapter_id == chapter.chapter_id %}
-                                        selected
-                                    {% endif %}
-                                    >{{chapter.chapter_id}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                    </form>
-
-                </div>
-                <button class="question_button" id="add_question"
-                    onclick="location.href='/edit_quiz_add_question/{{quiz_instance.quiz_id}}'" type="button">Add
-                    Question
-                </button>
-                <button class="question_button" id="add_support"
-                    onclick="location.href='/edit_quiz_add_support/{{quiz_instance.quiz_id}}'">Add Support
-                </button>
-                <button class="question_button" id="save_button">Save</button>
-                <button class="question_button" id="download_button">Download Quiz</button>
-                <div id="save_status" class="bordered"></div>
+                        >
+                    </div>
+                    <div class="form_element_wrapper">
+                        <span class = "form_label">Computer Allowed: </span>
+                        <input type = "checkbox" id = "computer_allowed"
+                            {% if quiz_instance.computer_allowed %}
+                                checked
+                            {% endif %}
+                        >
+                    </div>
+                    <div class = "form_element_wrapper">
+                        <span class = "form_label">Internet Allowed: </span>
+                        <input type = "checkbox" id = "internet_allowed"
+                            {% if quiz_instance.internet_allowed %}
+                                checked
+                            {% endif %}
+                        >
+                    </div>
+                    <div class = "form_element_wrapper">
+                        <span class = "form_label">Book Allowed: </span>
+                        <input type = "checkbox" id = "book_allowed"
+                            {% if quiz_instance.book_allowed %}
+                                checked
+                            {% endif %}
+                        >
+                    </div>
+                    <div class = "form_element_wrapper">
+                        <span class = "form_label">Volume: </span>
+                        <select id="volume" name="volume">
+                            {% for volume in volumes %}
+                                <option value="{{volume.volume_id}}"
+                                {% if quiz_instance.volume.volume_id == volume.volume_id %}
+                                    selected
+                                {% endif %}
+                                >{{volume.volume_id}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class = "form_element_wrapper">
+                        <span class = "form_label">Chapter: </span>
+                        <select id = "chapter" name = "chapter">
+                            {% for chapter in chapters %}
+                                <option value="{{chapter.chapter_id}}"
+                                {% if quiz_instance.chapter.chapter_id == chapter.chapter_id %}
+                                    selected
+                                {% endif %}
+                                >{{chapter.chapter_id}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <button class="question_button" id = "add_question" 
+                onclick="location.href='/edit_quiz_add_question/{{quiz_instance.quiz_id}}'" 
+                type="button">Add Question
+            </button>
+            <button class="question_button"
+            onclick="location.href='/edit_quiz_add_support/{{quiz_instance.quiz_id}}'" 
+                type="button"
+            >Add Support</button>
+            <button class="question_button" id = "save_button">Save</button>
+            <div id="save_status" class="bordered"></div> 
+            </div>       
+        </div>
+        <div id="customModal" class="modal">
+            <div class="modal-content">
+                <p>Are you sure you want to leave this page?</p>
+                <button class="modalButton" onclick="saveChanges()">Save Changes before leaving</button>
+                <button class="modalButton" onclick="leaveWithoutSaving()">Leave Without Saving</button>
+                <button class="modalButton" onclick="cancelLeave()">Cancel</button>
             </div>
         </div>
 
+
         <iframe src="footer.html" width="100%" frameBorder="0"></iframe>
+        <script type = "text/javascript">
 
-        <script type="text/javascript">
+            function create_buttons(button_wrapper){
+                let questions_list = document.getElementById("questions_list");
+                let ul = document.createElement("ul");
+                $(ul).addClass("unbulleted_list");
 
-            $(document).ready(function () {
+                let delete_button_li = document.createElement("li");
+                let delete_button = document.createElement("button");
+                delete_button.innerHTML = "Delete";
+                $(delete_button).addClass("delete");
+                delete_button.addEventListener('click', function(event){
+                    remove(event.target, questions_list);
+                });
+                delete_button_li.appendChild(delete_button);
+                
+                let up_button_li = document.createElement("li");
+                let up_button = document.createElement("button");
+                let up_button_image = document.createElement("img");
+                up_button_image.src = "{% static 'up_arrow.svg' %}";
+                up_button_image.width = 50;
+                up_button.appendChild(up_button_image);
+                up_button.addEventListener('click', function(event){
+                    decrease_order(event.target, questions_list);
+                });
+                up_button_li.appendChild(up_button);
+
+                let down_button_li = document.createElement("li");
+                let down_button = document.createElement("button");
+                let down_button_image = document.createElement("img");
+                down_button_image.src = "{% static 'down_arrow.svg' %}";
+                down_button_image.width = 50;
+                down_button.appendChild(down_button_image);
+                down_button.addEventListener('click', function(event){
+                    increase_order(event.target, questions_list);
+                });
+                down_button_li.appendChild(down_button);
+
+                ul.appendChild(delete_button_li);
+                ul.appendChild(up_button_li);
+                ul.appendChild(down_button_li);
+                button_wrapper.appendChild(ul);
+            }
+
+             // Function to handle deletions
+             function remove(button, questions_list) {
+                let list_element = questions_list;
+                let list = list_element.children;
+                let index = -1;
+
+                for(let i = 0; i < list.length; ++i){
+                    if(list[i].contains(button)){
+                        index = i;
+                    }
+                }
+
+                for(let i = 0; i < list.length; ++i){
+                    if(i > index){
+                        list[i].getElementsByClassName("question_ordering")[0].innerHTML = (i - 1).toString();
+                    }
+                    if(list[i].contains(button)){
+                        index = i;
+                    }
+                }
+                list_element.removeChild(list[index]);
+            }
+            
+            // Function to handle increasing order
+            function increase_order(button, questions_list){
+                let list_element = questions_list;
+                let list = list_element.children;
+            
+                let index = -1;
+                for(let i = 0; i < list.length; ++i){
+                    if(list[i].contains(button)){
+                        index = i;
+                    }
+                }
+                
+                if(index != list.length-1){
+                    list[index].getElementsByClassName("question_ordering")[0].innerHTML = (index + 1).toString();
+                    list[index + 1].getElementsByClassName("question_ordering")[0].innerHTML = (index).toString();
+                    list[index].parentNode.insertBefore(list[index+1], list[index]);   
+                    list[index + 1].scrollIntoView();
+                }
+            }
+
+            // Function to handle decreasing order
+            function decrease_order(button, questions_list){
+                let list_element = questions_list;
+                let list = list_element.children;
+            
+                let index = -1;
+                for(let i = 0; i < list.length; ++i){
+                    if(list[i].contains(button)){
+                        index = i;
+                    }
+                }
+                
+                if(index != 0){
+                    list[index].getElementsByClassName("question_ordering")[0].innerHTML = (index - 1).toString();
+                    list[index - 1].getElementsByClassName("question_ordering")[0].innerHTML = (index).toString();
+                    list[index-1].parentNode.insertBefore(list[index], list[index-1]);
+                    list[index-1].scrollIntoView();
+                }
+            }
+
+            $(document).ready(function() {
+                // Fetch questions list
+                let request = $.ajax({
+                    type: "GET",
+                    url: "/edit_quiz/{{quiz_instance.quiz_id}}",
+                    dataType: 'json',
+                    data:{
+                        csrfmiddlewaretoken: "{{csrf_token}}",
+                        command: "fetch_quiz_questions"
+                    }
+                });
+                request.done(function(data){
+                    display_questions(data, "questions_list", create_buttons, true);
+                });
 
                 // Function to handle saving
-                $('#save_button').on('click', function (event) {
-                    var list = document.getElementById("quiz_questions_list").children;
-                    var ids = []
+                $('#save_button').on('click', function(event){
+                    let list = document.getElementById("questions_list").children;
+                    let ids = []
 
-                    for (var i = 0; i < list.length; ++i) {
+                    for(var i = 0; i < list.length; ++i){
                         ids.push(list[i].id);
                     }
-
-
-                    var request = $.ajax({
+                    let request = $.ajax({
                         type: "POST",
                         url: "/edit_quiz/{{quiz_instance.quiz_id}}",
                         dataType: 'json',
-                        data: {
+                        data:{
                             csrfmiddlewaretoken: "{{csrf_token}}",
                             command: "save",
                             ids: JSON.stringify(ids),
+                            label: document.getElementById("label").value,
                             conceptual_difficulty: document.getElementById("conceptual_difficulty").value,
                             time_required_mins: document.getElementById("time_required_mins").value,
                             calculator_allowed: document.getElementById("calculator_allowed").checked,
@@ -241,123 +313,45 @@
                         }
                     });
 
-                    request.done(function () {
+                    request.done(function(){
                         const save_status = document.getElementById("save_status");
                         const save_date = new Date();
                         save_status.innerHTML = "Success! Quiz Saved at " + save_date.toString();
                     });
 
-                    request.fail(function () {
+                    request.fail(function(){
                         const save_status = document.getElementById("save_status");
                         const save_date = new Date();
                         save_status.innerHTML = "Oh no! There was an error saving at: " + save_date.toString();
                     });
 
                 });
-
-                $('#download_button').on('click', function(event){
-                    var list = document.getElementById("quiz_questions_list").children;
-                    var orderings = []
-                    var ids = []
-
-                    for(var i = 0; i < list.length; ++i){
-                        ids.push(list[i].id);
-                        orderings.push(i);
-                    }
-
-                    var request = $.ajax({
-                        type: "POST",
-                        url: "/edit_quiz/{{quiz_instance.quiz_id}}",
-                        dataType: 'json',
-                        data:{
-                            csrfmiddlewaretoken: "{{csrf_token}}",
-                            command: "download",
-                            orderings: JSON.stringify(orderings),
-                            ids: JSON.stringify(ids)
-                        }
-                    });
-
-                    request.done(function(){
-                        const save_status = document.getElementById("save_status");
-                        save_status.innerHTML = "Quiz sucessfully downloaded!"
-                    });
-
-                    request.fail(function () {
-                        const save_status = document.getElementById("save_status");
-                        save_status.innerHTML = "Quiz download failed...";
-                    });
-
-                });
             });
+            function confirmLeave() {
+                const modal = document.getElementById('customModal');
+                modal.style.display = 'inline-block';
+            }
 
-            // Function to handle deletions
-            $('.delete').on('click', function (event) {
-                var list_element = document.getElementById("quiz_questions_list");
-                var list = document.getElementById("quiz_questions_list").children;
-                var index = -1;
+            function saveChanges() {
+                document.getElementById('save_button').click();
+                location.href = '/main'
+                closeModal();
+            }
 
-                for (var i = 0; i < list.length; ++i) {
-                    if (list[i].contains($(this)[0])) {
-                        index = i;
-                    }
-                }
+            function leaveWithoutSaving() {
+                location.href = '/main'
+                closeModal();
+            }
 
+            function cancelLeave() {
+                closeModal();
+            }
 
-                for (var i = 0; i < list.length; ++i) {
-                    if (i > index) {
-                        list[i].getElementsByClassName("question_ordering")[0].innerHTML = (i - 1).toString();
-                    }
-                    if (list[i].contains($(this)[0])) {
-                        index = i;
-                    }
-                }
-                list_element.removeChild(list[index]);
-            });
-
-            // Function to toggle attachment visibility
-            $('.attachments_button').on('click', function (event) {
-                toggle_attachments_visible("quiz_questions_list", $(this)[0], "attachments");
-            });
-
-            // Function to handle increasing order
-            $('.increase_order').on('click', function (event) {
-                var list = document.getElementById("quiz_questions_list").children;
-
-                var index = -1;
-                for (var i = 0; i < list.length; ++i) {
-                    if (list[i].contains($(this)[0])) {
-                        index = i;
-                    }
-                }
-
-                if (index != list.length - 1) {
-                    list[index].getElementsByClassName("question_ordering")[0].innerHTML = (index + 1).toString();
-                    list[index + 1].getElementsByClassName("question_ordering")[0].innerHTML = (index).toString();
-                    list[index].parentNode.insertBefore(list[index + 1], list[index]);
-                    list[index + 1].scrollIntoView();
-                }
-            });
-
-            // Function to handle decreasing order
-            $('.decrease_order').on('click', function (event) {
-                var list = document.getElementById("quiz_questions_list").children;
-
-                var index = -1;
-                for (var i = 0; i < list.length; ++i) {
-                    if (list[i].contains($(this)[0])) {
-                        index = i;
-                    }
-                }
-
-                if (index != 0) {
-                    list[index].getElementsByClassName("question_ordering")[0].innerHTML = (index - 1).toString();
-                    list[index - 1].getElementsByClassName("question_ordering")[0].innerHTML = (index).toString();
-                    list[index - 1].parentNode.insertBefore(list[index], list[index - 1]);
-                    list[index - 1].scrollIntoView();
-                }
-            });
+            function closeModal() {
+                const modal = document.getElementById('customModal');
+                modal.style.display = 'none';
+            }
         </script>
-
-</body>
+    </body>
 
 </html>

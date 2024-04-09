@@ -4,8 +4,10 @@ from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.template import loader
 from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import FileSystemStorage
+from django.urls import resolve
 from mentapp.models import (
     Question_Attachment,
+    Quiz_Rendering,
     User,
     Email,
     Volume,
@@ -15,6 +17,8 @@ from mentapp.models import (
     Question_Loc,
     Quiz,
     Quiz_Question,
+    Quiz_Rendering,
+    Quiz_Feedback,
     Question,
     Verification,
     Question_Attachment,
@@ -30,6 +34,7 @@ from django.contrib.auth import authenticate, login
 from django.core.mail import send_mail
 from django.core.files.base import ContentFile
 from django.contrib.auth.decorators import login_required
+from datetime import date
 from mentoris.latex_to_pdf import latex_to_pdf
 
 
@@ -234,6 +239,8 @@ def profile(request):
     template = loader.get_template("mentapp/profile.html")
     return HttpResponse(template.render())
 
+def reset_password(request):
+    return render(request, "mentapp/reset_password.html")
 
 def customLogin(request):
     if request.method == "POST":
@@ -310,6 +317,151 @@ def chapter(request, volume_id, chapter_id):
     )
 
 
+def quiz(request, volume_id, chapter_id, quiz_id):
+    volume_id = get_object_or_404(Volume, volume_id=volume_id)
+    chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
+    quiz_id = get_object_or_404(Quiz, quiz_id=quiz_id)
+
+    if request.method == "POST":
+        if request.POST.get("command") == "viewer_publish":
+            feedback = Quiz_Feedback()
+            feedback.rendering_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            feedback.creator_id = quiz_id.creator_id
+            feedback.viewer_id = (
+                quiz_id.creator_id
+            )  # change this later when we can log in a user
+            feedback.challenge_rating = int(request.POST.get("challenge_rating"))
+            feedback.time_rating = int(request.POST.get("time_rating"))
+            feedback.viewer_comment = request.POST.get("viewer_comment")
+
+            feedback.save()
+            return JsonResponse({"success": True})
+        elif request.POST.get("command") == "delete":
+            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            feedback = Quiz_Feedback.objects.get(
+                rendering_id=render_id,
+                feedback_id=request.POST.get("feedback_id"),
+            )
+            feedback.delete()
+            return JsonResponse({"success": True})
+    else:
+        avg_rating = quiz_id.conceptual_difficulty
+        avg_time = quiz_id.time_required_mins
+
+        try:
+            reviews = []
+            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            review_objects = Quiz_Feedback.objects.filter(
+                rendering_id=render_id,
+                date_completed__isnull=True,
+            ).distinct()
+
+            challenge_ratings = 0
+            time_ratings = 0
+
+            for review in review_objects:
+                challenge_ratings += review.challenge_rating
+                time_ratings += review.time_rating
+                email = Email.objects.get(user=review.viewer_id, is_primary=True)
+                reviews.append([email, review])
+
+            avg_rating = challenge_ratings / len(review_objects)
+            avg_time = time_ratings / len(review_objects)
+        except:
+            reviews = []
+
+        creator = User()
+        creator_email = Email()
+        try:
+            creator = User.objects.get(user_id=quiz_id.creator_id.user_id)
+            creator_email = Email.objects.get(user=creator, is_primary=True)
+        except (
+            User.DoesNotExist,
+            Email.DoesNotExist,
+            User.DoesNotExist,
+            AttributeError,
+        ) as error:
+            pass
+
+        return render(
+            request,
+            "mentapp/quiz.html",
+            {
+                "volume": volume_id,
+                "chapter": chapter_id,
+                "quiz": quiz_id,
+                "reviews": reviews,
+                "creator": creator_email,
+                "avg_rating": int(avg_rating),
+                "avg_time": int(avg_time),
+            },
+        )
+
+
+def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
+    volume_id = get_object_or_404(Volume, volume_id=volume_id)
+    chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
+    quiz_id = get_object_or_404(Quiz, quiz_id=quiz_id)
+
+    if request.method == "POST":
+        render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+        feedback = Quiz_Feedback.objects.get(
+            rendering_id=render_id,
+            feedback_id=request.POST.get("feedback_id"),
+        )
+        if request.POST.get("command") == "resolve":
+            feedback.date_completed = date.today()
+            feedback.save()
+        elif request.POST.get("command") == "delete":
+            feedback.delete()
+        elif request.POST.get("command") == "publish":
+            feedback.creator_comment = request.POST.get("creator_comment")
+            feedback.save()
+        return JsonResponse({"success": True})
+    else:
+        avg_rating = quiz_id.conceptual_difficulty
+        avg_time = quiz_id.time_required_mins
+
+        try:
+            reviews = []
+            render_id = Quiz_Rendering.objects.get(quiz=quiz_id)
+            review_objects = Quiz_Feedback.objects.filter(
+                rendering_id=render_id,
+                date_completed__isnull=True,
+            ).distinct()
+
+            challenge_ratings = 0
+            time_ratings = 0
+
+            for review in review_objects:
+                challenge_ratings += review.challenge_rating
+                time_ratings += review.time_rating
+                email = Email.objects.get(user=review.viewer_id, is_primary=True)
+                reviews.append([email, review])
+
+            avg_rating = challenge_ratings / len(review_objects)
+            avg_time = time_ratings / len(review_objects)
+        except:
+            reviews = []
+
+        creator = User.objects.get(user_id=quiz_id.creator_id.user_id)
+        creator_email = Email.objects.get(user=creator, is_primary=True)
+
+        return render(
+            request,
+            "mentapp/quiz_maker_view.html",
+            {
+                "volume": volume_id,
+                "chapter": chapter_id,
+                "quiz": quiz_id,
+                "reviews": reviews,
+                "creator": creator_email,
+                "avg_rating": int(avg_rating),
+                "avg_time": int(avg_time),
+            },
+        )
+
+
 def promotion(request):
     if request.method == "POST":
         email_object = Email.objects.get(
@@ -330,14 +482,13 @@ def promotion(request):
         user.save()
         return JsonResponse({"success": True})
     else:
-        users = grab_users(True)
         return render(
             request,
             "mentapp/promotion.html",
             {
-                "newbies": users["newbies"],
-                "mentors": users["mentors"],
-                "quiz_makers": users["quiz_makers"],
+                "newbies": grab_users(False, False, False, True, True),
+                "mentors": grab_users(True, False, False, True, True),
+                "quiz_makers": grab_users(True, True, False, True, True),
             },
         )
 
@@ -369,89 +520,36 @@ def user_directory(request):
         user.save()
         return JsonResponse({"success": True, "status": status, "color": color})
     else:
-        users = grab_users(False)
         return render(
             request,
             "mentapp/user_directory.html",
             {
-                "newbies": users["newbies"],
-                "mentors": users["mentors"],
-                "quiz_makers": users["quiz_makers"],
-                "admins": users["admins"],
+                "newbies": grab_users(False, False, False, True, False),
+                "mentors": grab_users(True, False, False, True, False),
+                "quiz_makers": grab_users(True, True, False, True, False),
+                "admins": grab_users(True, True, True, True, False),
             },
         )
 
 
-def grab_users(get_promotion):
+def grab_users(verified, quiz_maker, admin, active, get_promotion):
     try:
-        newbie_ids = (
+        user_ids = (
             User.objects.filter(
-                is_verified=False,
-                is_quizmaker=False,
-                is_admin=False,
-                is_active=True,
+                is_verified=verified,
+                is_quizmaker=quiz_maker,
+                is_admin=admin,
+                is_active=active,
                 promotion_requested=get_promotion,
             )
             .values_list("user_id", flat=True)
             .distinct()
         )
-        newbies = grab_verification_info(newbie_ids)
+        users = grab_verification_info(user_ids)
     except:
-        newbies = []
+        users = []
 
-    try:
-        mentor_ids = (
-            User.objects.filter(
-                is_verified=True,
-                is_quizmaker=False,
-                is_admin=False,
-                is_active=True,
-                promotion_requested=get_promotion,
-            )
-            .values_list("user_id", flat=True)
-            .distinct()
-        )
-        mentors = grab_verification_info(mentor_ids)
-    except:
-        mentors = []
-
-    try:
-        quiz_maker_ids = (
-            User.objects.filter(
-                is_verified=True,
-                is_quizmaker=True,
-                is_admin=False,
-                is_active=True,
-                promotion_requested=get_promotion,
-            )
-            .values_list("user_id", flat=True)
-            .distinct()
-        )
-        quiz_makers = grab_verification_info(quiz_maker_ids)
-    except:
-        quiz_makers = []
-
-    try:
-        admin_ids = (
-            User.objects.filter(
-                is_verified=True,
-                is_quizmaker=True,
-                is_admin=True,
-                is_active=True,
-            )
-            .values_list("user_id", flat=True)
-            .distinct()
-        )
-        admins = grab_verification_info(admin_ids)
-    except:
-        admins = []
-
-    return {
-        "newbies": newbies,
-        "mentors": mentors,
-        "quiz_makers": quiz_makers,
-        "admins": admins,
-    }
+    return users
 
 
 def grab_verification_info(user_ids):
@@ -499,41 +597,63 @@ def user_info(request, user_id):
     )
 
 
-def edit_quiz(request, quiz_id):
-    chapters = Chapter.objects.all()
-    volumes = Volume.objects.all()
+def grab_questions_data_table(questions):
+    questions_list = list()
+    for question in questions:
+        question_Loc = (
+            # Display question only with ENG lang code and US dialect code for editing
+            Question_Loc.objects.get(
+                question=question.question_id, lang_code="ENG", dialect_code="US"
+            )
+        )
+        question_attachments = Question_Attachment.objects.filter(question=question_Loc)
 
+        attachment_urls = list()
+        for question_attachment in question_attachments:
+            attachment_url = question_attachment.blob_key.file.url
+            attachment_urls.append(attachment_url)
+
+        question_values = dict()
+        question_values["question_id"] = question.question_id
+        question_values["chapter"] = question.chapter.chapter_id
+        question_values["volume"] = question.chapter.volume.volume_id
+
+        if question.creator is not None:
+            question_values["creator"] = question_Loc.creator.full_name
+        else:
+            question_values["creator"] = ""
+
+        question_values["conceptual_difficulty"] = question.conceptual_difficulty
+        question_values["time_required_mins"] = question.time_required_mins
+        question_values["point_value"] = question.point_value
+        question_values["question_latex"] = question_Loc.question_latex
+        question_values["attachment_urls"] = attachment_urls
+        questions_list.append(question_values)
+    return questions_list
+
+
+def grab_quiz_questions_data_table(quiz_questions):
+    questions = list()
+    for quiz_question in quiz_questions:
+        questions.append(quiz_question.question)
+
+    questionTable = grab_questions_data_table(questions)
+    for question_values, quiz_question in zip(questionTable, quiz_questions):
+        question_values["ordering"] = quiz_question.ordering
+
+    return questionTable
+
+
+def edit_quiz(request, quiz_id):
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
     quiz_questions = (
         Quiz_Question.objects.all()
         .filter(quiz=quiz_instance.quiz_id)
         .order_by("ordering")
     )
-    questions_Loc_quiz_attatchments = list()
-
-    for quiz_question in quiz_questions:
-        # Display question only with ENG lang code and US dialect code for editing
-        questions_Loc = Question_Loc.objects.all().filter(
-            question=quiz_question.question,
-            lang_code="ENG",
-            dialect_code="US",
-        ).first()
-
-        question_attachments = Question_Attachment.objects.filter(
-            question=questions_Loc
-        )
-
-        files = list()
-        for question_attachment in question_attachments:
-            file = question_attachment.blob_key.file
-            files.append(file)
-
-        questions_Loc_quiz_attatchments.append((questions_Loc, quiz_question, files))
-
     if request.method == "POST":
         if request.POST.get("command") == "save":
             ids_str = json.loads(request.POST.get("ids"))
-
             ids = list()
             for id_str in ids_str:
                 ids.append(int(id_str))
@@ -547,20 +667,11 @@ def edit_quiz(request, quiz_id):
                     if quiz_question.question.question_id == id:
                         quiz_question.ordering = count
                         quiz_question.save()
-
-            quiz_instance.conceptual_difficulty = float(
-                request.POST.get("conceptual_difficulty")
-            )
-            quiz_instance.time_required_mins = int(
-                request.POST.get("time_required_mins")
-            )
-            quiz_instance.volume = get_object_or_404(
-                Volume, volume_id=request.POST.get("volume")
-            )
-            quiz_instance.chapter = get_object_or_404(
-                Chapter, chapter_id=request.POST.get("chapter")
-            )
-
+            quiz_instance.label = request.POST.get("label")
+            quiz_instance.conceptual_difficulty = float(request.POST.get("conceptual_difficulty"))
+            quiz_instance.time_required_mins = int(request.POST.get("time_required_mins"))
+            quiz_instance.volume = get_object_or_404(Volume, volume_id = request.POST.get("volume"))    
+            quiz_instance.chapter = get_object_or_404(Chapter, chapter_id = request.POST.get("chapter"))
             calculator_allowed_str = request.POST.get("calculator_allowed")
             computer_allowed_str = request.POST.get("computer_allowed")
             internet_allowed_str = request.POST.get("internet_allowed")
@@ -587,15 +698,6 @@ def edit_quiz(request, quiz_id):
                 quiz_instance.book_allowed = False
 
             quiz_instance.save()
-            return JsonResponse({"success": True})
-
-        elif request.POST.get("command") == "download":
-            ids_str = json.loads(request.POST.get("ids"))
-
-            ids = list()
-            for id_str in ids_str:
-                ids.append(int(id_str))
-
             question_list = []
 
             for id in ids:
@@ -608,18 +710,19 @@ def edit_quiz(request, quiz_id):
                         question_list.append(question_content)
 
             latex_to_pdf(question_list, quiz_instance)
-
             return JsonResponse({"success": True})
+    else:
+        if request.GET.get("command") == "fetch_quiz_questions":
+            return JsonResponse(
+                grab_quiz_questions_data_table(quiz_questions), safe=False
+            )
 
+    chapters = Chapter.objects.all()
+    volumes = Volume.objects.all()
     return render(
         request,
         "mentapp/edit_quiz.html",
-        {
-            "quiz_instance": quiz_instance,
-            "questions_Loc_and_quiz": questions_Loc_quiz_attatchments,
-            "volumes": volumes,
-            "chapters": chapters,
-        },
+        {"quiz_instance": quiz_instance, "volumes": volumes, "chapters": chapters},
     )
 
 
@@ -664,6 +767,7 @@ def edit_quiz_add_question(request, quiz_id):
             question_instances = question_instances.filter(
                 chapter__volume__volume_id=volume_filter
             )
+
         if chapter_filter:
             question_instances = question_instances.filter(chapter=chapter_filter)
 
@@ -683,49 +787,7 @@ def edit_quiz_add_question(request, quiz_id):
                 time_required_mins=time_filter
             )
 
-        questions_list = list()
-
-        for question in question_instances:
-            question_Loc = (
-                # Display question only with ENG lang code and US dialect code for editing
-                Question_Loc.objects.all()
-                .filter(
-                    lang_code="ENG", dialect_code="US", question=question.question_id
-                )
-                .first()
-            )
-
-            question_attachments = Question_Attachment.objects.filter(
-                question=question_Loc
-            )
-
-            attachment_urls = list()
-            for question_attachment in question_attachments:
-                attachment_url = question_attachment.blob_key.file.url
-                attachment_urls.append(attachment_url)
-
-            question_values = dict()
-            question_values["question_id"] = question.question_id
-
-            if question.chapter is not None:
-                question_values["chapter"] = question.chapter.chapter_id
-                question_values["volume"] = question.chapter.volume.volume_id
-            else:
-                question_values["chapter"] = ""
-                question_values["volume"] = ""
-
-            if question.creator is not None:
-                question_values["creator"] = question_Loc.creator.full_name
-            else:
-                question_values["creator"] = ""
-
-            question_values["conceptual_difficulty"] = question.conceptual_difficulty
-            question_values["time_required_mins"] = question.time_required_mins
-            question_values["point_value"] = question.point_value
-            question_values["question_latex"] = question_Loc.question_latex
-            question_values["attachment_urls"] = attachment_urls
-            questions_list.append(question_values)
-        return JsonResponse(questions_list, safe=False)
+        return JsonResponse(grab_questions_data_table(question_instances), safe=False)
 
     return render(
         request,
@@ -888,8 +950,12 @@ def request_translation(request, user_id):
     )
 
 
-def download_pdf(request, blob_key):
-    blob_instance = get_object_or_404(Blob, blob_key=blob_key)
+def download_pdf(request, quiz_id):
+    quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
+    quiz_rendering_instance = Quiz_Rendering.objects.filter(quiz=quiz_instance).latest(
+        "date_created"
+    )
+    blob_instance = quiz_rendering_instance.blob_key
 
     response = HttpResponse(blob_instance.file, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{blob_instance.filename}"'
@@ -936,6 +1002,16 @@ def create_quiz(request, volume_id, chapter_id):
         return redirect("/edit_quiz/{}".format(quiz.quiz_id))
 
 
+def delete_quiz(request, quiz_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    url = request.path
+
+    if request.method == "POST":
+        quiz.delete()
+
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
 def create_support(request):
 
     volumes = (
@@ -979,7 +1055,7 @@ def create_support(request):
                 blob.save()
 
                 support_attachment_instance = Support_Attachment(
-                    support=support,
+                    support=support_loc,
                     lang_code=support_loc.lang_code,
                     dialect_code=support_loc.dialect_code,
                     filename=blob.filename,

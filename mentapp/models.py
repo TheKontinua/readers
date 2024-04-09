@@ -146,7 +146,7 @@ class Question_Loc(models.Model):
 
 class Blob(models.Model):
     blob_key = models.AutoField(primary_key=True)
-    file = models.FileField(upload_to='pdfs/', null=True, blank=True)
+    file = models.FileField(upload_to="pdfs/", null=True, blank=True)
     content_type = models.CharField(max_length=255, null=True, blank=True)
     filename = models.CharField(max_length=255, null=True, blank=True)
 
@@ -159,7 +159,7 @@ class Question_Attachment(models.Model):
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("question","filename", "lang_code", "dialect_code")
+        unique_together = ("question", "filename", "lang_code", "dialect_code")
         indexes = [
             models.Index(
                 fields=["question", "filename", "lang_code", "dialect_code"],
@@ -167,16 +167,15 @@ class Question_Attachment(models.Model):
             )
         ]
 
+
 class Support(models.Model):
     support_id = models.AutoField(primary_key=True, editable=False)
     volume_id = models.ForeignKey(Volume, null=True, on_delete=models.CASCADE)
-    
-
-
 
 
 class Quiz(models.Model):
     quiz_id = models.AutoField(primary_key=True)
+    label = models.CharField(max_length=255, null=True, blank=True)
     conceptual_difficulty = models.FloatField()
     time_required_mins = models.IntegerField()
     calculator_allowed = models.BooleanField(default=False)
@@ -185,7 +184,7 @@ class Quiz(models.Model):
     book_allowed = models.BooleanField(default=False)
     volume = models.ForeignKey(Volume, on_delete=models.SET_NULL, null=True)
     chapter = models.ForeignKey(Chapter, on_delete=models.SET_NULL, null=True)
-    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    creator_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
 
 class Quiz_Question(models.Model):
@@ -212,37 +211,22 @@ class Quiz_Rendering(models.Model):
     paper_size = models.CharField(default="8x11", max_length=50)
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
-    class Meta:
-        unique_together = ("quiz", "lang_code", "dialect_code")
-        indexes = [
-            models.Index(
-                fields=["quiz", "lang_code", "dialect_code"],
-                name="quiz_rendering_comp_pkey",
-            )
-        ]
-
 
 class Quiz_Feedback(models.Model):
-    quiz = models.ForeignKey(Quiz_Rendering, on_delete=models.CASCADE)
-    lang_code = models.CharField(max_length=5, default="ENG")
-    dialect_code = models.CharField(max_length=5, default="US")
-    date_created = models.DateTimeField(default=now)
-    date_completed = models.DateTimeField(default=now)
-    status = models.CharField(max_length=300, null=True)
-    creator_id = models.CharField(max_length=50, null=True)
-    viewer_id = models.CharField(max_length=50, null=True)
+    feedback_id = models.AutoField(primary_key=True)
+    rendering_id = models.ForeignKey(Quiz_Rendering, on_delete=models.CASCADE)
+    creator_id = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="creator_id"
+    )
+    date_created = models.DateField(default=now)
+    date_completed = models.DateField(null=True, blank=True)
+    viewer_id = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="viewer_id"
+    )
     challenge_rating = models.IntegerField(default=0)
     time_rating = models.IntegerField(default=0)
-    comments_text = models.TextField(null=True)
-
-    class Meta:
-        unique_together = ("quiz", "lang_code", "dialect_code")
-        indexes = [
-            models.Index(
-                fields=["quiz", "lang_code", "dialect_code"],
-                name="quiz_feedback_comp_pkey",
-            )
-        ]
+    creator_comment = models.TextField(default="")
+    viewer_comment = models.TextField()
 
 
 class Email(models.Model):
@@ -325,6 +309,7 @@ class Language(models.Model):
             )
         ]
 
+
 class Support_Loc(models.Model):
     support = models.ForeignKey(Support, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
@@ -334,7 +319,9 @@ class Support_Loc(models.Model):
     date_created = models.DateTimeField(default=now)
     date_approved = models.DateTimeField(default=now)
     creator = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="created_support_loc", 
+        User,
+        on_delete=models.CASCADE,
+        related_name="created_support_loc",
     )
     approver = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="approved_support_loc"
@@ -349,6 +336,7 @@ class Support_Loc(models.Model):
             )
         ]
 
+
 class Support_Attachment(models.Model):
     support = models.ForeignKey(Support_Loc, null=True, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5)
@@ -359,10 +347,10 @@ class Support_Attachment(models.Model):
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
-        unique_together = ("support", "lang_code", "dialect_code","blob_key")
+        unique_together = ("support", "lang_code", "dialect_code", "blob_key")
         indexes = [
             models.Index(
-                fields=["support", "lang_code", "dialect_code","blob_key"],
+                fields=["support", "lang_code", "dialect_code", "blob_key"],
                 name="support_attachment_comp_pkey",
             )
         ]

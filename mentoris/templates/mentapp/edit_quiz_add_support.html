@@ -12,6 +12,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static '/css/colors.css'%}">
     <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
+    <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
     <script>
@@ -61,7 +62,7 @@
         style="display: block; padding: 0px; margin: 0px;"></iframe>
 
     <div id="left_panel">
-        <button id="back_button" onclick="location.href='/edit_quiz/{{quiz_id}}'" type="button">Back</button>
+        <button id="back_button" onclick="confirmLeave()" type="button">Back</button>
         <div id="quiz_content" class="bordered">
             <ul id="supports_list" style="list-style-type:none;">
             </ul>
@@ -106,11 +107,19 @@
         <div id="save_status" class="bordered"></div>
     </div>
 
-    <iframe src="footer.html" width="100%" frameBorder="0"></iframe>
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <p>Are you sure you want to leave this page?</p>
+            <button class="modalButton" onclick="saveChanges()">Save Changes before leaving</button>
+            <button class="modalButton" onclick="leaveWithoutSaving()">Leave Without Saving</button>
+            <button class="modalButton" onclick="cancelLeave()">Cancel</button>
+        </div>
+    </div>
 
+
+    <iframe src="footer.html" style="width: 100%;" frameborder="0"></iframe>
 
     <script type="text/javascript">
-
         // Toggle add button between two states, indicated by label 
         // and class
         function toggle_add(button) {
@@ -153,7 +162,6 @@
 
             // Dynamicly create each support when filter is pressed
             $('#filter_button').on('click', function (event) {
-                console.log(document.getElementById('volume_value').value);
                 volume_value = document.getElementById('volume_value').value;
                 creator_value = document.getElementById('creator_value').value;
                 title = document.getElementById('title').value;
@@ -204,21 +212,20 @@
                         button_wrapper.appendChild(add_button);
                         border_wrapper.appendChild(button_wrapper);
 
-                        var latex_wrapper = document.createElement("div");
+                        var latex_wrapper =  generate_latex(data[i]["support_latex"], data[i]["attachment_urls"]);
+                        
+                        document.createElement("div");
                         latex_wrapper.style.clear = "both";
 
                         var latex = document.createElement("latex-js");
-                        latex.innerHTML = data[i]["support_latex"]
-                        latex_wrapper.appendChild(latex);
-                        border_wrapper.appendChild(latex_wrapper);
 
+                        border_wrapper.appendChild(latex_wrapper);
                         list_item.appendChild(border_wrapper);
                         document.getElementById("supports_list").appendChild(list_item);
                     }
                 });
 
-                request.fail(function (jqXHR, textStatus, errorThrown) {
-                    console.log("Request failed:", textStatus, errorThrown);
+                request.fail(function () {
                     document.getElementById("supports_list").innerHTML = "Search failed, try again";
                 });
 
@@ -258,8 +265,35 @@
                 });
             });
         });
+
+
+        function confirmLeave() {
+            const modal = document.getElementById('customModal');
+            modal.style.display = 'inline-block';
+        }
+
+        function saveChanges() {
+            document.getElementById('save_changes_button').click();
+            location.href = '/edit_quiz/{{quiz_id}}'
+            closeModal();
+        }
+
+        function leaveWithoutSaving() {
+            location.href = '/edit_quiz/{{quiz_id}}'
+            closeModal();
+        }
+
+        function cancelLeave() {
+            closeModal();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            modal.style.display = 'none';
+        }
     </script>
 
 </body>
+
 
 </html>
