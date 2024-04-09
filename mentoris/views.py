@@ -1,6 +1,6 @@
 import base64
 import json, os, random
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.template import loader
 from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import FileSystemStorage
@@ -486,6 +486,8 @@ def user_info(request, user_id):
     if user_id != request.user.user_id and request.user.is_admin != True:
         return render(request, "mentapp/login.html")
     user_profile = get_object_or_404(User, user_id=user_id)
+    if user_profile.is_admin == True:
+        return HttpResponseForbidden("Forbidden: Admin's use admin portal")
     print("This is the user_id:", user_id)
     print("This is the user retrieved", user_profile)
     print("This is the user associated email", user_profile.email)
