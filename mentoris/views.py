@@ -219,7 +219,6 @@ def sign_up(request):
             user = authenticate(username=email, password=request.POST.get("password_hash"))
             login(request, user)
             return redirect(f"../profile/{user.user_id}")
-        print("Form was invalid!")
         return render(
             request,
             "mentapp/sign_up.html",
@@ -240,9 +239,7 @@ def customLogin(request):
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
-        print("This is email: ", email,"This is password: ", password)
         user = authenticate(request, username=email, password=password)
-        print("this is user returned by auth", user)
         if user is not None:
             login(request, user)
             return redirect(f"../profile/{user.user_id}")
@@ -488,17 +485,12 @@ def user_info(request, user_id):
     user_profile = get_object_or_404(User, user_id=user_id)
     if user_profile.is_admin == True:
         return HttpResponseForbidden("Forbidden: Admin's use admin portal")
-    print("This is the user_id:", user_id)
-    print("This is the user retrieved", user_profile)
-    print("This is the user associated email", user_profile.email)
     try:
         email = Email.objects.get(user=user_profile, is_primary=True)
-        print("this was the email retrieved: ", email)
         other_emails = Email.objects.filter(user=user_profile, is_primary=False)
         other_emailss = [obj.email_address for obj in other_emails]
         other_email = ", ".join(other_emailss)
     except Email.DoesNotExist:
-        print("Email doesn't exist")
         email = None
     return render(
         request,

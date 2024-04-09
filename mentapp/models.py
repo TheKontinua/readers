@@ -27,7 +27,6 @@ class CustomUserManager(BaseUserManager):
         """
         Creates and saves a superuser with the given email and password.
         """
-        print("Attempting to create superuser using:",email, password, user_id)
         extra_fields.setdefault('is_admin', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)

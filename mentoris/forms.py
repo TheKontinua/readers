@@ -42,7 +42,6 @@ class UserForm(forms.ModelForm):
         # Manually handle optional fields with default values
         for field in self.fields:
             if field == 'password_hash':
-                print("this is the password being set: ", self.cleaned_data.get(field))
                 instance.set_password(self.cleaned_data.get(field))
             form_value = self.cleaned_data.get(field)
             if form_value is None:
