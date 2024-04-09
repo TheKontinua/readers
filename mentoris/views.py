@@ -643,8 +643,10 @@ def grab_quiz_questions_data_table(quiz_questions):
 
     return questionTable
 
-
+@login_required
 def edit_quiz(request, quiz_id):
+    if not request.user.is_quizmaker or request.user.is_admin:
+        return HttpResponseForbidden("Must be quizmaker or admin to access edit quiz")
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
     quiz_questions = (
         Quiz_Question.objects.all()
@@ -914,16 +916,16 @@ def user_edit(request, user_id):
 
     for key, value in request.POST.items():
         if key == "primary_email":
-            Email.objects.filter(user_id=user_id, is_primary=True).update(
+            Email.objects.filter(user=user, is_primary=True).update(
                 email_address=value
             )
         if key == "other_emails":
-            Email.objects.filter(user_id=user_id, is_primary=False).delete()
+            Email.objects.filter(user=user, is_primary=False).delete()
             insEmails = value.split(",")
             for em in insEmails:
                 emailObject = Email()
                 emailObject.email_address = em
-                emailObject.user_id = user_id
+                emailObject.user = user
                 emailObject.save()
         # Check if the user object has this field and the value is not empty
         if hasattr(user, key) and value.strip():
