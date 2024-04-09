@@ -1082,3 +1082,66 @@ def create_support(request):
             "mentapp/create_support.html",
             {"form": LatexForm(), "volumes": volumes},
         )
+    
+
+
+def edit_question(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    volumes = Volume.objects.values_list("volume_id", flat=True).distinct().order_by("volume_id")
+    
+    if request.method == 'POST':
+        form = LatexForm(request.POST)
+        if form.is_valid():
+            question.latex_question = form.cleaned_data['latex_question']
+            question.latex_answer = form.cleaned_data['latex_answer']
+            question.latex_grading = form.cleaned_data['latex_grading']
+            question.time_required_mins = form.cleaned_data['time_required']
+            question.volume_id = form.cleaned_data['volume']
+            chapter_title = form.cleaned_data['chapter'].split("_")[0]
+            chapter_loc = get_object_or_404(Chapter_Loc, title=chapter_title)
+            question.chapter = chapter_loc.chapter
+            question.conceptual_difficulty = form.cleaned_data['difficulty']
+            question.point_value = form.cleaned_data['points']
+            question.pages_required = form.cleaned_data['pages_required']
+            question.title = form.cleaned_data['title']
+            question.save()
+
+            # Save question attachments
+            question_attachments = request.FILES.getlist("attachments")
+            for attachment in question_attachments:
+                blob = Blob(file=attachment, content_type=attachment.content_type, filename=attachment.name)
+                blob.save()
+                question_attachment_instance = Question_Attachment(
+                    question=question,
+                    lang_code=question.lang_code,
+                    dialect_code=question.dialect_code,
+                    filename=blob.filename,
+                    blob_key=blob,
+                )
+                question_attachment_instance.save()
+
+            # Redirect to the appropriate page
+            return redirect('main') 
+    else:
+        form = LatexForm(initial={
+            'latex_question': question.latex_question,
+            'latex_answer': question.latex_answer,
+            'latex_grading': question.latex_grading,
+            'time_required': question.time_required_mins,
+            'volume': question.volume_id,
+            'chapter': question.chapter.title,  # Assuming chapter has a title attribute
+            'difficulty': question.conceptual_difficulty,
+            'points': question.point_value,
+            'pages_required': question.pages_required,
+            'title': question.title,
+        })
+
+    return render(
+        request,
+        "mentapp/latex_question.html",
+        {
+            "form": form,
+            "question": question,
+            "volumes": volumes,
+        },
+    )

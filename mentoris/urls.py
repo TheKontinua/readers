@@ -46,4 +46,5 @@ urlpatterns = [
     path("create_support/", views.create_support, name="create_support"),
     path("quiz/create/<int:volume_id>/<chapter_id>", views.create_quiz, name="create_quiz"),
     path("delete_quiz/<int:quiz_id>/", views.delete_quiz, name="delete_quiz"),
+    path("edit_question/<int:question_id>/", views.edit_question, name="edit_question"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
