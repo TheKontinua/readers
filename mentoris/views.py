@@ -1085,63 +1085,153 @@ def create_support(request):
     
 
 
-def edit_question(request, pk):
-    question = get_object_or_404(Question, pk=pk)
+def edit_question(request, question_id):
+    question_object = get_object_or_404(Question, question_id=question_id)
     volumes = Volume.objects.values_list("volume_id", flat=True).distinct().order_by("volume_id")
+    question_loc = Question_Loc.objects.get(question=question_object)
+
+    #existing question data from db
+    question = question_loc.question_latex
+    answer = question_loc.answer_latex
+    grading = question_loc.rubric_latex
+    difficulty = question_object.conceptual_difficulty
+    time = question_object.time_required_mins
+    points = question_object.point_value
+    pages = question_object.pages_required
+    volume_id = question_object.chapter.volume.volume_id
+
+    form = LatexForm(
+    initial={
+        'latex_question': question_loc.question_latex,
+        'latex_answer': question_loc.answer_latex,
+        'latex_grading': question_loc.rubric_latex,
+        'difficulty': difficulty,
+        'volume': volume_id,
+        'chapter': question_object.chapter_id if question_object else None,
+        'time_required': time,
+        'points': points,
+        'pages_required': pages,
+    }
+)
+
     
-    if request.method == 'POST':
-        form = LatexForm(request.POST)
-        if form.is_valid():
-            question.latex_question = form.cleaned_data['latex_question']
-            question.latex_answer = form.cleaned_data['latex_answer']
-            question.latex_grading = form.cleaned_data['latex_grading']
-            question.time_required_mins = form.cleaned_data['time_required']
-            question.volume_id = form.cleaned_data['volume']
-            chapter_title = form.cleaned_data['chapter'].split("_")[0]
+    chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
+
+    chapter_locs = Chapter_Loc.objects.filter(
+        chapter__chapter_id__in=chapters
+    ).distinct()
+
+    chapter_object = chapter_locs[0]
+
+    if request.method == "POST":
+        
+        question = request.POST.get("latex_question")
+        answer = request.POST.get("latex_answer")
+        grading = request.POST.get("latex_grading")
+        volume_id = request.POST.get("volume")
+        volume_id = int(volume_id)
+        chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
+
+        chapter_locs = Chapter_Loc.objects.filter(
+            chapter__chapter_id__in=chapters
+        ).distinct()
+
+        hidden_question = request.POST.get("question_hidden")
+        hidden_answer = request.POST.get("answer_hidden")
+        hidden_grading = request.POST.get("grading_hidden")
+
+        if "submit-question" in request.POST:
+
+            # TODO: question_object.creator = CURRENT USER
+
+            chapter_object = request.POST.get("chapter")
+            chapter_string = chapter_object.split("_")
+            chapter_title = chapter_string[0]
             chapter_loc = get_object_or_404(Chapter_Loc, title=chapter_title)
-            question.chapter = chapter_loc.chapter
-            question.conceptual_difficulty = form.cleaned_data['difficulty']
-            question.point_value = form.cleaned_data['points']
-            question.pages_required = form.cleaned_data['pages_required']
-            question.title = form.cleaned_data['title']
-            question.save()
+            question_object.chapter = chapter_loc.chapter
 
-            # Save question attachments
-            question_attachments = request.FILES.getlist("attachments")
-            for attachment in question_attachments:
-                blob = Blob(file=attachment, content_type=attachment.content_type, filename=attachment.name)
-                blob.save()
-                question_attachment_instance = Question_Attachment(
-                    question=question,
-                    lang_code=question.lang_code,
-                    dialect_code=question.dialect_code,
-                    filename=blob.filename,
-                    blob_key=blob,
-                )
-                question_attachment_instance.save()
+            question_object.conceptual_difficulty = request.POST.get("difficulty")
+            question_object.time_required_mins = request.POST.get("time_required")
+            question_object.point_value = request.POST.get("points")
+            question_object.pages_required = request.POST.get("pages_required")
+            question_object.save()
 
-            # Redirect to the appropriate page
-            return redirect('main') 
+            question_loc.question_latex = question
+            question_loc.answer_latex = answer
+            question_loc.rubric_latex = grading
+            # TODO: question_loc.creator = CURRENT USER
+            question_loc.save()
+
+            # question_attachments = request.FILES.getlist("attachments")
+
+            # for attachment in question_attachments:
+
+            #     blob = Blob(
+            #         file=attachment,
+            #         content_type=attachment.content_type,
+            #         filename=attachment.name,
+            #     )
+            #     blob.save()
+
+            #     question_attachment_instance = Question_Attachment(
+            #         question=question_loc,
+            #         lang_code=question_loc.lang_code,
+            #         dialect_code=question_loc.dialect_code,
+            #         filename=blob.filename,
+            #         blob_key=blob,
+            #     )
+            #     question_attachment_instance.save()
+
+            chapter_id = chapter_loc.chapter.chapter_id
+
+            return redirect(f"/main/{volume_id}/{chapter_id}")
+
+        if "question-button" in request.POST:
+            answer = hidden_answer
+            grading = hidden_grading
+        if "answer-button" in request.POST:
+            question = hidden_question
+            grading = hidden_grading
+        if "grading-button" in request.POST:
+            question = hidden_question
+            answer = hidden_answer
+        if "volume-button" not in request.POST:
+            chapter_object = request.POST.get("chapter")
+            chapter_string = chapter_object.split("_")
+            chapter_title = chapter_string[0]
+            chapter_object = get_object_or_404(Chapter_Loc, title=chapter_title)
+        else:
+            chapter_object = chapters[0]
+
+        return render(
+            request,
+            "mentapp/edit_question.html",
+            {
+                "form": form,
+                "question_id": question_id,
+                "question": question,
+                "answer": answer,
+                "grading": grading,
+                "volume_id": volume_id,
+                "volumes": volumes,
+                "chapters": chapter_locs,
+                "chapter": chapter_object,
+            },
+        )
     else:
-        form = LatexForm(initial={
-            'latex_question': question.latex_question,
-            'latex_answer': question.latex_answer,
-            'latex_grading': question.latex_grading,
-            'time_required': question.time_required_mins,
-            'volume': question.volume_id,
-            'chapter': question.chapter.title,  # Assuming chapter has a title attribute
-            'difficulty': question.conceptual_difficulty,
-            'points': question.point_value,
-            'pages_required': question.pages_required,
-            'title': question.title,
-        })
-
-    return render(
-        request,
-        "mentapp/latex_question.html",
-        {
-            "form": form,
-            "question": question,
-            "volumes": volumes,
-        },
+        return render(
+            request,
+            "mentapp/edit_question.html",
+            {
+                "form": form,
+                "question_id": question_id,
+                "question": question,
+                "answer": answer,
+                "grading": grading,
+                "question_loc": question_loc,
+                "volumes": volumes,
+                "volume_id": volume_id,
+                "chapters": chapter_locs,
+                "chapter": chapter_object,
+            },
     )

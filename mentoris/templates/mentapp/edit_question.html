@@ -62,7 +62,7 @@
         <button id="back_button" onclick="confirmLeave()" type="button">Back</button>
 
         <div class="container">
-            <form method="POST" action="{% url 'edit_question' %}" enctype="multipart/form-data">
+            <form method="POST" action="{% url 'edit_question' question_id=question_id%}" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <div class="row">
