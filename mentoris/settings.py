@@ -71,18 +71,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "mentoris.wsgi.application"
 
-
-DATABASES = {
-
-
-
-}
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-
-
+DATABASES = {
+}
 
 
 STORAGES = {
@@ -150,6 +143,6 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 AUTH_USER_MODEL = "mentapp.User"
 
 AUTHENTICATION_BACKENDS = [
-    'mentoris.emailauth.EmailAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    "mentoris.emailauth.EmailAuthBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
