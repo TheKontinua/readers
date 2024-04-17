@@ -12,7 +12,7 @@ from mentapp.models import (
     Question_Attachment,
 )
 
-TIMEOUT = 5  # try to render the PDF for 5 seconds before failing
+TIMEOUT = 10  # try to render the PDF for 10 seconds before failing
 
 
 def generateRandomString(hashId):
@@ -225,16 +225,16 @@ def latex_to_pdf(latex_question_list, quiz_data):
 
     if str(os.name) == "posix":
         tex_live_folder = "tex-live-linux"
-        #latex_exe = "pdflatex.exe"
+        # latex_exe = "pdflatex.exe"
         os_folder = "x86_64-linux"
     else:
         tex_live_folder = "tex-live"
-        #latex_exe = "pdflatex"
+        # latex_exe = "pdflatex"
         os_folder = "windows"
 
     # Path to pdflatex command
     temp_path = os.path.join(
-        script_path, r"..", tex_live_folder, "bin", os_folder, "pdflatex"
+        script_path, r"..", tex_live_folder, "bin", os_folder, "pdftex"
     )
     pdflatex_path = os.path.abspath(temp_path)
 
@@ -251,7 +251,7 @@ def latex_to_pdf(latex_question_list, quiz_data):
     # Run pdflatex command
     try:
         completed_process = subprocess.run(
-            [pdflatex_path, latex_file_path],
+            [pdflatex_path, "-fmt", "pdflatex", latex_file_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -273,7 +273,7 @@ def latex_to_pdf(latex_question_list, quiz_data):
     # Run twice to get the page numbers to load correctly
     try:
         completed_process = subprocess.run(
-            [pdflatex_path, latex_file_path],
+            [pdflatex_path, "-fmt", "pdflatex", latex_file_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
