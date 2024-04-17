@@ -12,6 +12,8 @@ from mentapp.models import (
     Question_Attachment,
 )
 
+TIMEOUT = 5  # try to render the PDF for 5 seconds before failing
+
 
 def generateRandomString(hashId):
     random.seed(hashId)
@@ -65,7 +67,7 @@ quiz_data: quiz object
 
 def latex_to_pdf(latex_question_list, quiz_data):
     script_path = os.path.dirname(__file__)
-    file_location = os.path.join(script_path, r"..\docs\latex\output_quiz.tex")
+    file_location = os.path.join(script_path, "..", "docs", "latex", "output_quiz.tex")
     abs_file_location = os.path.abspath(file_location)
     output_file = open(abs_file_location, "w")
     output_file.write(r"\documentclass[letterpaper,12pt,addpoints]{exam}" + "\n")
@@ -82,7 +84,7 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.write(r"\firstpageheader{}{}{}" + "\n")
 
     rendering = Quiz_Rendering()
-   
+
     recent_id = 0
     try:
         recent_id = Quiz_Rendering.objects.latest("date_created").rendering_id
@@ -196,7 +198,7 @@ def latex_to_pdf(latex_question_list, quiz_data):
         attachment_list = Question_Attachment.objects.filter(question=question_loc)
         for attachment in attachment_list:
             blob = attachment.blob_key
-            temp_path = os.path.join(script_path, r"..\media", str(blob.file))
+            temp_path = os.path.join(script_path, "..", "media", str(blob.file))
             blob_path = os.path.abspath(temp_path)
 
             final_path = os.path.join(script_path, blob.filename)
@@ -221,65 +223,90 @@ def latex_to_pdf(latex_question_list, quiz_data):
 
     output_file.close()
 
-    success_flag = 0  # will be set to 2 if both generations succeed
+    if str(os.name) == "posix":
+        tex_live_folder = "tex-live-linux"
+        #latex_exe = "pdflatex.exe"
+        os_folder = "x86_64-linux"
+    else:
+        tex_live_folder = "tex-live"
+        #latex_exe = "pdflatex"
+        os_folder = "windows"
 
     # Path to pdflatex command
-    temp_path = os.path.join(script_path, r"..\tex-live\bin\windows\pdflatex")
+    temp_path = os.path.join(
+        script_path, r"..", tex_live_folder, "bin", os_folder, "pdflatex"
+    )
     pdflatex_path = os.path.abspath(temp_path)
 
     # Path to LaTeX file
-    temp_path = os.path.join(script_path, r"..\docs\latex\output_quiz.tex")
+    temp_path = os.path.join(script_path, r"..", "docs", "latex", "output_quiz.tex")
     latex_file_path = os.path.abspath(temp_path)
 
     # set current process running directory to latex folder
-    temp_path = os.path.join(script_path, "..\docs\latex")
+    temp_path = os.path.join(script_path, "..", "docs", "latex")
     process_path = os.path.abspath(temp_path)
 
     os.chdir(process_path)
 
     # Run pdflatex command
-    process = subprocess.Popen(
-        [pdflatex_path, latex_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    try:
+        completed_process = subprocess.run(
+            [pdflatex_path, latex_file_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=TIMEOUT,
+        )
+        error = completed_process.stderr
 
-    output, error = process.communicate()
+    except subprocess.TimeoutExpired:
+        print("Process terminated")
+        error = "Process timed out".encode("utf-8")
 
     if error:
         print("Error occurred:")
         print(error.decode("utf-8"))
+        raise ChildProcessError
     else:
         print("PDF 1 generated successfully.")
-        success_flag += 1
 
     # Run twice to get the page numbers to load correctly
-    process = subprocess.Popen(
-        [pdflatex_path, latex_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    output, error = process.communicate()
+    try:
+        completed_process = subprocess.run(
+            [pdflatex_path, latex_file_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=TIMEOUT,
+        )
+        error = completed_process.stderr
+
+    except subprocess.TimeoutExpired:
+        print("Process terminated")
+        error = "Process timed out".encode("utf-8")
 
     if error:
         print("Error occurred:")
         print(error.decode("utf-8"))
+        raise ChildProcessError
     else:
         print("PDF 2 generated successfully.")
-        success_flag += 1
-    if success_flag == 2:
-        blob = save_pdf_blob(string_id)
-        rendering.quiz = quiz_data
-        rendering.blob_key = blob
-        rendering.save()
+    blob = save_pdf_blob(string_id)
+    rendering.quiz = quiz_data
+    rendering.blob_key = blob
+    rendering.save()
 
 
 def save_pdf_blob(string_id):
     # rename output_quiz.pdf to new file_name
     script_path = os.path.dirname(__file__)
 
-    temp_path = os.path.join(script_path, "..\docs\latex")
-    file_temp = os.path.join(temp_path, "output_quiz.pdf")
+    temp_path = os.path.join(script_path, r"..", "docs", "latex")
+    file_temp = os.path.join(temp_path, r"output_quiz.pdf")
     file_path = os.path.abspath(file_temp)
 
-    new_name = r"..\..\media\pdfs" + "\\" + string_id + ".pdf"
-    pdf_temp = os.path.join(temp_path, new_name)
+    new_name = string_id + ".pdf"
+    pdf_temp = os.path.join(temp_path, "..", "..", "media", "pdfs", new_name)
     pdf_path = os.path.abspath(pdf_temp)
 
     if os.path.isfile(pdf_path):

@@ -669,10 +669,18 @@ def edit_quiz(request, quiz_id):
                         quiz_question.ordering = count
                         quiz_question.save()
             quiz_instance.label = request.POST.get("label")
-            quiz_instance.conceptual_difficulty = float(request.POST.get("conceptual_difficulty"))
-            quiz_instance.time_required_mins = int(request.POST.get("time_required_mins"))
-            quiz_instance.volume = get_object_or_404(Volume, volume_id = request.POST.get("volume"))    
-            quiz_instance.chapter = get_object_or_404(Chapter, chapter_id = request.POST.get("chapter"))
+            quiz_instance.conceptual_difficulty = float(
+                request.POST.get("conceptual_difficulty")
+            )
+            quiz_instance.time_required_mins = int(
+                request.POST.get("time_required_mins")
+            )
+            quiz_instance.volume = get_object_or_404(
+                Volume, volume_id=request.POST.get("volume")
+            )
+            quiz_instance.chapter = get_object_or_404(
+                Chapter, chapter_id=request.POST.get("chapter")
+            )
             calculator_allowed_str = request.POST.get("calculator_allowed")
             computer_allowed_str = request.POST.get("computer_allowed")
             internet_allowed_str = request.POST.get("internet_allowed")
