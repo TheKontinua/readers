@@ -125,8 +125,13 @@
         <button id="save_changes_button">Save Additions</button>
         <button id="filter_button">Search</button>
         <br>
-        <button id="create_question" style="width: 200px;"
-        onclick="location.href='/latex/'">Create New Question</button>
+        <form action="{% url 'create_question' %}" method="post">
+            {% csrf_token %}
+            <button style="width: 200px;" type="submit">
+                Create New Question
+            </button>
+        </form>
+        
         <div id="save_status" class="bordered"></div>        
     </div>
 

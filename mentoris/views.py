@@ -1084,12 +1084,39 @@ def create_support(request):
         )
     
 
+def create_question(request):
+    
+    volumes = (
+        Volume.objects.values_list("volume_id", flat=True)
+        .distinct()
+        .order_by("volume_id")
+    )
+
+    volume_id = 1
+    chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
+
+    chapter_locs = Chapter_Loc.objects.filter(
+        chapter__chapter_id__in=chapters
+    ).distinct()
+
+    chapter_object = chapter_locs[0]
+    if request.method == 'POST':
+
+        question = Question.objects.create(chapter = chapters[0])
+        question_loc = Question_Loc.objects.create(
+            question=question)
+
+        return redirect(f"/edit_question/{question.question_id}")
+
+
+    return render(request, 'mentapp/main.html')
+
 
 def edit_question(request, question_id):
     question_object = get_object_or_404(Question, question_id=question_id)
     volumes = Volume.objects.values_list("volume_id", flat=True).distinct().order_by("volume_id")
-    question_loc = Question_Loc.objects.get(question=question_object)
-
+    question_loc = get_object_or_404(Question_Loc,question=question_object)
+    
     #existing question data from db
     question = question_loc.question_latex
     answer = question_loc.answer_latex
@@ -1113,8 +1140,7 @@ def edit_question(request, question_id):
         'pages_required': pages,
     }
 )
-
-    
+ 
     chapters = Chapter.objects.filter(volume__volume_id=volume_id).distinct()
 
     chapter_locs = Chapter_Loc.objects.filter(
@@ -1124,7 +1150,7 @@ def edit_question(request, question_id):
     chapter_object = chapter_locs[0]
 
     if request.method == "POST":
-        
+
         question = request.POST.get("latex_question")
         answer = request.POST.get("latex_answer")
         grading = request.POST.get("latex_grading")
@@ -1160,6 +1186,8 @@ def edit_question(request, question_id):
             question_loc.answer_latex = answer
             question_loc.rubric_latex = grading
             # TODO: question_loc.creator = CURRENT USER
+            print('question_loc',question_loc)
+            print('question',question)
             question_loc.save()
 
             # question_attachments = request.FILES.getlist("attachments")
