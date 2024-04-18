@@ -37,8 +37,10 @@ from django.contrib.auth.decorators import login_required
 from datetime import date
 from mentoris.latex_to_pdf import latex_to_pdf
 
-
+@login_required
 def latex(request):
+    if request.user.is_quizmaker == False and request.user.is_admin == False and request.user.is_verified == False:
+        return HttpResponseForbidden("Forbidden: Must be mentor or quizmaker to access add questions page.")
     volumes = (
         Volume.objects.values_list("volume_id", flat=True)
         .distinct()
