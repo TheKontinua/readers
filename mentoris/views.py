@@ -36,11 +36,46 @@ from django.core.files.base import ContentFile
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from mentoris.latex_to_pdf import latex_to_pdf
+from functools import wraps
 
-@login_required
+def mentor_req(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        #Checking that there is a logged in user else return to the login page
+        if not request.user.is_authenticated:
+            return render(request, "mentapp/login.html")
+        #Checking that user is mentor (verified) or higher else returning an error
+        if not (request.user.is_quizmaker or request.user.is_admin or request.user.is_verified):
+            return HttpResponseForbidden("Forbidden: Must be mentor or quizmaker to access add questions page.")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def quizmaker_req(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        #Checking that there is a logged in user else return to the login page
+        if not request.user.is_authenticated:
+            return render(request, "mentapp/login.html")
+        #Checking user is quiz maker or higher else returning forbidden HTTP page.
+        if not (request.user.is_quizmaker or request.user.is_admin):
+            return HttpResponseForbidden("Forbidden: Must be quizmaker or admin to access edit quiz.")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def admin_req(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        #Checking that there is a logged in user else return to the login page
+        if not request.user.is_authenticated:
+            return redirect('admin:login')
+        #Must be admin!
+        if not request.user.is_admin:
+            return HttpResponseForbidden("Forbidden: Must be admin to access edit quiz.")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+@mentor_req
 def latex(request):
-    if request.user.is_quizmaker == False and request.user.is_admin == False and request.user.is_verified == False:
-        return HttpResponseForbidden("Forbidden: Must be mentor or quizmaker to access add questions page.")
     volumes = (
         Volume.objects.values_list("volume_id", flat=True)
         .distinct()
@@ -269,7 +304,7 @@ def customLogin(request):
     else:
         return render(request, "mentapp/login.html")
 
-
+@mentor_req
 def main(request, volume_id=1):
     template = loader.get_template("mentapp/main.html")
 
@@ -322,7 +357,7 @@ def chapter(request, volume_id, chapter_id):
         },
     )
 
-
+@mentor_req
 def quiz(request, volume_id, chapter_id, quiz_id):
     volume_id = get_object_or_404(Volume, volume_id=volume_id)
     chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
@@ -400,7 +435,7 @@ def quiz(request, volume_id, chapter_id, quiz_id):
             },
         )
 
-
+@quizmaker_req
 def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
     volume_id = get_object_or_404(Volume, volume_id=volume_id)
     chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
@@ -462,7 +497,7 @@ def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
             },
         )
 
-
+@quizmaker_req
 def question_approval(request):
     if request.method == "POST":
         question = Question.objects.get(
@@ -499,7 +534,7 @@ def question_approval(request):
         {"question": question_info},
     )
 
-
+@admin_req
 def promotion(request):
     if request.method == "POST":
         email_object = Email.objects.get(
@@ -530,7 +565,7 @@ def promotion(request):
             },
         )
 
-
+@admin_req
 def user_directory(request):
     if request.method == "POST":
         email_object = Email.objects.get(
@@ -683,9 +718,8 @@ def grab_quiz_questions_data_table(quiz_questions):
     return questionTable
 
 @login_required
+@quizmaker_req
 def edit_quiz(request, quiz_id):
-    if not request.user.is_quizmaker or request.user.is_admin:
-        return HttpResponseForbidden("Must be quizmaker or admin to access edit quiz")
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
     quiz_questions = (
         Quiz_Question.objects.all()
