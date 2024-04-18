@@ -45,7 +45,7 @@ def getChapterNum(volume, chapter):
             chapterNum = i
             break
     if chapterNum != -1:
-        return "(" + str(chapterNum) + "/" + str(numChapters) + ")"
+        return "(" + str(chapterNum + 1) + "/" + str(numChapters) + ")"
     else:
         print("Error: chapter not found")
         return "(X/X)"
