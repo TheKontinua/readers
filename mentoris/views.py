@@ -396,7 +396,6 @@ def quiz(request, volume_id, chapter_id, quiz_id):
         ) as error:
             pass
 
-        print(reviews)
         return render(
             request,
             "mentapp/quiz.html",
