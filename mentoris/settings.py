@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "multiupload",
 ]
 
 MIDDLEWARE = [
@@ -56,7 +57,11 @@ ROOT_URLCONF = "mentoris.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["mentoris/templates", "mentapp/templates,"],
+        "DIRS": [
+            "mentoris/templates",
+            "mentapp/templates,",
+            "mentoris/mentoris/templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
