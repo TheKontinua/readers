@@ -323,10 +323,14 @@ class Support_Loc(models.Model):
     creator = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        null=True,
         related_name="created_support_loc",
     )
     approver = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="approved_support_loc"
+        User, 
+        on_delete=models.CASCADE, 
+        null=True,
+        related_name="approved_support_loc"
     )
 
     class Meta:

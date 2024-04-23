@@ -76,7 +76,8 @@ WSGI_APPLICATION = "mentoris.wsgi.application"
 
 DATABASES = {
 
- 
+ 'default': 
+        
 }
 
 
