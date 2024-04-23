@@ -1115,29 +1115,24 @@ def create_question(request):
 def edit_question(request, question_id):
     question_object = get_object_or_404(Question, question_id=question_id)
     volumes = Volume.objects.values_list("volume_id", flat=True).distinct().order_by("volume_id")
-    question_loc = get_object_or_404(Question_Loc,question=question_object)
-    
-    #existing question data from db
+    question_loc = get_object_or_404(Question_Loc,question=question_object)    
+
     question = question_loc.question_latex
     answer = question_loc.answer_latex
     grading = question_loc.rubric_latex
-    difficulty = question_object.conceptual_difficulty
-    time = question_object.time_required_mins
-    points = question_object.point_value
-    pages = question_object.pages_required
     volume_id = question_object.chapter.volume.volume_id
 
     form = LatexForm(
     initial={
-        'latex_question': question_loc.question_latex,
-        'latex_answer': question_loc.answer_latex,
-        'latex_grading': question_loc.rubric_latex,
-        'difficulty': difficulty,
+        'latex_question': question,
+        'latex_answer': answer,
+        'latex_grading': grading,
+        'difficulty': question_object.conceptual_difficulty,
         'volume': volume_id,
         'chapter': question_object.chapter_id if question_object else None,
-        'time_required': time,
-        'points': points,
-        'pages_required': pages,
+        'time_required': question_object.time_required_mins,
+        'points': question_object.point_value,
+        'pages_required': question_object.pages_required,
     }
 )
  
@@ -1182,12 +1177,11 @@ def edit_question(request, question_id):
             question_object.pages_required = request.POST.get("pages_required")
             question_object.save()
 
-            question_loc.question_latex = question
-            question_loc.answer_latex = answer
-            question_loc.rubric_latex = grading
+            question_loc.question_latex = hidden_question
+            question_loc.answer_latex = hidden_answer
+            question_loc.rubric_latex = hidden_grading
             # TODO: question_loc.creator = CURRENT USER
-            print('question_loc',question_loc)
-            print('question',question)
+        
             question_loc.save()
 
             # question_attachments = request.FILES.getlist("attachments")
