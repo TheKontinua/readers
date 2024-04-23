@@ -37,7 +37,45 @@ from django.contrib.auth.decorators import login_required
 from datetime import date
 from mentoris.latex_to_pdf import latex_to_pdf
 
+from functools import wraps
 
+def mentor_req(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        #Checking that there is a logged in user else return to the login page
+        if not request.user.is_authenticated:
+            return render(request, "mentapp/login.html")
+        #Checking that user is mentor (verified) or higher else returning an error
+        if not (request.user.is_quizmaker or request.user.is_admin or request.user.is_verified):
+            return HttpResponseForbidden("Forbidden: Must be mentor or quizmaker to access add questions page.")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def quizmaker_req(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        #Checking that there is a logged in user else return to the login page
+        if not request.user.is_authenticated:
+            return render(request, "mentapp/login.html")
+        #Checking user is quiz maker or higher else returning forbidden HTTP page.
+        if not (request.user.is_quizmaker or request.user.is_admin):
+            return HttpResponseForbidden("Forbidden: Must be quizmaker or admin to access edit quiz.")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def admin_req(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        #Checking that there is a logged in user else return to the login page
+        if not request.user.is_authenticated:
+            return redirect('admin:login')
+        #Must be admin!
+        if not request.user.is_admin:
+            return HttpResponseForbidden("Forbidden: Must be admin to access edit quiz.")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+@mentor_req
 def latex(request):
     volumes = (
         Volume.objects.values_list("volume_id", flat=True)
@@ -75,7 +113,8 @@ def latex(request):
             question_object = Question()
             question_loc = Question_Loc()
 
-            # TODO: question_object.creator = CURRENT USER
+            question.creator = request.user
+            question_loc.creator = request.user
 
             chapter_object = request.POST.get("chapter")
             chapter_string = chapter_object.split("_")
@@ -93,7 +132,9 @@ def latex(request):
             question_loc.question_latex = question
             question_loc.answer_latex = answer
             question_loc.rubric_latex = grading
-            # TODO: question_loc.creator = CURRENT USER
+
+            question.creator = request.user
+            question_loc.creator = request.user
             question_loc.save()
 
             question_attachments = request.FILES.getlist("attachments")
@@ -212,7 +253,7 @@ def sign_up(request):
             emailObject.save()
 
             other_emails = request.POST.get("other_emails")
-            
+
             if other_emails is not None and other_emails != "":
                 email_list = other_emails.split(",")
                 for other_email in email_list:
@@ -221,7 +262,9 @@ def sign_up(request):
                     emailObject.user = user
                     emailObject.is_primary = False
                     emailObject.save()
-            user = authenticate(username=email, password=request.POST.get("password_hash"))
+            user = authenticate(
+                username=email, password=request.POST.get("password_hash")
+            )
             login(request, user)
             return redirect(f"../profile/{user.user_id}")
         return render(
@@ -239,8 +282,10 @@ def profile(request):
     template = loader.get_template("mentapp/profile.html")
     return HttpResponse(template.render())
 
+
 def reset_password(request):
     return render(request, "mentapp/reset_password.html")
+
 
 def customLogin(request):
     if request.method == "POST":
@@ -263,7 +308,7 @@ def customLogin(request):
     else:
         return render(request, "mentapp/login.html")
 
-
+@mentor_req
 def main(request, volume_id=1):
     template = loader.get_template("mentapp/main.html")
 
@@ -316,7 +361,7 @@ def chapter(request, volume_id, chapter_id):
         },
     )
 
-
+@mentor_req
 def quiz(request, volume_id, chapter_id, quiz_id):
     volume_id = get_object_or_404(Volume, volume_id=volume_id)
     chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
@@ -327,9 +372,8 @@ def quiz(request, volume_id, chapter_id, quiz_id):
             feedback = Quiz_Feedback()
             feedback.quiz = quiz_id
             feedback.creator_id = quiz_id.creator_id
-            feedback.viewer_id = (
-                quiz_id.creator_id
-            )  # change this later when we can log in a user
+            feedback.viewer_id = request.user
+
             feedback.challenge_rating = int(request.POST.get("challenge_rating"))
             feedback.time_rating = int(request.POST.get("time_rating"))
             feedback.viewer_comment = request.POST.get("viewer_comment")
@@ -362,8 +406,9 @@ def quiz(request, volume_id, chapter_id, quiz_id):
                 email = Email.objects.get(user=review.viewer_id, is_primary=True)
                 reviews.append([email, review])
 
-            avg_rating = challenge_ratings / len(review_objects)
-            avg_time = time_ratings / len(review_objects)
+            if len(review_objects) > 1:
+                avg_rating = challenge_ratings / len(review_objects)
+                avg_time = time_ratings / len(review_objects)
         except:
             reviews = []
 
@@ -394,7 +439,7 @@ def quiz(request, volume_id, chapter_id, quiz_id):
             },
         )
 
-
+@quizmaker_req
 def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
     volume_id = get_object_or_404(Volume, volume_id=volume_id)
     chapter_id = get_object_or_404(Chapter, chapter_id=chapter_id)
@@ -456,7 +501,44 @@ def quiz_maker_view(request, volume_id, chapter_id, quiz_id):
             },
         )
 
+@quizmaker_req
+def question_approval(request):
+    if request.method == "POST":
+        question = Question.objects.get(
+            question_id=request.POST.get("question_id"),
+        )
+        question.approval_requested = False
+        if request.POST.get("command") == "accept":
+            question.approved = True
+            question_loc = Question_Loc.objects.get(question=question)
+            question_loc.date_approved = date.today()
+            question_loc.approver = request.user
+            question_loc.save()
+        question.save()
+        return JsonResponse({"success": True})
 
+    try:
+        question_locs = Question_Loc.objects.order_by("date_created")
+        question_info = []
+
+        for question_loc in question_locs:
+            question = question_loc.question
+            if question.approval_requested and not question.approved:
+                question_info = [question, question_loc]
+                break
+
+        chapter_loc = Chapter_Loc.objects.get(chapter=question.chapter)
+        question_info.append(chapter_loc)
+    except:
+        question_info = []
+
+    return render(
+        request,
+        "mentapp/question_approval.html",
+        {"question": question_info},
+    )
+
+@admin_req
 def promotion(request):
     if request.method == "POST":
         email_object = Email.objects.get(
@@ -487,7 +569,7 @@ def promotion(request):
             },
         )
 
-
+@admin_req
 def user_directory(request):
     if request.method == "POST":
         email_object = Email.objects.get(
@@ -571,6 +653,7 @@ def grab_verification_info(user_ids):
         )
     return verification_info
 
+
 @login_required
 def user_info(request, user_id):
     if user_id != request.user.user_id and request.user.is_admin != True:
@@ -639,6 +722,8 @@ def grab_quiz_questions_data_table(quiz_questions):
     return questionTable
 
 
+@login_required
+@quizmaker_req
 def edit_quiz(request, quiz_id):
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
     quiz_questions = (
@@ -917,16 +1002,14 @@ def user_edit(request, user_id):
 
     for key, value in request.POST.items():
         if key == "primary_email":
-            Email.objects.filter(user_id=user_id, is_primary=True).update(
-                email_address=value
-            )
+            Email.objects.filter(user=user, is_primary=True).update(email_address=value)
         if key == "other_emails":
-            Email.objects.filter(user_id=user_id, is_primary=False).delete()
+            Email.objects.filter(user=user, is_primary=False).delete()
             insEmails = value.split(",")
             for em in insEmails:
                 emailObject = Email()
                 emailObject.email_address = em
-                emailObject.user_id = user_id
+                emailObject.user = user
                 emailObject.save()
         # Check if the user object has this field and the value is not empty
         if hasattr(user, key) and value.strip():
