@@ -892,7 +892,8 @@ def create_support(request):
 
         support = Support.objects.create(volume_id = Volume.objects.first())
         support_loc = Support_Loc.objects.create(
-            support=support)
+            support=support,
+            title_latex="")
 
         return redirect(f"/edit_support/{support.support_id}")
 
@@ -914,14 +915,66 @@ def edit_support(request, support_id):
         'latex_support': content,
         'title': title,
         'volume': volume_id,
-    }
-)
+        }
+    )
+
+    if request.method == "POST":
+        form = LatexForm(request.POST, request.FILES)
+        support_content = request.POST.get("latex_support")
+        support_title = request.POST.get("title")
+        volume_id = int(request.POST.get("volume"))
+        volume = get_object_or_404(Volume, volume_id=volume_id)
+        support_attachments = request.FILES.getlist("attachments")
+
+        if "submit-support" in request.POST:
+
+            support_object.volume_id=volume
+            support_object.save()
+
+            support_loc.title_latex=support_title
+            support_loc.content_latex=support_content
+            support_loc.save()
+
+            for attachment in support_attachments:
+                blob = Blob(
+                    file=attachment,
+                    content_type=attachment.content_type,
+                    filename=attachment.name,
+                )
+                blob.save()
+
+                support_attachment_instance = Support_Attachment(
+                    support=support_loc,
+                    lang_code=support_loc.lang_code,
+                    dialect_code=support_loc.dialect_code,
+                    filename=blob.filename,
+                    blob_key=blob,
+                )
+                support_attachment_instance.save()
+
+            return redirect("main")
+
+        return render(
+            request,
+            "mentapp/edit_support.html",
+            {
+                "form": form,
+                "volumes": volumes,
+                "volume_id": volume_id,
+                "support_content": support_content,
+                "support_id": support_id
+            },
+        )
     
     return render(
         request,
         "mentapp/edit_support.html",
+        {
+            "form": form, 
+            "volumes": volumes,
+            "support_id": support_id}
     )
-    
+
 
 def create_question(request):
     
