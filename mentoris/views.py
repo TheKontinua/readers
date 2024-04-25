@@ -130,7 +130,6 @@ def latex(request):
             question_object = Question()
             question_loc = Question_Loc()
 
-            question.creator = request.user
             question_loc.creator = request.user
 
             chapter_object = request.POST.get("chapter")
@@ -150,7 +149,6 @@ def latex(request):
             question_loc.answer_latex = answer
             question_loc.rubric_latex = grading
 
-            question.creator = request.user
             question_loc.creator = request.user
             question_loc.save()
 
