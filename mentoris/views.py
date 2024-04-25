@@ -25,7 +25,9 @@ from mentapp.models import (
     Support,
     Support_Loc,
     Support_Attachment,
+    Site,
     Quiz_Support,
+    Handle
 )
 from mentoris.forms import UserForm, LatexForm, QuizForm
 from django.shortcuts import render, get_object_or_404, redirect
@@ -1167,3 +1169,19 @@ def create_support(request):
             "mentapp/create_support.html",
             {"form": LatexForm(), "volumes": volumes},
         )
+
+def handles(request): 
+    if request.method == 'POST':
+        new_site = Site(
+            site_id = request.POST.get("platform")
+        )
+        new_site.save()
+        new_handle = Handle(
+            site=new_site, 
+            handle=request.POST.get("username"),
+            user = request.user,
+            )
+        new_handle.save()
+    user_handles = Handle.objects.filter(user=request.user)
+    context = {'user_handles': user_handles}
+    return render(request, 'mentapp/handles.html', context)

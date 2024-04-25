@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <link rel="stylesheet" type="text/css" 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">  <link rel="stylesheet" type="text/css">
+    <h2>Add Social Media Handle</h2>
+    <form
+    method="POST"
+    action="{% url 'handles'%}"
+    >
+        {% csrf_token %}
+        <label for="platform">Platform:</label>
+        <select class="form-select" id="platform" name="platform">
+            <option value="twitter">Twitter</option>
+            <option value="instagram">Instagram</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="facebook">Facebook</option>
+            <option value="github">GitHub</option>
+            <option value="youtube">YouTube</option>
+        </select><br>
+
+        <label for="username" class="control-label">Username:</label>
+        <input type="text" class="form-control" id="username" name="username"><br>
+
+        <button class="btn btn-primary" type="submit">Add</button>
+
+        <h2>User Handles</h2>
+        <ul>
+            {% for handle in user_handles %}
+                <li>{{ handle.platform }}: {{ handle.username }}</li>
+            {% endfor %}
+        </ul>
+    </form>
+</html>
