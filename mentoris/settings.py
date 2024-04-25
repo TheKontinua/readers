@@ -60,7 +60,6 @@ TEMPLATES = [
         "DIRS": [
             "mentoris/templates",
             "mentapp/templates,",
-            "mentoris/mentoris/templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
