@@ -130,7 +130,6 @@ def latex(request):
             question_object = Question()
             question_loc = Question_Loc()
 
-            question.creator = request.user
             question_loc.creator = request.user
 
             chapter_object = request.POST.get("chapter")
@@ -150,7 +149,6 @@ def latex(request):
             question_loc.answer_latex = answer
             question_loc.rubric_latex = grading
 
-            question.creator = request.user
             question_loc.creator = request.user
             question_loc.save()
 
@@ -763,8 +761,15 @@ def edit_quiz(request, quiz_id):
         .filter(quiz=quiz_instance.quiz_id)
         .order_by("ordering")
     )
+    quiz_supports = (
+        Quiz_Support.objects.all()
+        .filter(quiz=quiz_instance.quiz_id)
+        .order_by("ordering")
+    )
+
     if request.method == "POST":
         if request.POST.get("command") == "save":
+            # TODO: Ids are just the questions, update edit_quiz.html to include supports
             ids_str = json.loads(request.POST.get("ids"))
             ids = list()
             for id_str in ids_str:
@@ -819,6 +824,7 @@ def edit_quiz(request, quiz_id):
 
             quiz_instance.save()
             question_list = []
+            support_list = []
 
             for id in ids:
                 for quiz_question in quiz_questions:
@@ -828,8 +834,15 @@ def edit_quiz(request, quiz_id):
                             Question_Loc, question=question_meta
                         )
                         question_list.append(question_content)
+                for quiz_support in quiz_supports:
+                    if quiz_support.support.support_id == id:
+                        support_meta = quiz_support.support
+                        support_content = get_object_or_404(
+                            Support_Loc, support=support_content
+                        )
+                        support_list.append(support_content)
 
-            latex_to_pdf(question_list, quiz_instance)
+            latex_to_pdf(question_list, support_list, quiz_instance)
             return JsonResponse({"success": True})
     else:
         if request.GET.get("command") == "fetch_quiz_questions":
@@ -1137,7 +1150,6 @@ def create_support(request):
         .distinct()
         .order_by("volume_id")
     )
-    creators = User.objects.values_list("user_id")
 
     volume_id = 1
 
@@ -1158,8 +1170,8 @@ def create_support(request):
                 support=support,
                 title_latex=support_title,
                 content_latex=support_content,
-                creator_id=creators.first()[0],
-                approver_id=creators.first()[0],
+                creator=User.objects.distinct().first(),
+                approver=User.objects.distinct().first(),
             )
 
             support_loc.save()
