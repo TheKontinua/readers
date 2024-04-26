@@ -1114,7 +1114,7 @@ def upload_pdf(request, pdf_path):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
 
-
+@quizmaker_req
 def create_quiz(request, volume_id, chapter_id):
     if request.method == "POST":
         # Create a new Quiz instance
