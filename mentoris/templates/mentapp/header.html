@@ -42,7 +42,7 @@
 
         <script>
             document.getElementById("my-profile-button").addEventListener('click', function(){
-                var user = '2bfaba0d-8cfc-490f-878e-81a474984121';
+                var user = '{{ user.user_id }}';
                 window.top.location.href="/profile/"+user;
             });
 

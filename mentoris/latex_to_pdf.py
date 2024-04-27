@@ -10,6 +10,7 @@ from mentapp.models import (
     Quiz_Rendering,
     Blob,
     Question_Attachment,
+    Support_Attachment,
 )
 
 TIMEOUT = 10  # try to render the PDF for 10 seconds before failing
@@ -65,7 +66,7 @@ quiz_data: quiz object
 """
 
 
-def latex_to_pdf(latex_question_list, quiz_data):
+def latex_to_pdf(latex_question_list, support_list, quiz_data):
     script_path = os.path.dirname(__file__)
     file_location = os.path.join(script_path, "..", "docs", "latex", "output_quiz.tex")
     abs_file_location = os.path.abspath(file_location)
@@ -175,7 +176,35 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.write(r"}" + "\n")
     output_file.write(r"} %Ends helvetica" + "\n")
 
-    # TODO: Supports here
+    files_to_remove = []
+
+    for support_loc in support_list:
+        support_latex = support_loc.content_latex
+        output_file.write(support_latex + "\n\n")
+
+        attachment_list = Support_Attachment.objects.filter(support=support_loc)
+        for attachment in attachment_list:
+            blob = attachment.blob_key
+            temp_path = os.path.join(script_path, "..", "media", str(blob.file))
+            blob_path = os.path.abspath(temp_path)
+
+            final_path = os.path.join(script_path, "..", "docs", "latex", blob.filename)
+
+            shutil.copy(blob_path, final_path)
+
+            output_file.write(r"\vspace{0.2cm}" + "\n")
+            output_file.write(r"\begin{center}" + "\n")
+
+            blob_filename = blob.filename[:-4]
+            # change to be based where the last period is
+
+            output_file.write(
+                r"\includegraphics[width=2cm]{" + blob_filename + r"}" + "\n"
+            )
+            output_file.write(r"\end{center}" + "\n")
+
+            files_to_remove.append(final_path)
+            # os.remove(final_path)
 
     output_file.write(r"\begin{enumerate}" + "\n\n")
     # output_file.write(r"\clearpage" + "\n")
@@ -201,18 +230,23 @@ def latex_to_pdf(latex_question_list, quiz_data):
             temp_path = os.path.join(script_path, "..", "media", str(blob.file))
             blob_path = os.path.abspath(temp_path)
 
-            final_path = os.path.join(script_path, blob.filename)
+            final_path = os.path.join(script_path, "..", "docs", "latex", blob.filename)
 
             shutil.copy(blob_path, final_path)
 
             output_file.write(r"\vspace{0.2cm}" + "\n")
             output_file.write(r"\begin{center}" + "\n")
+
+            blob_filename = blob.filename[:-4]
+            # change to be based where the last period is
+
             output_file.write(
-                r"\includegraphics[width=2cm]{" + blob.filename + r"}" + "\n"
+                r"\includegraphics[width=2cm]{" + blob_filename + r"}" + "\n"
             )
             output_file.write(r"\end{center}" + "\n")
 
-            os.remove(final_path)
+            files_to_remove.append(final_path)
+            # os.remove(final_path)
 
         pages_required = question_loc.question.pages_required
         spacingString = pagesRequiredToSpacing(pages_required)
@@ -266,6 +300,9 @@ def latex_to_pdf(latex_question_list, quiz_data):
     if error:
         print("Error occurred:")
         print(error.decode("utf-8"))
+        for path in files_to_remove:
+            os.remove(path)
+        os.chdir(script_path)
         raise ChildProcessError
     else:
         print("PDF 1 generated successfully.")
@@ -288,6 +325,9 @@ def latex_to_pdf(latex_question_list, quiz_data):
     if error:
         print("Error occurred:")
         print(error.decode("utf-8"))
+        for path in files_to_remove:
+            os.remove(path)
+        os.chdir(script_path)
         raise ChildProcessError
     else:
         print("PDF 2 generated successfully.")
@@ -295,6 +335,10 @@ def latex_to_pdf(latex_question_list, quiz_data):
     rendering.quiz = quiz_data
     rendering.blob_key = blob
     rendering.save()
+
+    for path in files_to_remove:
+        os.remove(path)
+    os.chdir(script_path)
 
 
 def save_pdf_blob(string_id):
