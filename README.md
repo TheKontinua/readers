@@ -16,12 +16,12 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1gqyTfj
 4. Locate the config file in the `.AWS folder` (location varies based on operating system, usually in the home directory). Ask the team for the AWS Elastic Beanstalk credentials
     - Run the command `eb init` in the root directory of the project
         - Select 3 `(us-west-2 : US West (Oregon))`
-        - Select 2 `(mentoris)`
-        - Select 1 `(django-env)`
+        - Select 1 `(mentoris)`
+        - Select 1 `(Mentoris-env)`
         - Do not continue with CodeCommit
     - update the dependencies in requirements.txt (this can be done by running the command `pip freeze > requirements.txt` assuming you are working in a virtual environment with only the minimum packages installed to have Mentoris running, otherwise the dependencies need to be manually added)
     - Use the command `eb deploy` to deploy code into AWS Elastic Beanstalk  when ready
-    - The current state of the project after deployment can be viewed here: [django-env.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/main/](http://django-env.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/main/)
+    - The current state of the project after deployment can be viewed here: [ http://mentoris-env.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/main/]( http://mentoris-env.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/main/)
     - Github: [GitHub - TheKontinua/mentoris: The web app for mentors](https://github.com/TheKontinua/mentoris)
 5. Complete the official Django tutorial: [Writing your first Django app, part 1 | Django documentation](https://docs.djangoproject.com/en/5.0/intro/tutorial01/)
 6. Meet with the team to get tasks for your first sprint.
