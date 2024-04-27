@@ -107,6 +107,8 @@ class Question(models.Model):
     time_required_mins = models.FloatField(default=0)
     point_value = models.FloatField(default=0)
     pages_required = models.FloatField(default=0)
+    approval_requested=models.BooleanField(default=True)
+    approved=models.BooleanField(default=False)
 
 
 class Question_Loc(models.Model):

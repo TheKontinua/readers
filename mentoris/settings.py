@@ -60,7 +60,7 @@ TEMPLATES = [
         "DIRS": [
             "mentoris/templates",
             "mentapp/templates,",
-            "mentoris/mentoris/templates",
+            "mentoris/mentoris/templates/mentapp",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -78,8 +78,6 @@ WSGI_APPLICATION = "mentoris.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-DATABASES = {}
 
 
 STORAGES = {
