@@ -9,6 +9,16 @@
         <link rel="stylesheet" type="text/css" />
     </head>
     <style>
+        td {
+            vertical-align: middle;
+        }
+
+        .zero-whitespace {
+            padding: 0;
+            margin: 0;
+            border: 0;
+        }
+
         .optionButton1,
         .optionButton2 {
             background-color: white;
@@ -102,50 +112,48 @@
                                 <td style="width: 15%">
                                     Name: <a
                                         href="{{ quiz.quiz_id }}"
-                                        class="text-dark"
-                                        style="
-                                                margin-top: 3%;
-                                                margin-bottom: 0px;
-                                            "
+                                        class="text-dark zero-whitespace"
                                     >{{ quiz.label }}
                                     </a>
                                 </td>
                                 <td style="width: 20%">
                                     <p
-                                        class="text-secondary"
-                                        style="margin: 0; margin-top: 3%"
+                                        class="text-secondary zero-whitespace"
                                     >
                                         Conceptual Difficulty: {{ quiz.conceptual_difficulty }}
                                     </p>
                                 </td>
                                 <td style="width: 10%">
                                     <p
-                                        class="text-secondary"
-                                        style="margin: 0; margin-top: 3%"
+                                        class="text-secondary zero-whitespace"
                                     >
                                         Time: {{ quiz.time_required_mins }}m
                                     </p>
                                 </td>
                                 <td style="width: 15%">
                                     <p
-                                        class="text-secondary"
-                                        style="margin: 0; margin-top: 3%"
+                                        class="text-secondary zero-whitespace"
                                     >
                                         Calculator: {{ quiz.calculator_allowed }}
                                     </p>
                                 </td>
+                                <td style="width: 15%">
+                                    <p
+                                        class="text-secondary zero-whitespace"
+                                    >
+                                        Computer: {{ quiz.computer_allowed }}
+                                    </p>
+                                </td>
                                 <td style="width: 14%">
                                     <p
-                                        class="text-secondary"
-                                        style="margin: 0; margin-top: 3%"
+                                        class="text-secondary zero-whitespace"
                                     >
                                         Internet: {{ quiz.internet_allowed }}
                                     </p>
                                 </td>
                                 <td style="width: 10%">
                                     <p
-                                        class="text-secondary"
-                                        style="margin: 0; margin-top: 3%"
+                                        class="text-secondary zero-whitespace"
                                     >
                                         Book: {{ quiz.book_allowed }}
                                     </p>
