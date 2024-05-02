@@ -1,9 +1,6 @@
-import base64
-import json, os, random
+import json, os
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.template import loader
-from django.core.files.storage import FileSystemStorage
-from django.core.files.storage import FileSystemStorage
 from django.urls import resolve
 from mentapp.models import (
     Question_Attachment,
@@ -27,7 +24,7 @@ from mentapp.models import (
     Support_Attachment,
     Quiz_Support,
 )
-from mentoris.forms import UserForm, LatexForm, QuizForm
+from mentoris.forms import UserForm, LatexForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
@@ -130,6 +127,7 @@ def latex(request):
             question_object = Question()
             question_loc = Question_Loc()
 
+            question_object.creator = request.user
             question_loc.creator = request.user
 
             chapter_object = request.POST.get("chapter")
@@ -149,7 +147,6 @@ def latex(request):
             question_loc.answer_latex = answer
             question_loc.rubric_latex = grading
 
-            question_loc.creator = request.user
             question_loc.save()
 
             question_attachments = request.FILES.getlist("attachments")
@@ -838,7 +835,7 @@ def edit_quiz(request, quiz_id):
                     if quiz_support.support.support_id == id:
                         support_meta = quiz_support.support
                         support_content = get_object_or_404(
-                            Support_Loc, support=support_content
+                            Support_Loc, support=support_meta
                         )
                         support_list.append(support_content)
 
@@ -1127,6 +1124,7 @@ def create_quiz(request, volume_id, chapter_id):
             book_allowed=False,
             volume_id=volume_id,
             chapter_id=chapter_id,
+            creator_id=request.user,
         )
 
         # Redirect to the edit page for the new quiz
@@ -1170,8 +1168,7 @@ def create_support(request):
                 support=support,
                 title_latex=support_title,
                 content_latex=support_content,
-                creator=User.objects.distinct().first(),
-                approver=User.objects.distinct().first(),
+                creator=request.user,
             )
 
             support_loc.save()

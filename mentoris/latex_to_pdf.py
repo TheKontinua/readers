@@ -206,53 +206,57 @@ def latex_to_pdf(latex_question_list, support_list, quiz_data):
             files_to_remove.append(final_path)
             # os.remove(final_path)
 
-    output_file.write(r"\begin{enumerate}" + "\n\n")
-    # output_file.write(r"\clearpage" + "\n")
-    output_file.write(r"\vspace{0.25cm}" + "\n")
+    if len(latex_question_list) > 0: # Checks if quiz is empty
+        output_file.write(r"\begin{enumerate}" + "\n\n")
+        # output_file.write(r"\clearpage" + "\n")
+        output_file.write(r"\vspace{0.25cm}" + "\n")
 
-    for question_loc in latex_question_list:
-        latex_question = question_loc.question_latex
-        point = int(question_loc.question.point_value)
-        plural = "" if point == 1 else "s"
-        output_file.write(
-            r"\item ("
-            + str(point)
-            + r" point"
-            + plural
-            + r") "
-            + latex_question
-            + "\n\n"
-        )
-
-        attachment_list = Question_Attachment.objects.filter(question=question_loc)
-        for attachment in attachment_list:
-            blob = attachment.blob_key
-            temp_path = os.path.join(script_path, "..", "media", str(blob.file))
-            blob_path = os.path.abspath(temp_path)
-
-            final_path = os.path.join(script_path, "..", "docs", "latex", blob.filename)
-
-            shutil.copy(blob_path, final_path)
-
-            output_file.write(r"\vspace{0.2cm}" + "\n")
-            output_file.write(r"\begin{center}" + "\n")
-
-            blob_filename = blob.filename[:-4]
-            # change to be based where the last period is
-
+        for question_loc in latex_question_list:
+            latex_question = question_loc.question_latex
+            point = int(question_loc.question.point_value)
+            plural = "" if point == 1 else "s"
             output_file.write(
-                r"\includegraphics[width=2cm]{" + blob_filename + r"}" + "\n"
+                r"\item ("
+                + str(point)
+                + r" point"
+                + plural
+                + r") "
+                + latex_question
+                + "\n\n"
             )
-            output_file.write(r"\end{center}" + "\n")
 
-            files_to_remove.append(final_path)
-            # os.remove(final_path)
+            attachment_list = Question_Attachment.objects.filter(question=question_loc)
+            for attachment in attachment_list:
+                blob = attachment.blob_key
+                temp_path = os.path.join(script_path, "..", "media", str(blob.file))
+                blob_path = os.path.abspath(temp_path)
 
-        pages_required = question_loc.question.pages_required
-        spacingString = pagesRequiredToSpacing(pages_required)
-        output_file.write(r"\vspace{" + spacingString + r"}" + "\n\n")
+                final_path = os.path.join(
+                    script_path, "..", "docs", "latex", blob.filename
+                )
 
-    output_file.write(r"\end{enumerate}" + "\n")
+                shutil.copy(blob_path, final_path)
+
+                output_file.write(r"\vspace{0.2cm}" + "\n")
+                output_file.write(r"\begin{center}" + "\n")
+
+                blob_filename = blob.filename[:-4]
+                # change to be based where the last period is
+
+                output_file.write(
+                    r"\includegraphics[width=2cm]{" + blob_filename + r"}" + "\n"
+                )
+                output_file.write(r"\end{center}" + "\n")
+
+                files_to_remove.append(final_path)
+                # os.remove(final_path)
+
+            pages_required = question_loc.question.pages_required
+            spacingString = pagesRequiredToSpacing(pages_required)
+            output_file.write(r"\vspace{" + spacingString + r"}" + "\n\n")
+
+        output_file.write(r"\end{enumerate}" + "\n")
+
     output_file.write(r"\end{document}" + "\n")
 
     output_file.close()
