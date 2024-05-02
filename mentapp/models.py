@@ -255,7 +255,7 @@ class Site(models.Model):
 
 
 class Handle(models.Model):
-    handle_id = models.CharField(max_length=100, primary_key=True, default="handle")
+    handle_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
     handle = models.CharField(max_length=50, default="handle")

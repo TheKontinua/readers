@@ -3,8 +3,10 @@ from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.template import loader
 from django.urls import resolve
 from mentapp.models import (
+    Handle,
     Question_Attachment,
     Quiz_Rendering,
+    Site,
     User,
     Email,
     Volume,
@@ -274,6 +276,21 @@ def sign_up(request):
                     emailObject.user = user
                     emailObject.is_primary = False
                     emailObject.save()
+
+            github = request.POST.get("github")
+            if github is not None:
+                handleObject = Handle(
+                    user=user, site=Site.objects.get(site_id="github"), handle=github
+                )
+                handleObject.save()
+
+            x = request.POST.get("x")
+            if x is not None:
+                handleObject = Handle(
+                    user=user, site=Site.objects.get(site_id="x"), handle=x
+                )
+                handleObject.save()
+
             user = authenticate(
                 username=email, password=request.POST.get("password_hash")
             )
@@ -686,10 +703,16 @@ def user_info(request, user_id):
         other_email = ", ".join(other_emailss)
     except Email.DoesNotExist:
         email = None
+    handles = Handle.objects.filter(user=user_profile)
     return render(
         request,
         "mentapp/profile.html",
-        {"user_profile": user_profile, "email": email, "other_email": other_email},
+        {
+            "user_profile": user_profile,
+            "email": email,
+            "other_email": other_email,
+            "handles": handles,
+        },
     )
 
 
