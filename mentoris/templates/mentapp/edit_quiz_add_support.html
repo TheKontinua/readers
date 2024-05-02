@@ -117,7 +117,7 @@
         <button id="save_changes_button">Save Additions</button>
         <button id="filter_button">Search</button>
         <br>
-        <form action="{% url 'create_support' %}" method="post">
+        <form action="{% url 'create_support' quiz_id=quiz_id%}" method="post">
             {% csrf_token %}
             <button style="width: 200px;" type="submit">
                 Create New Support
@@ -194,7 +194,7 @@
                             command: "filter",
                             volume: volume_value,
                             creator: creator_value,
-                            title: title != ""?title : ""
+                            title: title
                         }
                         
                     });
@@ -243,7 +243,10 @@
                             if (index !== -1) {
                                 let support_id = list[index].id;
                                 if (support_id) {
-                                    window.location.href = "/edit_support/" + support_id;
+                                    var pathname = window.location.pathname;
+                                    var segments = pathname.split('/');
+                                    var quiz_id = segments[segments.length - 1];
+                                    window.location.href = "/edit_support/" + quiz_id + "/"+support_id;
                                 } else {
                                     console.error('Support ID not found');
                                 }
@@ -269,14 +272,14 @@
                         
                         border_wrapper.appendChild(button_wrapper);
 
-                        var latex_wrapper =  generate_latex(data[i]["support_latex"], data[i]["attachment_urls"]);
+                        //var latex_wrapper =  generate_latex(data[i]["support_latex"], data[i]["attachment_urls"]);
                         
                         document.createElement("div");
-                        latex_wrapper.style.clear = "both";
+                        //latex_wrapper.style.clear = "both";
 
                         var latex = document.createElement("latex-js");
 
-                        border_wrapper.appendChild(latex_wrapper);
+                        //border_wrapper.appendChild(latex_wrapper);
                         list_item.appendChild(border_wrapper);
                         document.getElementById("supports_list").appendChild(list_item);
                     }

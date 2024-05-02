@@ -886,7 +886,7 @@ def delete_quiz(request, quiz_id):
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
     
-def create_support(request):
+def create_support(request, quiz_id):
 
     if request.method == 'POST':
 
@@ -895,12 +895,12 @@ def create_support(request):
             support=support,
             title_latex="")
 
-        return redirect(f"/edit_support/{support.support_id}")
+        return redirect(f"/edit_support/{quiz_id}/{support.support_id}")
 
     return render(request, 'mentapp/main.html')
 
 
-def edit_support(request, support_id):
+def edit_support(request, quiz_id, support_id):
     support_object = get_object_or_404(Support, support_id=support_id)
     volumes = Volume.objects.values_list("volume_id", flat=True).distinct().order_by("volume_id")
     support_loc = get_object_or_404(Support_Loc,support=support_object)    
@@ -952,12 +952,13 @@ def edit_support(request, support_id):
                 )
                 support_attachment_instance.save()
 
-            return redirect("main")
+            return redirect(f"/edit_quiz_add_support/{quiz_id}")
 
         return render(
             request,
             "mentapp/edit_support.html",
             {
+                "quiz_id": quiz_id,
                 "form": form,
                 "volumes": volumes,
                 "volume_id": volume_id,
@@ -970,6 +971,7 @@ def edit_support(request, support_id):
         request,
         "mentapp/edit_support.html",
         {
+            "quiz_id": quiz_id,
             "form": form, 
             "volumes": volumes,
             "support_id": support_id}
