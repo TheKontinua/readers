@@ -16,12 +16,13 @@
         <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
 
         <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
-        <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
+        <script src= "{% static '/scripts/generate_quiz_html.js' %}"></script>
         <script>
             customElements.define("latex-js", latexjs.LaTeXJSComponent);
         </script>
 
         <style>
+
             .add_question_button {
                 border: 2px solid Black;
                 border-radius: 25px;
@@ -36,6 +37,20 @@
 
             .add_question_do_not_add_state{
               background: var(--KontinuaRed); 
+            }
+
+            .edit_question {
+                border: 2px solid Black;
+                border-radius: 25px;
+                margin: 5px;
+                width: 8em;
+                height: 2em;
+                font-weight: bold;
+            }
+
+            .edit_question:hover{
+                background-color: var(--KontinuaBlue);
+                color: white;
             }
 
             #quiz_content {
@@ -110,8 +125,13 @@
         <button id="save_changes_button">Save Additions</button>
         <button id="filter_button">Search</button>
         <br>
-        <button id="create_question" style="width: 200px;"
-        onclick="location.href='/latex/'">Create New Question</button>
+        <form action="{% url 'create_question' %}" method="post">
+            {% csrf_token %}
+            <button style="width: 200px;" type="submit">
+                Create New Question
+            </button>
+        </form>
+        
         <div id="save_status" class="bordered"></div>        
     </div>
 
@@ -150,10 +170,48 @@
                 add_button.addEventListener('click', function(event){
                     toggle_add(event.target);
                 });
+
+                let edit_button = document.createElement("button");
+                edit_button.innerHTML = "Edit";
+                edit_button.addEventListener('click', function (event) {
+                    let questions_list = document.getElementById("questions_list");
+                    let list = questions_list.children;
+                    let index = -1;
+
+                    for (let i = 0; i < list.length; ++i) {
+                        if (list[i].contains(event.target)) {
+                            index = i;
+                            break; // Once found, exit the loop
+                        }
+                    }
+
+                    if (index !== -1) {
+                        let question_id = list[index].id;
+                        if (question_id) {
+                            window.location.href = "/edit_question/" + question_id;
+                        } else {
+                            console.error('Question ID not found');
+                        }
+                    } else {
+                        console.error('Element not found in list');
+                    }
+                });
+
+
                 $(add_button).addClass("add_question_button");
                 $(add_button).addClass("add_question_add_state");
+                $(edit_button).addClass("edit_question");
                 $(add_button).addClass("bold_font");
-                button_wrapper.appendChild(add_button);
+
+                let ul = document.createElement("ul");
+                ul.className = "unbulleted_list";
+                let add_button_li = document.createElement("li");
+                let edit_button_li = document.createElement("li");
+                add_button_li.appendChild(add_button);
+                edit_button_li.appendChild(edit_button);
+                ul.appendChild(add_button_li);
+                ul.appendChild(edit_button_li);
+                button_wrapper.appendChild(ul);
             }
 
 

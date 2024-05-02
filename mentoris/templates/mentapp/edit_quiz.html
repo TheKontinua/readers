@@ -12,10 +12,10 @@
         />
         
         {% load static %}
-        <link rel="stylesheet" href="{% static "/css/colors.css"%}">
-        <link rel="stylesheet" href="{% static "/css/quiz_styles.css"%}">
+        <link rel="stylesheet" href="{% static '/css/colors.css'%}">
+        <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
 
-        <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
+        <script src= "{% static '/scripts/generate_quiz_html.js' %}"></script>
         <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
         <script>
             customElements.define("latex-js", latexjs.LaTeXJSComponent);
@@ -201,9 +201,38 @@
                 });
                 down_button_li.appendChild(down_button);
 
+                let edit_button_li = document.createElement("li");
+                let edit_button = document.createElement("button");
+                edit_button.innerHTML = "Edit";
+                edit_button.addEventListener('click', function (event) {
+                    let questions_list = document.getElementById("questions_list");
+                    let list = questions_list.children;
+                    let index = -1;
+
+                    for (let i = 0; i < list.length; ++i) {
+                        if (list[i].contains(event.target)) {
+                            index = i;
+                            break; 
+                        }
+                    }
+
+                    if (index !== -1) {
+                        let question_id = list[index].id;
+                        if (question_id) {
+                            window.location.href = "/edit_question/" + question_id;
+                        } else {
+                            console.error('Question ID not found');
+                        }
+                    } else {
+                        console.error('Element not found in list');
+                    }
+                });
+                edit_button_li.appendChild(edit_button);
+
                 ul.appendChild(delete_button_li);
                 ul.appendChild(up_button_li);
                 ul.appendChild(down_button_li);
+                ul.appendChild(edit_button_li);
                 button_wrapper.appendChild(ul);
             }
 

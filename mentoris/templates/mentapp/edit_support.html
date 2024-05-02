@@ -61,7 +61,7 @@
         }
     </style>
 
-    <title>Create Support</title>
+    <title>Edit Support</title>
 </head>
 
 <body>
@@ -72,7 +72,7 @@
 
         <div class="container">
 
-            <form method="POST" action="{% url 'create_support' %}" enctype="multipart/form-data">
+            <form method="POST" action="{% url 'edit_support' quiz_id=quiz_id support_id=support_id %}" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <div class="container" style="margin-top: 10px"></div>
@@ -150,16 +150,16 @@
 
                             </div>
                         </div>
-                        </div>
-                        <div class="col-2 d-flex align-items-center justify-content-center">
-                            <button type="submit" name="submit-support" class="btn btn-primary" style="
+                    </div>
+                    <div class="col-2 d-flex align-items-center justify-content-center">
+                        <button type="submit" name="submit-support" class="btn btn-primary" style="
                                     height: 100%;
                                     width: 200%;
                                     font-size: x-large;
                                 ">
-                                Submit Support
-                            </button>
-                        </div>
+                            Submit Support
+                        </button>
+                    </div>
                     <div class="container" style="margin-top: 30px"></div>
             </form>
         </div>

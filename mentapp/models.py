@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 import uuid
+
 from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
@@ -15,6 +16,7 @@ class CustomUserManager(BaseUserManager):
         Creates and saves a User with the given email and password.
         """
         if not email:
+
             raise ValueError("The Email field must be set")
         if not user_id:
             user_id = generate_user_id()
@@ -28,6 +30,7 @@ class CustomUserManager(BaseUserManager):
         """
         Creates and saves a superuser with the given email and password.
         """
+
         extra_fields.setdefault("is_admin", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_staff", True)
@@ -114,6 +117,7 @@ class Question(models.Model):
     time_required_mins = models.FloatField(default=0)
     point_value = models.FloatField(default=0)
     pages_required = models.FloatField(default=0)
+
     approval_requested = models.BooleanField(default=True)
     approved = models.BooleanField(default=False)
 
@@ -330,10 +334,14 @@ class Support_Loc(models.Model):
     creator = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        null=True,
         related_name="created_support_loc",
     )
     approver = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="approved_support_loc"
+        User, 
+        on_delete=models.CASCADE, 
+        null=True,
+        related_name="approved_support_loc"
     )
 
     class Meta:
