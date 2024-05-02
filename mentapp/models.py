@@ -1,12 +1,14 @@
 from django.db import models
-from django.contrib.auth.hashers import make_password, check_password
-from django.dispatch import receiver
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import pre_save
-from datetime import datetime
 import uuid
-from django.contrib.auth.models import AbstractBaseUser,  PermissionsMixin, BaseUserManager
+
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    PermissionsMixin,
+    BaseUserManager,
+)
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, user_id=None, password=None, **extra_fields):
@@ -14,7 +16,8 @@ class CustomUserManager(BaseUserManager):
         Creates and saves a User with the given email and password.
         """
         if not email:
-            raise ValueError('The Email field must be set')
+
+            raise ValueError("The Email field must be set")
         if not user_id:
             user_id = generate_user_id()
 
@@ -27,18 +30,25 @@ class CustomUserManager(BaseUserManager):
         """
         Creates and saves a superuser with the given email and password.
         """
-        extra_fields.setdefault('is_admin', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_verified', True)
 
-        return self.create_user(email, user_id=user_id, password=password, **extra_fields)
+        extra_fields.setdefault("is_admin", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_verified", True)
+
+        return self.create_user(
+            email, user_id=user_id, password=password, **extra_fields
+        )
+
 
 def generate_user_id():
     return str(uuid.uuid4())
 
+
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.CharField(max_length=100, primary_key=True, default="email@default.com")
+    email = models.CharField(
+        max_length=100, primary_key=True, default="email@default.com"
+    )
     user_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     full_name = models.CharField(max_length=50, default="new_user")
     password_hash = models.CharField(max_length=128, default="password")
@@ -107,8 +117,9 @@ class Question(models.Model):
     time_required_mins = models.FloatField(default=0)
     point_value = models.FloatField(default=0)
     pages_required = models.FloatField(default=0)
-    approval_requested=models.BooleanField(default=True)
-    approved=models.BooleanField(default=False)
+
+    approval_requested = models.BooleanField(default=True)
+    approved = models.BooleanField(default=False)
 
 
 class Question_Loc(models.Model):

@@ -7,7 +7,7 @@ The mentors for the students using this curriculum will need quizzes
 (and answer keys) for each chapter. Mentoris is the web app that will
 supply them with those quizzes and answer keys.
 
-Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwoVZBdJGd_tcb1RkzF5oQL2ENw1O/edit?usp=sharing&ouid=107605930377207959573&rtpof=true&sd=true) which outlines the entire project in more detail.
+Here is our [Technical Specification](https://docs.google.com/document/d/1gqyTfjpYk12v72GUw912kEI0EFNYl_ET/edit?usp=sharing&ouid=118232505108273987896&rtpof=true&sd=true) which outlines the entire project in more detail.
 
 ## Set Up
 1. Install Python 3.11 [Python Release Python 3.11.0 | Python.org](https://www.python.org/downloads/release/python-3110/)
@@ -16,12 +16,13 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwo
 4. Locate the config file in the `.AWS folder` (location varies based on operating system, usually in the home directory). Ask the team for the AWS Elastic Beanstalk credentials
     - Run the command `eb init` in the root directory of the project
         - Select 3 `(us-west-2 : US West (Oregon))`
-        - Select 2 `(mentoris)`
         - Select 1 `(mentoris)`
+        - Select 1 `(Mentoris-env)`
         - Do not continue with CodeCommit
+    - update the dependencies in requirements.txt (this can be done by running the command `pip freeze > requirements.txt` assuming you are working in a virtual environment with only the minimum packages installed to have Mentoris running, otherwise the dependencies need to be manually added)
     - Use the command `eb deploy` to deploy code into AWS Elastic Beanstalk  when ready
-    - The current state of the project after deployment can be viewed here: [mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com](http://mentoris.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/)
-    - The current deployment should always match what is in the main branch on the Github: [GitHub - TheKontinua/mentoris: The web app for mentors](https://github.com/TheKontinua/mentoris)
+    - The current state of the project after deployment can be viewed here: [ http://mentoris-env.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/main/]( http://mentoris-env.eba-tsm5gnpk.us-west-2.elasticbeanstalk.com/main/)
+    - Github: [GitHub - TheKontinua/mentoris: The web app for mentors](https://github.com/TheKontinua/mentoris)
 5. Complete the official Django tutorial: [Writing your first Django app, part 1 | Django documentation](https://docs.djangoproject.com/en/5.0/intro/tutorial01/)
 6. Meet with the team to get tasks for your first sprint.
 7. You are now ready to start writing code!
@@ -32,7 +33,7 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1ObuPwo
     b. Test the code before making a pull request
 11. Remove the AWS RDS credentials before making a pull request
 12. Make a pull request and wait for it to be approved by another team member
-13. Once the pull request has been merged to main the code is ready to be deployed to Elastic Beanstalk
+13. Once the pull request has been merged to main the code is ready to be deployed to Elastic Beanstalk!
 
 
 
@@ -45,7 +46,7 @@ written in Python using the Django web framework.
 We will be using PostgreSQL as the backend database.
 
 The questions and answers will be stored as LaTeX segments. The complete quiz will
-need to be typeset using TeX. Preview will be done with MathJAX or KaTeX.
+need to be typeset using TeX. Preview will be done with LaTex.js.
 
 We will deploy the system on Amazon Services.
 

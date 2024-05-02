@@ -24,6 +24,7 @@ from django.conf import settings
 urlpatterns = [
     re_path(r".*/header.html/", views.header, name="header"),
     re_path(r".*/footer.html/", views.footer, name="footer"),
+    path("", views.default, name="default"),
     path("admin/", admin.site.urls),
     path("login/", views.login, name="login"),
     path("signUp/", views.sign_up, name="sign_up"),
@@ -37,10 +38,22 @@ urlpatterns = [
     path("main/<int:volume_id>/", views.main, name="main_vol_chap"),
     path("main/<int:volume_id>/<chapter_id>/", views.chapter, name="chapter"),
     path("main/<int:volume_id>/<chapter_id>/<int:quiz_id>", views.quiz, name="quiz"),
-    path("main/<int:volume_id>/<chapter_id>/<int:quiz_id>/maker_view", views.quiz_maker_view, name="quiz_maker_view"),
+    path(
+        "main/<int:volume_id>/<chapter_id>/<int:quiz_id>/maker_view",
+        views.quiz_maker_view,
+        name="quiz_maker_view",
+    ),
     path("edit_quiz/<int:quiz_id>", views.edit_quiz, name="edit_quiz"),
-    path("edit_quiz_add_question/<int:quiz_id>", views.edit_quiz_add_question, name="edit_quiz_add_question"),
-    path("edit_quiz_add_support/<int:quiz_id>", views.edit_quiz_add_support, name="edit_quiz_add_support"),
+    path(
+        "edit_quiz_add_question/<int:quiz_id>",
+        views.edit_quiz_add_question,
+        name="edit_quiz_add_question",
+    ),
+    path(
+        "edit_quiz_add_support/<int:quiz_id>",
+        views.edit_quiz_add_support,
+        name="edit_quiz_add_support",
+    ),
     path("download_pdf/<int:quiz_id>/", views.download_pdf, name="download_pdf"),
     path("create_support/<int:quiz_id>", views.create_support, name="create_support"),
     path("edit_support/<int:quiz_id>/<int:support_id>/", views.edit_support, name="edit_support"),
@@ -48,4 +61,5 @@ urlpatterns = [
     path("delete_quiz/<int:quiz_id>/", views.delete_quiz, name="delete_quiz"),
     path("create_question/", views.create_question, name="create_question"),
     path("edit_question/<int:question_id>/", views.edit_question, name="edit_question"),
+    path("question_approval/", views.question_approval, name="question_approval"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

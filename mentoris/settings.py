@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.conf import settings
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "multiupload",
 ]
 
 MIDDLEWARE = [
@@ -56,7 +59,11 @@ ROOT_URLCONF = "mentoris.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["mentoris/templates", "mentapp/templates,"],
+        "DIRS": [
+            "mentoris/templates",
+            "mentapp/templates,",
+            os.path.join(settings.BASE_DIR, "/mentoris/templates/mentapp"),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

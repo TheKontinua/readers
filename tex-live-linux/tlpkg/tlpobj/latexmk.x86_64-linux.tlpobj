@@ -1,0 +1,8 @@
+name latexmk.x86_64-linux
+category Package
+revision 10937
+shortdesc x86_64-linux files of latexmk
+containersize 340
+containerchecksum d0d78524ebd8aecbd3f2646030150d37283be92d852aadc75c1efa33b08e1b73c6365ce4e41e86eb5626d819e75140c7fe4caf772f472b51810b7b0868f0aa4d
+binfiles arch=x86_64-linux size=1
+ bin/x86_64-linux/latexmk
