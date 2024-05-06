@@ -56,12 +56,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "mentoris.urls"
 
+# Locations checked for templates may look a little strange,
+# but, this is needed to work on Elastic Beanstalk
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             "mentoris/templates",
             "mentapp/templates,",
+            os.path.join(settings.BASE_DIR, "/mentoris/templates/"),
             os.path.join(settings.BASE_DIR, "/mentoris/templates/mentapp"),
         ],
         "APP_DIRS": True,
@@ -80,6 +83,7 @@ WSGI_APPLICATION = "mentoris.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+
 
 
 STORAGES = {
@@ -125,7 +129,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
 STATIC_URL = "static/"
 STATIC_ROOT = "static"
 STATICFILES_DIRS = ["mentoris/static"]
