@@ -50,7 +50,39 @@
                       <span class="input-group-text">Other Email Addresses</span>
                       <input type="email" multiple class="form-control" name="other_emails" aria-label="other-emails" value = "{{other_email}}" placeholder="email1@email.com, email2@email.com"></input>
                     </div>
-                </div> 
+                </div>
+
+                {% load static %}
+                {% for handle in handles %}
+                  <div class="container" style="margin-top: 15px"></div>
+                  <div>
+                  {% if handle.site.site_id == "github" %}
+                  <div class="form-group mb-3">
+                    <div class="input-group">
+                      <img
+                        src="{% static 'github-icon.png' %}"
+                        alt="GitHub Icon"
+                        height="30"
+                    />
+                    <input type="text" class="form-control" name="github" id="github" value ="{{ handle.handle }}" style="cursor: not-allowed" readonly>
+                    
+                    </div>
+                  </div>
+                  {% elif handle.site.site_id == "x" %}
+                  <div class="form-group mb-3">
+                    <div class="input-group">
+                      <img
+                        src="{% static 'x-icon.png' %}"
+                        alt="X Icon"
+                        height="30"
+                    />
+                    <input type="text" class="form-control" name="x" id="x" value ="{{ handle.handle }}" style="cursor: not-allowed" readonly>
+                    
+                    </div>
+                  </div>
+                  {% endif %}
+                  </div>
+                {% endfor %}
           </div>
           <div class="col-md-6" style="margin-top: 23px;">
               
@@ -84,10 +116,10 @@
                   </div>
                 </div>
                 <div class="button-container" style="display: flex; margin-top: 43px; justify-content: space-between;">
-                <button type="button" onclick="window.location.href='/reset_password'" class="btn btn-primary">Reset Password</button>
-                <button type="button" class="btn btn-primary">Edit Handles</button>
-                <button type="button" class="btn btn-primary">Request Authentication</button>
-                <button type="submit" class="btn btn-primary" style="margin-left: 100px;">Save</button>
+                  <button type="button" onclick="window.location.href='/reset_password'" class="btn btn-primary">Reset Password</button>
+                  <button type="button" class="btn btn-primary">Edit Handles</button>
+                  <button type="button" class="btn btn-primary">Request Authentication</button>
+                  <button type="submit" class="btn btn-primary" style="margin-left: 100px;">Save</button>
                 </div>
           </div>
           </div>
