@@ -1,7 +1,21 @@
-import json, os
+import base64
+import json, os, random
+from datetime import date
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
+from django.core.mail import EmailMessage
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
+from django.template.loader import render_to_string
 from django.urls import resolve
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from functools import wraps
 from mentapp.models import (
     Handle,
     Question_Attachment,
@@ -26,17 +40,9 @@ from mentapp.models import (
     Support_Attachment,
     Quiz_Support,
 )
-from mentoris.forms import UserForm, LatexForm
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from django.core.mail import send_mail
-from django.core.files.base import ContentFile
-from django.contrib.auth.decorators import login_required
-from datetime import date
+from mentoris.email_verification_token_generator import email_verification_token
+from mentoris.forms import UserForm, LatexForm, QuizForm
 from mentoris.latex_to_pdf import latex_to_pdf
-
-from functools import wraps
 
 
 def mentor_req(view_func):
@@ -73,7 +79,6 @@ def quizmaker_req(view_func):
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
-
 
 
 def admin_req(view_func):
@@ -305,7 +310,7 @@ def sign_up(request):
                 username=email, password=request.POST.get("password_hash")
             )
             login(request, user)
-            return redirect(f"../profile/{user.user_id}")
+            return redirect("verify_email")
         return render(
             request,
             "mentapp/sign_up.html",
@@ -322,8 +327,54 @@ def profile(request):
     return HttpResponse(template.render())
 
 
+def reset(request):
+    if request.method == "POST":
+        email_address = request.POST.get("email")
+        user = User.objects.get(email=email_address)
+        current_site = get_current_site(request)
+        subject = "Reset your password"
+        message = render_to_string(
+            "mentapp/reset_password_message.html",
+            {
+                "request": request,
+                "user": user,
+                "domain": current_site.domain,
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                "token": email_verification_token.make_token(user),
+            },
+        )
+        email = EmailMessage(
+            subject, message, "notifications@kontinua.org", [email_address]
+        )
+        email.content_subtype = "html"
+        email.send()
+        return JsonResponse({"success": True})
+    return render(request, "mentapp/reset.html")
+
+
+def verify_reset(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user and email_verification_token.check_token(user, token):
+        return redirect(f"/reset_password")
+    else:
+        messages.warning(request, "The link is invalid.")
+    return render(request, "mentapp/verify_email_confirm.html")
+
+
 def reset_password(request):
-    return render(request, "mentapp/reset_password.html")
+    if request.method == "POST":
+        email = request.POST.get("email")
+        user = User.objects.get(email=email)
+        new_password = request.POST.get("new_password")
+        user.set_password(new_password)
+        user.save()
+        return JsonResponse({"success": True})
+    else:
+        return render(request, "mentapp/reset_password.html")
 
 
 def customLogin(request):
@@ -1084,22 +1135,70 @@ def user_edit(request, user_id):
     return redirect(f"/profile/{user.user_id}")
 
 
-def request_translation(request, user_id):
-    # need to verify email to ses when they sign up in order for this to work
-    email = get_object_or_404(Email, user_id=user_id, is_primary=True)
-    primary_language = get_object_or_404(User.primary_language, user_id=user_id)
-    send_mail(
-        "Kontinua Quiz Questions Translations Request",
-        "Hi there! We have noticed you are fluent in "
-        + primary_language
-        + ". This week these questions were added in "
-        + primary_language
-        + ". I can do a preliminary translation to "
-        + primary_language
-        + " using Google Translate. Would you look at and correct those preliminary translations?  Click here.",
-        "notifications@kontinua.org",
-        [email],
-    )
+def verify_email(request):
+    if request.method == "POST":
+        email_address = request.user.email
+        email_object = Email.objects.get(email_address=email_address)
+
+        if not email_object.is_verified:
+            current_site = get_current_site(request)
+            user = request.user
+            subject = "Verify Email"
+            message = render_to_string(
+                "mentapp/verify_email_message.html",
+                {
+                    "request": request,
+                    "user": user,
+                    "domain": current_site.domain,
+                    "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                    "token": email_verification_token.make_token(user),
+                },
+            )
+            email = EmailMessage(
+                subject, message, "notifications@kontinua.org", [email_address]
+            )
+            email.content_subtype = "html"
+            email.send()
+            return JsonResponse({"success": True})
+        else:
+            return redirect("signUp")
+    return render(request, "mentapp/verify_email.html")
+
+
+def verify_email_confirm(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user and email_verification_token.check_token(user, token):
+        email = request.user.email
+        email_object = Email.objects.get(email_address=email)
+        email_object.is_verified = True
+        email_object.save()
+        messages.success(request, "Your email has been verified.")
+        return redirect(f"/profile/{user.user_id}")
+    else:
+        messages.warning(request, "The link is invalid.")
+    return render(request, "mentapp/verify_email_confirm.html")
+
+
+# def request_translation(request, user_id):
+#     # need to verify email to ses when they sign up in order for this to work
+#     email = get_object_or_404(Email, user_id=user_id, is_primary=True)
+#     primary_language = get_object_or_404(User.primary_language, user_id=user_id)
+#     send_mail(
+#         "Kontinua Quiz Questions Translations Request",
+#         "Hi there! We have noticed you are fluent in "
+#         + primary_language
+#         + ". This week these questions were added in "
+#         + primary_language
+#         + ". I can do a preliminary translation to "
+#         + primary_language
+#         + " using Google Translate. Would you look at and correct those preliminary translations?  Click here.",
+#         "notifications@kontinua.org",
+#         [email],
+#     )
 
 
 def download_pdf(request, quiz_id):
