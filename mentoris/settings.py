@@ -63,7 +63,7 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             "mentoris/templates",
-            "mentapp/templates,",
+            "mentapp/templates",
             os.path.join(settings.BASE_DIR, "/mentoris/templates/"),
             os.path.join(settings.BASE_DIR, "/mentoris/templates/mentapp"),
         ],
