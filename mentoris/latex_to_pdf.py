@@ -54,8 +54,6 @@ def getChapterNum(volume, chapter):
 
 # Converts page size to vspace
 def pagesRequiredToSpacing(pages, answer_length=0):
-    # centimeters = round(pages * 29.7, 2)
-    # return str(centimeters) + "cm"
     em = pages * 50 - answer_length
     return str(em) + "em"
 
