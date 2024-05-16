@@ -118,15 +118,17 @@
                 <div class="button-container" style="display: flex; margin-top: 43px; justify-content: space-between;">
                   <button type="button" onclick="window.location.href='/reset_password'" class="btn btn-primary">Reset Password</button>
                   <button type="button" class="btn btn-primary">Edit Handles</button>
-                  <button type="button" class="btn btn-primary">Request Authentication</button>
+                  <button id="request-btn" class="btn btn-primary">{{ request_btn }}</button>
                   <button type="submit" class="btn btn-primary" style="margin-left: 100px;">Save</button>
                 </div>
           </div>
           </div>
+          <hr/>
+          <div id="request_status"></div>
         </div>
     </form>
     <iframe src="footer.html" width="100%" height="50px" style="position: absolute; bottom: 0;" frameborder="0"></iframe>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script>
       (function () {
@@ -149,5 +151,33 @@
           })
       })()
     </script>
-</body>
+    <script type = "text/javascript">
+      $(document).ready(function() {
+          $('#request-btn').on('click', function(e){
+            e.preventDefault();
+            let request = $.ajax({
+                type: "POST",
+                url: "/profile/{{ user_profile.user_id }}/",
+                dataType: 'json',
+                data: {
+                  csrfmiddlewaretoken: "{{csrf_token}}",
+                  command: "request-auth"
+                }
+            });
+
+            request.done(function() {
+                const request_status = document.getElementById("request_status");
+                const request_date = new Date();
+                request_status.innerHTML = "Your promotion request has been submitted at " + request_date.toString() + ". We will update you on your status shortly.";
+            });
+
+            request.fail(function(){
+                const request_status = document.getElementById("request_status");
+                const request_date = new Date();
+                request_status.innerHTML = "There was an error submitting your promotion request at " + request_date.toString() + ".";
+            });
+          });
+      });
+    </script>
+  </body>
 </html>
