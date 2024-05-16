@@ -53,9 +53,9 @@ def getChapterNum(volume, chapter):
 
 
 # Converts page size to vspace
-def pagesRequiredToSpacing(pages):
-    centimeters = round(pages * 29.7, 2)
-    return str(centimeters) + "cm"
+def pagesRequiredToSpacing(pages, answer_length=0):
+    em = pages * 50 - answer_length
+    return str(em) + "em"
 
 
 """
@@ -195,8 +195,9 @@ def latex_to_pdf(latex_question_list, support_list, quiz_data):
             output_file.write(r"\vspace{0.2cm}" + "\n")
             output_file.write(r"\begin{center}" + "\n")
 
-            blob_filename = blob.filename[:-4]
-            # change to be based where the last period is
+            # removes file extension from  file_name
+            dotIndex = blob.filename[::-1].find(".")
+            blob_filename = blob.filename[: -1 * dotIndex - 1]
 
             output_file.write(
                 r"\includegraphics[width=2cm]{" + blob_filename + r"}" + "\n"
@@ -204,11 +205,9 @@ def latex_to_pdf(latex_question_list, support_list, quiz_data):
             output_file.write(r"\end{center}" + "\n")
 
             files_to_remove.append(final_path)
-            # os.remove(final_path)
 
-    if len(latex_question_list) > 0: # Checks if quiz is empty
+    if len(latex_question_list) > 0:  # Checks if quiz is empty
         output_file.write(r"\begin{enumerate}" + "\n\n")
-        # output_file.write(r"\clearpage" + "\n")
         output_file.write(r"\vspace{0.25cm}" + "\n")
 
         for question_loc in latex_question_list:
@@ -240,8 +239,9 @@ def latex_to_pdf(latex_question_list, support_list, quiz_data):
                 output_file.write(r"\vspace{0.2cm}" + "\n")
                 output_file.write(r"\begin{center}" + "\n")
 
-                blob_filename = blob.filename[:-4]
-                # change to be based where the last period is
+                # removes file extension from  file_name
+                dotIndex = blob.filename[::-1].find(".")
+                blob_filename = blob.filename[: -1 * dotIndex - 1]
 
                 output_file.write(
                     r"\includegraphics[width=2cm]{" + blob_filename + r"}" + "\n"
@@ -249,10 +249,64 @@ def latex_to_pdf(latex_question_list, support_list, quiz_data):
                 output_file.write(r"\end{center}" + "\n")
 
                 files_to_remove.append(final_path)
-                # os.remove(final_path)
 
             pages_required = question_loc.question.pages_required
             spacingString = pagesRequiredToSpacing(pages_required)
+            output_file.write(r"\vspace{" + spacingString + r"}" + "\n\n")
+
+        output_file.write(r"\end{enumerate}" + "\n")
+
+    # Answer Key
+    if len(latex_question_list) > 0:  # Checks if quiz is empty
+        output_file.write(r"\newpage")
+        output_file.write(r"\setcounter{page}{1}")
+        output_file.write(r"\begin{center}")
+        output_file.write(r"\LARGE Answer Key")
+        output_file.write(r"\vspace{0.5em}")
+        output_file.write(r"\end{center}")
+        output_file.write(r"\begin{enumerate}" + "\n\n")
+        output_file.write(r"\vspace{0.25cm}" + "\n")
+
+        for question_loc in latex_question_list:
+            latex_question = question_loc.question_latex
+            point = int(question_loc.question.point_value)
+            plural = "" if point == 1 else "s"
+            output_file.write(
+                r"\item ("
+                + str(point)
+                + r" point"
+                + plural
+                + r") "
+                + latex_question
+                + "\n\n"
+            )
+
+            attachment_list = Question_Attachment.objects.filter(question=question_loc)
+            for attachment in attachment_list:
+                blob = attachment.blob_key
+
+                shutil.copy(blob_path, final_path)
+
+                output_file.write(r"\vspace{0.2cm}" + "\n")
+                output_file.write(r"\begin{center}" + "\n")
+
+                # removes file extension from  file_name
+                dotIndex = blob.filename[::-1].find(".")
+                blob_filename = blob.filename[: -1 * dotIndex - 1]
+
+                output_file.write(
+                    r"\includegraphics[width=2cm]{" + blob_filename + r"}" + "\n"
+                )
+                output_file.write(r"\end{center}" + "\n")
+
+            answer_latex = question_loc.answer_latex
+            output_file.write(r"\color{red}")
+            output_file.write(answer_latex + "\n\n")
+            output_file.write(r"\color{black}")
+            answer_length = str(answer_latex).count("\n") + 1
+
+            pages_required = question_loc.question.pages_required
+            spacingString = pagesRequiredToSpacing(pages_required, answer_length)
             output_file.write(r"\vspace{" + spacingString + r"}" + "\n\n")
 
         output_file.write(r"\end{enumerate}" + "\n")
@@ -263,11 +317,9 @@ def latex_to_pdf(latex_question_list, support_list, quiz_data):
 
     if str(os.name) == "posix":
         tex_live_folder = "tex-live-linux"
-        # latex_exe = "pdflatex.exe"
         os_folder = "x86_64-linux"
     else:
         tex_live_folder = "tex-live"
-        # latex_exe = "pdflatex"
         os_folder = "windows"
 
     # Path to pdflatex command
