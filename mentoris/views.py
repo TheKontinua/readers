@@ -1201,7 +1201,7 @@ def verify_email(request):
             email.send()
             return JsonResponse({"success": True})
         else:
-            return redirect("signUp")
+            return redirect("sign_up")
     return render(request, "mentapp/verify_email.html")
 
 
@@ -1211,13 +1211,15 @@ def verify_email_confirm(request, uidb64, token):
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
+
     if user and email_verification_token.check_token(user, token):
-        email = request.user.email
+        email = user.email
         email_object = Email.objects.get(email_address=email)
         email_object.is_verified = True
         email_object.save()
         messages.success(request, "Your email has been verified.")
-        return redirect(f"/profile/{user.user_id}")
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return redirect("user_info", user_id=user.user_id)
     else:
         messages.warning(request, "The link is invalid.")
     return render(request, "mentapp/verify_email_confirm.html")
