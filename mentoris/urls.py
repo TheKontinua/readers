@@ -48,4 +48,5 @@ urlpatterns = [
     path("delete_quiz/<int:quiz_id>/", views.delete_quiz, name="delete_quiz"),
     path("question_approval/", views.question_approval, name="question_approval"),
     path("handles/", views.handles, name="handles"),
+    path('delete-handle/<str:handle>/<int:site_id>/<uuid:user_id>', views.delete_handle, name='delete_handle'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
