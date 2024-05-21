@@ -1245,9 +1245,32 @@ def verify_email_confirm(request, uidb64, token):
 
 def download_pdf(request, quiz_id):
     quiz_instance = get_object_or_404(Quiz, quiz_id=quiz_id)
-    quiz_rendering_instance = Quiz_Rendering.objects.filter(quiz=quiz_instance).latest(
-        "date_created"
-    )
+    try:
+        quiz_rendering_instance = Quiz_Rendering.objects.filter(
+            quiz=quiz_instance
+        ).latest("date_created")
+    except:
+        # function that saves the PDF
+        question_list = []
+        support_list = []
+
+        quiz_question_list = Quiz_Question.objects.filter(quiz=quiz_instance)
+        for quiz_question in quiz_question_list:
+            question_meta = quiz_question.question
+            question_content = get_object_or_404(Question_Loc, question=question_meta)
+            question_list.append(question_content)
+
+        quiz_support_list = Quiz_Support.objects.filter(quiz=quiz_instance)
+        for quiz_support in quiz_support_list:
+            support_meta = quiz_support.support
+            support_content = get_object_or_404(Support_Loc, support=support_meta)
+            support_list.append(support_content)
+        try:
+            latex_to_pdf(question_list, support_list, quiz_instance)
+        except:
+            print("Failed to save pdf")
+            raise SystemError
+        return download_pdf(request, quiz_id)
     blob_instance = quiz_rendering_instance.blob_key
 
     response = HttpResponse(blob_instance.file, content_type="application/pdf")
