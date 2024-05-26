@@ -12,7 +12,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static '/css/colors.css'%}">
     <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
-    <script src= "{% static '/scripts/generate_quiz_html.js' %}"></script>
+    <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
     <script>
@@ -44,28 +44,7 @@
         .add_support_do_not_add_state {
             background: var(--KontinuaRed);
         }
-
-        .edit_question {
-                border: 2px solid Black;
-                border-radius: 25px;
-                margin: 5px;
-                width: 8em;
-                height: 2em;
-                font-weight: bold;
-            }
-
-            .edit_question:hover{
-                background-color: var(--KontinuaBlue);
-                color: white;
-            }
-
-        #quiz_content {
-            width: 35em;
-            padding: 10px;
-            margin-bottom: 0px;
-        }
     </style>
-
 </head>
 
 <body>
@@ -75,16 +54,17 @@
     <iframe src="header.html" width="100%" height="95px" frameBorder="0"
         style="display: block; padding: 0px; margin: 0px;"></iframe>
 
-    <div id="left_panel">
-        <button id="back_button" onclick="confirmLeave()" type="button">Back</button>
-        <div id="quiz_content" class="bordered">
-            <ul id="supports_list" style="list-style-type:none;">
-            </ul>
-        </div>
-    </div>
+    <ul class="unbulleted_list">
+        <li><button id="back_button" onclick="confirmLeave()" type="button">Back</button></li>
+        <li>
+            <div id="quiz_content" class="bordered">
+                <ul id="supports_list"  class="unbulleted_list"></ul>
+            </div>
+        </li>
+    </ul>
 
-    <!--Div for filters-->
-    <div id="right_panel" style="width: 25em;">
+    <!--Div for filters -->
+    <div id="right_panel">
         <div class="bordered" id="meta_data">
             <div>
                 <div class="filter_wrapper">
@@ -117,12 +97,7 @@
         <button id="save_changes_button">Save Additions</button>
         <button id="filter_button">Search</button>
         <br>
-        <form action="{% url 'create_support' quiz_id=quiz_id%}" method="post">
-            {% csrf_token %}
-            <button style="width: 200px;" type="submit">
-                Create New Support
-            </button>
-        </form>
+        <button id="create_support" style="width: 200px;" onclick="location.href='/create_support/'">Create New Support</button>
         <div id="save_status" class="bordered"></div>
     </div>
 
@@ -174,7 +149,6 @@
 
 
         $(document).ready(function () {
-
             $('.add_support_button').on('click', function (event) {
                 toggle_add(this);
             });
@@ -196,11 +170,16 @@
                             creator: creator_value,
                             title: title
                         }
-                        
                     });
                 
                 request.done(function (data) {
-                    document.getElementById("supports_list").innerHTML = "";
+                    support_list = document.getElementById("supports_list");
+                    support_list.innerHTML = "";
+                    
+
+                    /**
+                    * TODO extract this code into a .js file, a lot of this will be needed on the edit support page
+                    */
                     for (const i in data) {
                         var list_item = document.createElement("li");
                         list_item.id = data[i]["support_id"];
@@ -226,62 +205,26 @@
                             toggle_add(event.target);
                         });
 
-                        var edit_button = document.createElement("button");
-                        edit_button.innerHTML = "Edit";
-                        edit_button.addEventListener('click', function (event) {
-                            let supports_list = document.getElementById("supports_list");
-                            let list = supports_list.children;
-                            let index = -1;
-
-                            for (let i = 0; i < list.length; ++i) {
-                                if (list[i].contains(event.target)) {
-                                    index = i;
-                                    break; // Once found, exit the loop
-                                }
-                            }
-
-                            if (index !== -1) {
-                                let support_id = list[index].id;
-                                if (support_id) {
-                                    var pathname = window.location.pathname;
-                                    var segments = pathname.split('/');
-                                    var quiz_id = segments[segments.length - 1];
-                                    window.location.href = "/edit_support/" + quiz_id + "/"+support_id;
-                                } else {
-                                    console.error('Support ID not found');
-                                }
-                            } else {
-                                console.error('Element not found in list');
-                            }
-                        });
-
                         $(add_button).addClass("add_support_button");
                         $(add_button).addClass("add_support_add_state");
                         $(add_button).addClass("bold_font");
-                        $(edit_button).addClass("edit_question");
-
-                        let ul = document.createElement("ul");
-                        ul.className = "unbulleted_list";
-                        let add_button_li = document.createElement("li");
-                        let edit_button_li = document.createElement("li");
-                        add_button_li.appendChild(add_button);
-                        edit_button_li.appendChild(edit_button);
-                        ul.appendChild(add_button_li);
-                        ul.appendChild(edit_button_li);
-                        button_wrapper.appendChild(ul);
-                        
+                        button_wrapper.appendChild(add_button);
                         border_wrapper.appendChild(button_wrapper);
-
-                        //var latex_wrapper =  generate_latex(data[i]["support_latex"], data[i]["attachment_urls"]);
                         
-                        document.createElement("div");
-                        //latex_wrapper.style.clear = "both";
-
-                        var latex = document.createElement("latex-js");
-
-                        //border_wrapper.appendChild(latex_wrapper);
-                        list_item.appendChild(border_wrapper);
-                        document.getElementById("supports_list").appendChild(list_item);
+                        let latex_wrapper = document.createElement("iframe");
+                        latex_wrapper.src = "/latex_window/support/" + data[i]["support_id"] + "/"+ widthHTMLElement(border_wrapper) + "/" ;
+                        border_wrapper.appendChild(latex_wrapper);
+                
+                        support_list.appendChild(border_wrapper);
+                        border_wrapper.appendChild(list_item);
+                        initLatexFrame(latex_wrapper);
+                        latex_wrapper.contentWindow.addEventListener(
+                            "message",
+                            (event) => {
+                                border_wrapper.style.height= (200 + latex_wrapper.contentDocument.body.scrollHeight) + "px";
+                            },
+                            false,
+                        );
                     }
                 });
 
@@ -351,9 +294,8 @@
             const modal = document.getElementById('customModal');
             modal.style.display = 'none';
         }
+
     </script>
 
 </body>
-
-
 </html>
