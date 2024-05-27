@@ -45,8 +45,9 @@ function generate_latex(text, names, urls, box_width){
         prototype['includegraphics'] = function(width, given_name) {
             let image = document.createElement("img");
             for(let i = 0; i < names.length; ++i){
-                let raw_name = names[i].substring(names[i].lastIndexOf("."), names[i].length);
-                if(given_name === raw_name){
+                let raw_name = names[i].substring(0, names[i].lastIndexOf("."));
+                console.log(raw_name);
+                if(given_name == raw_name){
                     image.src = (urls[i]);
                 }
             }
@@ -161,47 +162,9 @@ function make_attribute_label(name, value_class, value){
 }
 
 
-function clone_question(question_wrapper){
-    let new_wrapper = document.createElement("div");
-    $(new_wrapper).addClass("bordered");
-    let old_metadata = question_wrapper.getElementsByClassName("question_metadata")[0];
-    let old_iframe = question_wrapper.querySelector("iframe");
-
-
-    let new_metadata = old_metadata;
-    new_wrapper.appendChild(new_metadata);
-    let new_buttons = question_wrapper.getElementsByClassName("quiz_display_button_wrapper")[0];
-    new_wrapper.appendChild(new_buttons);
-    let new_iframe = document.createElement("iframe");
-    new_wrapper.appendChild(new_iframe);
-    new_iframe.src = old_iframe.src;
-    return new_wrapper;
-}
-
-function init_clone(question_wrapper){
-    let iframe = question_wrapper.querySelector("iframe");
-    console.log(iframe);
-    console.log("attempting to init....");
-    initLatexFrame(iframe);
-    iframe.contentWindow.addEventListener(
-        "message",
-        (event) => {
-            console.log("message recieved");
-            question_wrapper.style.height= (200 + iframe.contentDocument.body.offsetHeight) + "px";
-        }
-      );
-}
-
-function redisplay_questions(question_container_id, button_function, quiz_state){
-    let container = document.getElementById(question_container_id);
-    container.innerHTML = "";
-    console.log("enter redisplay");
-    console.log(quiz_state);
-    for(let [key, data] of quiz_state){
-        console.log("enter loop");
-        console.log(key);
-        console.log(data);
-        let list_item = document.createElement("li");
+// helper function to display 1 question
+function display_question(data, container, button_function, isQuizQuestion, isInitial, quiz_state){
+    let list_item = document.createElement("li");
         list_item.id = data["question_id"];
                             
         // border for each question
@@ -212,7 +175,11 @@ function redisplay_questions(question_container_id, button_function, quiz_state)
         let question_wrapper = document.createElement("div");
         question_wrapper.style.float = "left";
         $(question_wrapper).addClass("question_metadata");
-            question_wrapper.appendChild(make_attribute_label("Ordering: ", "question_ordering", "" + key));
+        if(isQuizQuestion){
+            if(isInitial)
+                quiz_state.set(data["ordering"], data);
+            question_wrapper.appendChild(make_attribute_label("Ordering: ", "question_ordering", data["ordering"]));
+        }
         
         // add attribute labels
         question_wrapper.appendChild(make_attribute_label("Difficulty: ", "conceptual_difficulty", data["conceptual_difficulty"]));
@@ -244,10 +211,33 @@ function redisplay_questions(question_container_id, button_function, quiz_state)
         latex_wrapper.contentWindow.addEventListener(
             "message",
             (event) => {
-                console.log("message recieved");
                 border_wrapper.style.height= (200 + latex_wrapper.contentDocument.body.offsetHeight) + "px";
             }
           );
+}
+
+
+/**
+ * Function to display quiz questions in a given container (no return value)
+ * @param {Object} data[i] - A JavaScript object containing the data for the quiz questions to display
+ * @param {Object} data[i] - A JavaScript object containing the data for a quiz question to display
+ * @param {string} data[i].conceptual_difficulty - A string of the difficulty of this question
+ * @param {string} data[i].volume - A string of the volume of this question
+ * @param {string} data[i].chapter - A string of the chapter of this question
+ * @param {string} data[i].creator - A string of the creator of this question
+ * @param {string} data[i].point_value - A string of the point value of this question
+ * @param {string} data[i].time_required_mins - A string of the time required in minutes of this question
+ * @param {string} question_container_id - The html id of the container to display the quiz questions in
+ * @param {function} button_function  - The function to add buttons to the right of the attributes 
+ * (needs to have a parameter to accept the div to add the buttons to)
+ * @param {string} data[i].ordering - A string of the ordering of this question (only required if areQuizQuestions)
+ * @param {dict} data[i].quiz_state - A dictionary to map order (int) to data representing the order questions should be displayed in
+ */
+function redisplay_questions(question_container_id, button_function, quiz_state){
+    let container = document.getElementById(question_container_id);
+    container.innerHTML = "";
+    for(let [key, data] of quiz_state){
+        display_question(data, container, button_function, true, false, quiz_state)
     };
 }
 
@@ -267,61 +257,12 @@ function redisplay_questions(question_container_id, button_function, quiz_state)
  * @param {boolean} areQuizQuestions - A boolean representing if this list are questions or quiz questions
  * (questions don't have ordering, but quiz questions do)
  * @param {string} data[i].ordering - A string of the ordering of this question (only required if areQuizQuestions)
+ * @param {dict} data[i].quiz_state - An empty dictionary to map order (int) to data
  */
 function display_questions(data, question_container_id, button_function, areQuizQuestions, quiz_state){
     let container = document.getElementById(question_container_id);
     container.innerHTML = "";
     for(const i in data){
-        let list_item = document.createElement("li");
-        list_item.id = data[i]["question_id"];
-                            
-        // border for each question
-        let border_wrapper = document.createElement("div");
-        $(border_wrapper).addClass("bordered");
-                        
-        // wrapper containing question meta data
-        let question_wrapper = document.createElement("div");
-        question_wrapper.style.float = "left";
-        $(question_wrapper).addClass("question_metadata");
-        if(areQuizQuestions){
-                console.log(data[i]);
-                quiz_state.set(data[i]["ordering"], data[i]);
-            question_wrapper.appendChild(make_attribute_label("Ordering: ", "question_ordering", data[i]["ordering"]));
-        }
-        
-        // add attribute labels
-        question_wrapper.appendChild(make_attribute_label("Difficulty: ", "conceptual_difficulty", data[i]["conceptual_difficulty"]));
-        question_wrapper.appendChild(make_attribute_label("Volume: ", "volume", data[i]["volume"]));
-        question_wrapper.appendChild(make_attribute_label("Chapter: ", "chapter", data[i]["chapter"]));
-        question_wrapper.appendChild(make_attribute_label("Creator: ", "creator", data[i]["creator"]));
-        question_wrapper.appendChild(make_attribute_label("Point Value: ", "point_value", data[i]["point_value"]));
-        question_wrapper.appendChild(make_attribute_label("Time (minutes): ", "time_required_mins", data[i]["time_required_mins"]));
-        border_wrapper.appendChild(question_wrapper);
-
-        // wrapper for buttons
-        let button_wrapper = document.createElement("div");
-        button_wrapper.style.float = "right";
-        $(button_wrapper).addClass("quiz_display_button_wrapper");
-
-        // add buttons using function
-        button_function(button_wrapper);
-        border_wrapper.appendChild(button_wrapper);
-
-        // add LaTeX
-        let latex_wrapper = document.createElement("iframe");
-        latex_wrapper.src = "/latex_window/question/" + data[i]["question_id"] + "/"+ 
-                            "question" + "/" + widthHTMLElement(container) + "/" ;
-        border_wrapper.appendChild(latex_wrapper);
-
-        list_item.appendChild(border_wrapper);
-        container.appendChild(list_item);
-        initLatexFrame(latex_wrapper);
-        latex_wrapper.contentWindow.addEventListener(
-            "message",
-            (event) => {
-                console.log("message recieved");
-                border_wrapper.style.height= (200 + latex_wrapper.contentDocument.body.offsetHeight) + "px";
-            }
-          );
+        display_question(data[i], container, button_function, areQuizQuestions, true, quiz_state)
     };
 }
