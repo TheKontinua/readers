@@ -3,7 +3,7 @@ import json, os, random
 from datetime import date
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.base import ContentFile
@@ -1586,3 +1586,7 @@ def edit_question(request, question_id):
                 "chapter": chapter_object,
             },
         )
+def customLogout(request):
+    if request.method == "GET":
+        logout(request)
+    return render(request, "mentapp/login.html")
