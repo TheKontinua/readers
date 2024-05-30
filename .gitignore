@@ -145,3 +145,7 @@ mentapp/migrations/*
 media/pdfs/*
 pdfs/
 question_attachments/
+
+# Latex Stuff
+docs/latex/output_quiz.aux
+docs/latex/output_quiz.tex
