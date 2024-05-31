@@ -387,12 +387,12 @@ def customLogin(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         user = authenticate(request, username=email, password=password)
-        if user is not None and not user.is_verified:
-            login(request, user)
-            return render(request, "mentapp/verify_email.html")
-        elif user is not None and user.is_verified or user.is_quizmaker and not user.is_admin:
+        if user is not None and user.is_verified or user.is_quizmaker or user.is_admin:
             login(request, user)
             return render(request, "mentapp/main.html")
+        elif user is not None and not user.is_verified:
+            login(request, user)
+            return render(request, "mentapp/verify_email.html")
         else:
             messages.error(
                 request,
