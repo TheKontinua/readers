@@ -1173,7 +1173,6 @@ def create_support(request):
 
 def handles(request): 
     if request.method == 'POST':
-        print(request.POST.get("platform"))
         if request.POST.get("platform") == 'twitter':
             sitechoice = Site.objects.get(site_id=1)
         elif request.POST.get("platform") == 'instagram':
@@ -1193,10 +1192,7 @@ def handles(request):
         )
         new_handle.save()
     user_handles = Handle.objects.filter(user=request.user)
-    for handle in user_handles:
-        print(handle.handle, handle.user)
     context = {'user_handles': user_handles}
-    print(context)
     return render(request, 'mentapp/handles.html', context)
 
 def delete_handle(request, handle, site_id, user_id):
