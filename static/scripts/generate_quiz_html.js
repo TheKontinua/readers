@@ -46,7 +46,6 @@ function generate_latex(text, names, urls, box_width){
             let image = document.createElement("img");
             for(let i = 0; i < names.length; ++i){
                 let raw_name = names[i].substring(0, names[i].lastIndexOf("."));
-                console.log(raw_name);
                 if(given_name == raw_name){
                     image.src = (urls[i]);
                 }

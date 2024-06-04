@@ -36,7 +36,6 @@
             request.done(function(data){
                 let filenames = [];
                 let urls = [];
-                console.log("attempting to add...");
                 for(const attachment of data["attachments"]){
                     filenames.push(attachment["filename"]);
                     urls.push(attachment["url"]);
