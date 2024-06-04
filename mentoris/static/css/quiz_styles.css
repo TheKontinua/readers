@@ -37,7 +37,7 @@ li {
 
 #right_panel {
     float: right;
-    width: 35em;
+    width: 40%;
 }
 #left_panel {
     float: left;
@@ -82,4 +82,11 @@ button:hover {
 
 .modalButton{
     width: 70%;
+}
+
+#quiz_content {
+    padding: 10px;
+    float: left;
+    margin-bottom: 0px;
+    width: 50%;
 }

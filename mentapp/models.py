@@ -327,7 +327,7 @@ class Support_Loc(models.Model):
     support = models.ForeignKey(Support, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
-    title_latex = models.CharField(max_length=100, null=True)
+    title = models.CharField(max_length=100, null=True)
     content_latex = models.CharField(max_length=500, null=True)
     date_created = models.DateTimeField(default=now)
     date_approved = models.DateTimeField(default=now)
@@ -358,9 +358,7 @@ class Support_Attachment(models.Model):
     support = models.ForeignKey(Support_Loc, null=True, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5)
     dialect_code = models.CharField(max_length=5)
-    filename = models.FileField(
-        upload_to="support_attachments/",
-    )
+    filename = models.CharField(max_length=255)
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
