@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
+from django.core.exceptions import ValidationError
+from django.urls import resolve, reverse
 from django.core.mail import EmailMessage
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
@@ -38,7 +40,9 @@ from mentapp.models import (
     Support,
     Support_Loc,
     Support_Attachment,
+    Site,
     Quiz_Support,
+    Handle
 )
 from mentoris.email_verification_token_generator import email_verification_token
 from mentoris.forms import UserForm, LatexForm, QuizForm
@@ -1666,3 +1670,36 @@ def edit_question(request, question_id):
             "chapter": chapter_object,
         },
     )
+
+def handles(request): 
+    if request.method == 'POST':
+        if request.POST.get("platform") == 'twitter':
+            sitechoice = Site.objects.get(site_id=1)
+        elif request.POST.get("platform") == 'instagram':
+            sitechoice = Site.objects.get(site_id=2)
+        elif request.POST.get("platform") == 'linkedin':
+            sitechoice = Site.objects.get(site_id=3)
+        elif request.POST.get("platform") == 'facebook':
+            sitechoice = Site.objects.get(site_id=4)
+        elif request.POST.get("platform") == 'github':
+            sitechoice = Site.objects.get(site_id=5)
+        elif request.POST.get("platform") == 'youtube':
+            sitechoice = Site.objects.get(site_id=6)
+        new_handle = Handle(
+            site = sitechoice, 
+            handle = request.POST.get("username"),
+            user = request.user,
+        )
+        new_handle.save()
+    user_handles = Handle.objects.filter(user=request.user)
+    context = {'user_handles': user_handles}
+    return render(request, 'mentapp/handles.html', context)
+
+def delete_handle(request, handle, site_id, user_id):
+    curr_user = get_object_or_404(User, user_id=user_id)
+    curr_site = get_object_or_404(Site, site_id=site_id)
+    handle = get_object_or_404(Handle, handle=handle, site=curr_site, user=curr_user)
+    if request.method == "POST":
+        handle.delete()
+    # Redirect to the referring page, or a default page if no referrer is found
+    return redirect(request.META.get("HTTP_REFERER", "/"))

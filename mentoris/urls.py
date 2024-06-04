@@ -84,4 +84,6 @@ urlpatterns = [
     path("create_question/", views.create_question, name="create_question"),
     path("edit_question/<int:question_id>/", views.edit_question, name="edit_question"),
     path("question_approval/", views.question_approval, name="question_approval"),
+    path("handles/", views.handles, name="handles"),
+    path('delete-handle/<str:handle>/<int:site_id>/<uuid:user_id>', views.delete_handle, name='delete_handle'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
