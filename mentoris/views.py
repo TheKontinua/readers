@@ -1653,22 +1653,23 @@ def edit_question(request, question_id):
     if "volume-button" not in request.POST:
         chapter_object = request.POST.get("chapter")
     else:
-        return render(
-            request,
-            "mentapp/edit_question.html",
-            {
-                "form": form,
-                "question_id": question_id,
-                "question": question,
-                "answer": answer,
-                "grading": grading,
-                "question_loc": question_loc,
-                "volumes": volumes,
-                "volume_id": volume_id,
-                "chapters": chapter_locs,
-                "chapter": chapter_object,
-            },
-        )
+        chapter_object = chapters[0]
+
+    return render(
+        request,
+        "mentapp/edit_question.html",
+        {
+            "form": form,
+            "question_id": question_id,
+            "question": question,
+            "answer": answer,
+            "grading": grading,
+            "volume_id": volume_id,
+            "volumes": volumes,
+            "chapters": chapter_locs,
+            "chapter": chapter_object,
+        },
+    )
 
 def handles(request): 
     if request.method == 'POST':
