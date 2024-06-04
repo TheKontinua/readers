@@ -346,3 +346,6 @@ INSERT INTO mentapp_chapter (chapter_id, ordering, volume_id) VALUES ('nn_classi
 INSERT INTO mentapp_chapter_loc (lang_code, dialect_code, title, chapter_id) VALUES ('en', 'US', 'Neural Networks for Classification', 'nn_classification');
 INSERT INTO mentapp_chapter (chapter_id, ordering, volume_id) VALUES ('deep_learning', 30.0, 36);
 INSERT INTO mentapp_chapter_loc (lang_code, dialect_code, title, chapter_id) VALUES ('en', 'US', 'Deep Learning', 'deep_learning');
+
+INSERT INTO mentapp_site (site_id) VALUES ('github');
+INSERT INTO mentapp_site (site_id) VALUES ('x');

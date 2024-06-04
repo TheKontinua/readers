@@ -1,0 +1,67 @@
+body {
+    margin: 0;
+}
+
+.container {
+    background-color: var(--KontinuaBlue);
+    padding: 10px;
+    margin: 0;
+    position: relative; 
+}
+
+.kontinua-logo {
+    border: 10px;
+    border-color: white;
+    border-style: solid;
+    border-radius: 5%;
+}
+
+.nav-container {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 10px;
+    margin-right: 30px;
+}
+
+.my-profile, .quizzes, .sign-in {
+    background-color: transparent;
+    color: white;
+    border: none;
+    font-size: 17px;
+    transition: 0.3s all ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.my-profile:hover, .quizzes:hover, .sign-in:hover {
+    color: var(--KontinuaYellow);
+    cursor: pointer;
+}
+
+.nav-logo{
+    width: 18px;
+    margin-bottom: -2px;
+}
+
+#my-profile-button, #quizzes-button, #sign-in-button{
+    margin-right: 30px;
+}
+
+#my-profile-button:hover, #quizzes-button:hover, #sign-in-button:hover{
+    cursor: pointer;
+    color: var(--KontinuaYellow);
+}
+
+#my-profile-button:hover .my-profile {
+    color: var(--KontinuaYellow);
+}
+
+#quizzes-button:hover .quizzes {
+    color: var(--KontinuaYellow);
+}
+
+#sign-in-button:hover .sign-in {
+    color: var(--KontinuaYellow);
+}

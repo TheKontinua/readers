@@ -12,7 +12,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static '/css/colors.css'%}">
     <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
-    <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
+    <script src= "{% static '/scripts/generate_quiz_html.js' %}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
     <script>
@@ -44,6 +44,20 @@
         .add_support_do_not_add_state {
             background: var(--KontinuaRed);
         }
+
+        .edit_question {
+                border: 2px solid Black;
+                border-radius: 25px;
+                margin: 5px;
+                width: 8em;
+                height: 2em;
+                font-weight: bold;
+            }
+
+            .edit_question:hover{
+                background-color: var(--KontinuaBlue);
+                color: white;
+            }
 
         #quiz_content {
             width: 35em;
@@ -103,7 +117,12 @@
         <button id="save_changes_button">Save Additions</button>
         <button id="filter_button">Search</button>
         <br>
-        <button id="create_support" style="width: 200px;" onclick="location.href='/create_support/'">Create New Support</button>
+        <form action="{% url 'create_support' quiz_id=quiz_id%}" method="post">
+            {% csrf_token %}
+            <button style="width: 200px;" type="submit">
+                Create New Support
+            </button>
+        </form>
         <div id="save_status" class="bordered"></div>
     </div>
 
@@ -175,8 +194,9 @@
                             command: "filter",
                             volume: volume_value,
                             creator: creator_value,
-                            title: title != ""?title : ""
+                            title: title
                         }
+                        
                     });
                 
                 request.done(function (data) {
@@ -206,20 +226,60 @@
                             toggle_add(event.target);
                         });
 
+                        var edit_button = document.createElement("button");
+                        edit_button.innerHTML = "Edit";
+                        edit_button.addEventListener('click', function (event) {
+                            let supports_list = document.getElementById("supports_list");
+                            let list = supports_list.children;
+                            let index = -1;
+
+                            for (let i = 0; i < list.length; ++i) {
+                                if (list[i].contains(event.target)) {
+                                    index = i;
+                                    break; // Once found, exit the loop
+                                }
+                            }
+
+                            if (index !== -1) {
+                                let support_id = list[index].id;
+                                if (support_id) {
+                                    var pathname = window.location.pathname;
+                                    var segments = pathname.split('/');
+                                    var quiz_id = segments[segments.length - 1];
+                                    window.location.href = "/edit_support/" + quiz_id + "/"+support_id;
+                                } else {
+                                    console.error('Support ID not found');
+                                }
+                            } else {
+                                console.error('Element not found in list');
+                            }
+                        });
+
                         $(add_button).addClass("add_support_button");
                         $(add_button).addClass("add_support_add_state");
                         $(add_button).addClass("bold_font");
-                        button_wrapper.appendChild(add_button);
+                        $(edit_button).addClass("edit_question");
+
+                        let ul = document.createElement("ul");
+                        ul.className = "unbulleted_list";
+                        let add_button_li = document.createElement("li");
+                        let edit_button_li = document.createElement("li");
+                        add_button_li.appendChild(add_button);
+                        edit_button_li.appendChild(edit_button);
+                        ul.appendChild(add_button_li);
+                        ul.appendChild(edit_button_li);
+                        button_wrapper.appendChild(ul);
+                        
                         border_wrapper.appendChild(button_wrapper);
 
-                        var latex_wrapper =  generate_latex(data[i]["support_latex"], data[i]["attachment_urls"]);
+                        //var latex_wrapper =  generate_latex(data[i]["support_latex"], data[i]["attachment_urls"]);
                         
                         document.createElement("div");
-                        latex_wrapper.style.clear = "both";
+                        //latex_wrapper.style.clear = "both";
 
                         var latex = document.createElement("latex-js");
 
-                        border_wrapper.appendChild(latex_wrapper);
+                        //border_wrapper.appendChild(latex_wrapper);
                         list_item.appendChild(border_wrapper);
                         document.getElementById("supports_list").appendChild(list_item);
                     }

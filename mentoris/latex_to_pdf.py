@@ -10,9 +10,11 @@ from mentapp.models import (
     Quiz_Rendering,
     Blob,
     Question_Attachment,
+    Support_Attachment,
 )
 
 TIMEOUT = 10  # try to render the PDF for 10 seconds before failing
+# TODO: It would probably be good to have some kind of loading icon while PDFs are rendering
 
 
 def generateRandomString(hashId):
@@ -52,9 +54,9 @@ def getChapterNum(volume, chapter):
 
 
 # Converts page size to vspace
-def pagesRequiredToSpacing(pages):
-    centimeters = round(pages * 29.7, 2)
-    return str(centimeters) + "cm"
+def pagesRequiredToSpacing(pages, answer_length=0):
+    em = pages * 50 - answer_length
+    return str(em) + "em"
 
 
 """
@@ -65,7 +67,8 @@ quiz_data: quiz object
 """
 
 
-def latex_to_pdf(latex_question_list, quiz_data):
+def latex_to_pdf(latex_question_list, support_list, quiz_data):
+    working_path = os.getcwd()
     script_path = os.path.dirname(__file__)
     file_location = os.path.join(script_path, "..", "docs", "latex", "output_quiz.tex")
     abs_file_location = os.path.abspath(file_location)
@@ -175,61 +178,170 @@ def latex_to_pdf(latex_question_list, quiz_data):
     output_file.write(r"}" + "\n")
     output_file.write(r"} %Ends helvetica" + "\n")
 
-    # TODO: Supports here
+    files_to_remove = []
 
-    output_file.write(r"\begin{enumerate}" + "\n\n")
-    # output_file.write(r"\clearpage" + "\n")
-    output_file.write(r"\vspace{0.25cm}" + "\n")
+    for support_loc in support_list:
+        support_latex = support_loc.content_latex
+        output_file.write(support_latex + "\n\n")
 
-    for question_loc in latex_question_list:
-        latex_question = question_loc.question_latex
-        point = int(question_loc.question.point_value)
-        plural = "" if point == 1 else "s"
-        output_file.write(
-            r"\item ("
-            + str(point)
-            + r" point"
-            + plural
-            + r") "
-            + latex_question
-            + "\n\n"
-        )
-
-        attachment_list = Question_Attachment.objects.filter(question=question_loc)
+        attachment_list = Support_Attachment.objects.filter(support=support_loc)
         for attachment in attachment_list:
             blob = attachment.blob_key
             temp_path = os.path.join(script_path, "..", "media", str(blob.file))
             blob_path = os.path.abspath(temp_path)
 
-            final_path = os.path.join(script_path, blob.filename)
+            final_path = os.path.join(script_path, "..", "docs", "latex", blob.filename)
 
             shutil.copy(blob_path, final_path)
 
-            output_file.write(r"\vspace{0.2cm}" + "\n")
-            output_file.write(r"\begin{center}" + "\n")
+            files_to_remove.append(final_path)
+
+    if len(latex_question_list) > 0:  # Checks if quiz is empty
+        output_file.write(r"\begin{enumerate}" + "\n\n")
+        output_file.write(r"\vspace{0.25cm}" + "\n")
+
+        for question_loc in latex_question_list:
+            latex_question = question_loc.question_latex
+            point = int(question_loc.question.point_value)
+            plural = "" if point == 1 else "s"
             output_file.write(
-                r"\includegraphics[width=2cm]{" + blob.filename + r"}" + "\n"
+                r"\item ("
+                + str(point)
+                + r" point"
+                + plural
+                + r") "
+                + latex_question
+                + "\n\n"
             )
-            output_file.write(r"\end{center}" + "\n")
 
-            os.remove(final_path)
+            attachment_list = Question_Attachment.objects.filter(question=question_loc)
+            for attachment in attachment_list:
+                blob = attachment.blob_key
+                temp_path = os.path.join(script_path, "..", "media", str(blob.file))
+                blob_path = os.path.abspath(temp_path)
 
-        pages_required = question_loc.question.pages_required
-        spacingString = pagesRequiredToSpacing(pages_required)
-        output_file.write(r"\vspace{" + spacingString + r"}" + "\n\n")
+                final_path = os.path.join(
+                    script_path, "..", "docs", "latex", blob.filename
+                )
 
-    output_file.write(r"\end{enumerate}" + "\n")
+                shutil.copy(blob_path, final_path)
+
+                output_file.write(r"\vspace{0.2cm}" + "\n")
+                output_file.write(r"\begin{center}" + "\n")
+
+                # removes file extension from  file_name
+                dotIndex = blob.filename[::-1].find(".")
+                blob_filename = blob.filename[: -1 * dotIndex - 1]
+
+                output_file.write(
+                    r"\includegraphics[width=2cm]{" + blob_filename + r"}" + "\n"
+                )
+                output_file.write(r"\end{center}" + "\n")
+
+                files_to_remove.append(final_path)
+
+            pages_required = question_loc.question.pages_required
+            spacingString = pagesRequiredToSpacing(pages_required)
+            output_file.write(r"\vspace{" + spacingString + r"}" + "\n\n")
+
+        output_file.write(r"\end{enumerate}" + "\n")
+
+    # Answer Key
+    if len(latex_question_list) > 0:  # Checks if quiz is empty
+        output_file.write(r"\newpage" + "\n")
+        output_file.write(r"\setcounter{page}{1}" + "\n")
+        output_file.write(r"{\fontfamily{phv}\selectfont" + "\n\n")
+        output_file.write(
+            r"\textbf{Kontinua " + volume_id_str + " " + chapterFraction + r"}" + "\n\n"
+        )
+        output_file.write(r"\Large \textbf{" + chapter_name + r"}" + "\n\n")
+        output_file.write(r"\vspace{2mm}" + "\n")
+        output_file.write(r"\LARGE Answer Key" + "\n" + r"}" + "\n")
+        output_file.write(r"\parbox{0.35\textwidth}{}" + "\n\n")
+        output_file.write(r"\vspace{0.5em}")
+        output_file.write(r"\begin{enumerate}" + "\n\n")
+        output_file.write(r"\vspace{0.25cm}" + "\n")
+
+        for question_loc in latex_question_list:
+            latex_question = question_loc.question_latex
+            point = int(question_loc.question.point_value)
+            plural = "" if point == 1 else "s"
+            output_file.write(
+                r"\item ("
+                + str(point)
+                + r" point"
+                + plural
+                + r") "
+                + latex_question
+                + "\n\n"
+            )
+
+            answer_latex = question_loc.answer_latex
+            output_file.write(r"\textit{Answer:} ")
+            output_file.write(answer_latex + "\n\n")
+            answer_length = str(answer_latex).count("\n") + 1
+
+            pages_required = question_loc.question.pages_required
+            spacingString = pagesRequiredToSpacing(pages_required, answer_length)
+            output_file.write(r"\vspace{" + spacingString + r"}" + "\n\n")
+
+        output_file.write(r"\end{enumerate}" + "\n")
+
+    # Rubric
+    if len(latex_question_list) > 0:  # Checks if quiz is empty
+        output_file.write(r"\newpage" + "\n")
+        output_file.write(r"\setcounter{page}{1}" + "\n")
+        output_file.write(r"{\fontfamily{phv}\selectfont" + "\n\n")
+        output_file.write(
+            r"\textbf{Kontinua " + volume_id_str + " " + chapterFraction + r"}" + "\n\n"
+        )
+        output_file.write(r"\Large \textbf{" + chapter_name + r"}" + "\n\n")
+        output_file.write(r"\vspace{2mm}" + "\n")
+        output_file.write(r"\LARGE Scoring Rubric" + "\n" + r"}" + "\n")
+        output_file.write(r"\parbox{0.35\textwidth}{}" + "\n\n")
+        output_file.write(r"\vspace{0.5em}")
+        output_file.write(r"\begin{enumerate}" + "\n\n")
+        output_file.write(r"\vspace{0.25cm}" + "\n")
+
+        for question_loc in latex_question_list:
+            latex_question = question_loc.question_latex
+            point = int(question_loc.question.point_value)
+            plural = "" if point == 1 else "s"
+            output_file.write(
+                r"\item ("
+                + str(point)
+                + r" point"
+                + plural
+                + r") "
+                + latex_question
+                + "\n\n"
+            )
+
+            # Includes Answer and Rubric Side-by-Side
+            output_file.write(r"\begin{minipage}[t]{0.50\textwidth}")
+            answer_latex = question_loc.answer_latex
+            output_file.write(r"\textit{Answer:} ")
+            output_file.write(answer_latex + "\n\n")
+            output_file.write(r"\end{minipage}" + "\n")
+            output_file.write(r"\hspace{0.05\textwidth}")
+
+            output_file.write(r"\begin{minipage}[t]{0.40\textwidth}" + "\n\n")
+            rubric_latex = question_loc.rubric_latex
+            output_file.write(r"\textit{Rubric:} ")
+            output_file.write(answer_latex + "\n")
+            output_file.write(r"\end{minipage}" + "\n\n")
+
+        output_file.write(r"\end{enumerate}" + "\n")
+
     output_file.write(r"\end{document}" + "\n")
 
     output_file.close()
 
     if str(os.name) == "posix":
         tex_live_folder = "tex-live-linux"
-        # latex_exe = "pdflatex.exe"
         os_folder = "x86_64-linux"
     else:
         tex_live_folder = "tex-live"
-        # latex_exe = "pdflatex"
         os_folder = "windows"
 
     # Path to pdflatex command
@@ -266,6 +378,9 @@ def latex_to_pdf(latex_question_list, quiz_data):
     if error:
         print("Error occurred:")
         print(error.decode("utf-8"))
+        for path in files_to_remove:
+            os.remove(path)
+        os.chdir(working_path)
         raise ChildProcessError
     else:
         print("PDF 1 generated successfully.")
@@ -288,6 +403,9 @@ def latex_to_pdf(latex_question_list, quiz_data):
     if error:
         print("Error occurred:")
         print(error.decode("utf-8"))
+        for path in files_to_remove:
+            os.remove(path)
+        os.chdir(working_path)
         raise ChildProcessError
     else:
         print("PDF 2 generated successfully.")
@@ -295,6 +413,10 @@ def latex_to_pdf(latex_question_list, quiz_data):
     rendering.quiz = quiz_data
     rendering.blob_key = blob
     rendering.save()
+
+    for path in files_to_remove:
+        os.remove(path)
+    os.chdir(working_path)
 
 
 def save_pdf_blob(string_id):

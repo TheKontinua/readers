@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.conf import settings
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -54,13 +56,16 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "mentoris.urls"
 
+# Locations checked for templates may look a little strange,
+# but, this is needed to work on Elastic Beanstalk
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             "mentoris/templates",
-            "mentapp/templates,",
-            "mentoris/mentoris/templates",
+            "mentapp/templates",
+            os.path.join(settings.BASE_DIR, "/mentoris/templates/"),
+            os.path.join(settings.BASE_DIR, "/mentoris/templates/mentapp"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -73,6 +78,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = "mentoris.wsgi.application"
 
@@ -125,7 +131,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
 STATIC_URL = "static/"
 STATIC_ROOT = "static"
 STATICFILES_DIRS = ["mentoris/static"]
@@ -138,8 +143,13 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Email Notifications - AWS SES
-EMAIL_BACKEND = "django_ses.SESBackend"
+# Email Notifications
+EMAIL_BACKEND = ""
+EMAIL_HOST = ""
+EMAIL_PORT = 465
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
+EMAIL_USE_TLS = True
 
 # Allows Iframes to display from pages hosted by this server
 X_FRAME_OPTIONS = "SAMEORIGIN"
