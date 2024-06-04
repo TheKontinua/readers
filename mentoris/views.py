@@ -62,7 +62,7 @@ def mentor_req(view_func):
             or request.user.is_verified
         ):
             return HttpResponseForbidden(
-                "Forbidden: Must be mentor or quizmaker to access add questions page."
+                "Forbidden: Must be mentor or quizmaker to access add questions page. Use request verification for mentor status"
             )
         return view_func(request, *args, **kwargs)
 
@@ -78,7 +78,7 @@ def quizmaker_req(view_func):
         # Checking user is quiz maker or higher else returning forbidden HTTP page.
         if not (request.user.is_quizmaker or request.user.is_admin):
             return HttpResponseForbidden(
-                "Forbidden: Must be quizmaker or admin to access edit quiz."
+                "Forbidden: Must be quizmaker or admin to access edit quiz. Must request verification"
             )
         return view_func(request, *args, **kwargs)
 
@@ -94,7 +94,7 @@ def admin_req(view_func):
         # Must be admin!
         if not request.user.is_admin:
             return HttpResponseForbidden(
-                "Forbidden: Must be admin to access edit quiz."
+                "Forbidden: Must be admin to access."
             )
         return view_func(request, *args, **kwargs)
 
@@ -418,9 +418,12 @@ def customLogin(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         user = authenticate(request, username=email, password=password)
-        if user is not None:
+        if user is not None and user.is_verified or user.is_quizmaker or user.is_admin:
             login(request, user)
-            return redirect(f"../profile/{user.user_id}")
+            return render(request, "mentapp/main.html")
+        elif user is not None and not user.is_verified:
+            login(request, user)
+            return render(request, "mentapp/verify_email.html")
         else:
             messages.error(
                 request,
@@ -820,7 +823,7 @@ def user_info(request, user_id):
         return render(request, "mentapp/login.html")
     user_profile = get_object_or_404(User, user_id=user_id)
     if user_profile.is_admin == True:
-        return HttpResponseForbidden("Forbidden: Admin's use admin portal")
+        return redirect('/admin/')
 
     try:
         email = Email.objects.get(user=user_profile, is_primary=True)
