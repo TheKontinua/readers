@@ -2,13 +2,8 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 import uuid
-
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    PermissionsMixin,
-    BaseUserManager,
-)
-
+from django.contrib.auth.models import AbstractBaseUser,  PermissionsMixin, BaseUserManager
+from django.urls import reverse
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, user_id=None, password=None, **extra_fields):
@@ -256,14 +251,18 @@ class Email(models.Model):
 
 class Site(models.Model):
     site_id = models.CharField(max_length=100, primary_key=True, default="site")
+    name = models.CharField(max_length=100, default="name")
 
 
 class Handle(models.Model):
-    handle_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
     handle = models.CharField(max_length=50, default="handle")
     is_verified = models.BooleanField(default=False)
+    class Meta:
+        unique_together = ('user', 'handle', 'site')
+    def get_absolute_url(self):
+        return reverse('delete_handle', args=[str(self.id)])
 
 
 class Verification(models.Model):
@@ -327,7 +326,7 @@ class Support_Loc(models.Model):
     support = models.ForeignKey(Support, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5, default="ENG")
     dialect_code = models.CharField(max_length=5, default="US")
-    title_latex = models.CharField(max_length=100, null=True)
+    title = models.CharField(max_length=100, null=True)
     content_latex = models.CharField(max_length=500, null=True)
     date_created = models.DateTimeField(default=now)
     date_approved = models.DateTimeField(default=now)
@@ -358,9 +357,7 @@ class Support_Attachment(models.Model):
     support = models.ForeignKey(Support_Loc, null=True, on_delete=models.CASCADE)
     lang_code = models.CharField(max_length=5)
     dialect_code = models.CharField(max_length=5)
-    filename = models.FileField(
-        upload_to="support_attachments/",
-    )
+    filename = models.CharField(max_length=255)
     blob_key = models.ForeignKey(Blob, on_delete=models.CASCADE, null=True)
 
     class Meta:
