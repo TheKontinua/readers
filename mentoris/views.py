@@ -42,7 +42,7 @@ from mentapp.models import (
     Support_Attachment,
     Site,
     Quiz_Support,
-    Handle
+    Handle,
 )
 from mentoris.email_verification_token_generator import email_verification_token
 from mentoris.forms import UserForm, LatexForm, QuizForm
@@ -93,9 +93,7 @@ def admin_req(view_func):
             return redirect("admin:login")
         # Must be admin!
         if not request.user.is_admin:
-            return HttpResponseForbidden(
-                "Forbidden: Must be admin to access."
-            )
+            return HttpResponseForbidden("Forbidden: Must be admin to access.")
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
@@ -120,44 +118,60 @@ def latex(request, question_id):
 
     if request.method == "POST":
         if request.POST.get("command") == "deleteAttachment":
-            question =  get_object_or_404(Question, question_id = question_id)
-            question_loc = get_object_or_404(Question_Loc, question = question, lang_code = "ENG", dialect_code = "US")
-            attachment = get_object_or_404(Question_Attachment, question = question_loc, filename = request.POST.get("filename"))
+            question = get_object_or_404(Question, question_id=question_id)
+            question_loc = get_object_or_404(
+                Question_Loc, question=question, lang_code="ENG", dialect_code="US"
+            )
+            attachment = get_object_or_404(
+                Question_Attachment,
+                question=question_loc,
+                filename=request.POST.get("filename"),
+            )
             attachment.blob_key.delete()
             attachment.delete()
             return JsonResponse({"success": True})
-        
+
         if request.POST.get("command") == "answer":
-            question =  get_object_or_404(Question, question_id = question_id)
-            question_loc = get_object_or_404(Question_Loc, question = question, lang_code = "ENG", dialect_code = "US")
+            question = get_object_or_404(Question, question_id=question_id)
+            question_loc = get_object_or_404(
+                Question_Loc, question=question, lang_code="ENG", dialect_code="US"
+            )
             question_loc.answer_latex = request.POST.get("input")
             question_loc.save()
             return JsonResponse({"success": True})
-        
+
         if request.POST.get("command") == "rubric":
-            question =  get_object_or_404(Question, question_id = question_id)
-            question_loc = get_object_or_404(Question_Loc, question = question, lang_code = "ENG", dialect_code = "US")
+            question = get_object_or_404(Question, question_id=question_id)
+            question_loc = get_object_or_404(
+                Question_Loc, question=question, lang_code="ENG", dialect_code="US"
+            )
             question_loc.rubric_latex = request.POST.get("input")
             question_loc.save()
             return JsonResponse({"success": True})
-        
+
         if request.POST.get("command") == "question":
-            question =  get_object_or_404(Question, question_id = question_id)
-            question_loc = get_object_or_404(Question_Loc, question = question, lang_code = "ENG", dialect_code = "US")
+            question = get_object_or_404(Question, question_id=question_id)
+            question_loc = get_object_or_404(
+                Question_Loc, question=question, lang_code="ENG", dialect_code="US"
+            )
             question_loc.question_latex = request.POST.get("input")
             question_loc.save()
             return JsonResponse({"success": True})
 
         if request.POST.get("command") == "upload":
-            question =  get_object_or_404(Question, question_id = question_id)
-            question_loc = get_object_or_404(Question_Loc, question = question, lang_code = "ENG", dialect_code = "US")
+            question = get_object_or_404(Question, question_id=question_id)
+            question_loc = get_object_or_404(
+                Question_Loc, question=question, lang_code="ENG", dialect_code="US"
+            )
             for filename, file in request.FILES.items():
-                name = filename[0:filename.rfind(".")]
-                blob = Blob(file = file, content_type = file.content_type, filename= name)
-                attachment = Question_Attachment(question = question_loc, blob_key = blob, filename = name)
+                name = filename[0 : filename.rfind(".")]
+                blob = Blob(file=file, content_type=file.content_type, filename=name)
+                attachment = Question_Attachment(
+                    question=question_loc, blob_key=blob, filename=name
+                )
                 blob.save()
                 attachment.save()
-            
+
             return JsonResponse({"success": True, "url": blob.file.url, "name": name})
         form = LatexForm(request.POST)
         question = request.POST.get("latex_question")
@@ -418,12 +432,12 @@ def customLogin(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         user = authenticate(request, username=email, password=password)
-        if user is not None and user.is_verified or user.is_quizmaker or user.is_admin:
+        if user is not None and user.is_verified:
             login(request, user)
             return render(request, "mentapp/main.html")
         elif user is not None and not user.is_verified:
             login(request, user)
-            return render(request, "mentapp/verify_email.html")
+            return redirect(f"/profile/{user.user_id}")
         else:
             messages.error(
                 request,
@@ -823,7 +837,7 @@ def user_info(request, user_id):
         return render(request, "mentapp/login.html")
     user_profile = get_object_or_404(User, user_id=user_id)
     if user_profile.is_admin == True:
-        return redirect('/admin/')
+        return redirect("/admin/")
 
     try:
         email = Email.objects.get(user=user_profile, is_primary=True)
@@ -1040,8 +1054,8 @@ def edit_quiz_add_question(request, quiz_id):
         time_filter = request.GET.get("time")
         difficulty_filter = request.GET.get("difficulty")
         question_instances = Question.objects.all()
-        #TODO fix question approval
-        #question_instances = Question.objects.all().filter(approved=True)
+        # TODO fix question approval
+        # question_instances = Question.objects.all().filter(approved=True)
 
         if volume_filter:
             question_instances = question_instances.filter(
@@ -1194,7 +1208,14 @@ def user_edit(request, user_id):
 
     for key, value in request.POST.items():
         if key == "primary_email":
-            Email.objects.filter(user=user, is_primary=True).update(email_address=value)
+            Email.objects.filter(user=user, is_primary=True).delete()
+
+            emailObject = Email()
+            emailObject.email_address = value
+            emailObject.user = user
+            emailObject.is_primary = True
+            emailObject.is_verified = True
+            emailObject.save()
         if key == "other_emails":
             Email.objects.filter(user=user, is_primary=False).delete()
             insEmails = value.split(",")
@@ -1368,18 +1389,18 @@ def latex_window_support(request, support_id, width):
     return render(
         request,
         "mentapp/latex_window.html",
-        {
-            "type": "support",
-            "support_id": support_id,
-            "width": width
-        }
+        {"type": "support", "support_id": support_id, "width": width},
     )
 
 
 def grab_attachments_support(support_id):
-    support =  get_object_or_404(Support, support_id = support_id)
-    support_loc = get_object_or_404(Support_Loc, support = support, lang_code = "ENG", dialect_code = "US")
-    attachments = Support_Attachment.objects.filter(support = support_loc, lang_code = "ENG", dialect_code = "US")
+    support = get_object_or_404(Support, support_id=support_id)
+    support_loc = get_object_or_404(
+        Support_Loc, support=support, lang_code="ENG", dialect_code="US"
+    )
+    attachments = Support_Attachment.objects.filter(
+        support=support_loc, lang_code="ENG", dialect_code="US"
+    )
     attachmentsList = list()
 
     for attachment in attachments:
@@ -1390,19 +1411,23 @@ def grab_attachments_support(support_id):
 
     return attachmentsList
 
+
 # Returns a JSON response with only the attachment files and names
 def fetch_attachments_support(request, support_id):
     attachmentsList = grab_attachments_support(support_id)
     return JsonResponse({"attachments": attachmentsList})
 
+
 # Returns a JSON response with the attachment files and names and the LaTeX
 def fetch_attachments_inputs_support(request, support_id):
-    support =  get_object_or_404(Support, support_id = support_id)
-    support_Loc = get_object_or_404(Support_Loc, support = support, lang_code="ENG", dialect_code="US")
+    support = get_object_or_404(Support, support_id=support_id)
+    support_Loc = get_object_or_404(
+        Support_Loc, support=support, lang_code="ENG", dialect_code="US"
+    )
     input = support_Loc.content_latex
     attachmentsList = grab_attachments_support(support_id)
-    return JsonResponse({"attachments": attachmentsList, "input" : input})
-    
+    return JsonResponse({"attachments": attachmentsList, "input": input})
+
 
 def create_support(request, quiz_id):
 
@@ -1516,18 +1541,16 @@ def latex_window_question(request, question_id, part, width):
     return render(
         request,
         "mentapp/latex_window.html",
-        {
-            "type": "question",
-            "part": part,
-            "question_id": question_id,
-            "width": width
-        }
+        {"type": "question", "part": part, "question_id": question_id, "width": width},
     )
 
+
 def grab_attachments_question(question_id):
-    question =  get_object_or_404(Question, question_id = question_id)
-    question_loc = get_object_or_404(Question_Loc, question = question, lang_code = "ENG", dialect_code = "US")
-    attachments = Question_Attachment.objects.filter(question = question_loc)
+    question = get_object_or_404(Question, question_id=question_id)
+    question_loc = get_object_or_404(
+        Question_Loc, question=question, lang_code="ENG", dialect_code="US"
+    )
+    attachments = Question_Attachment.objects.filter(question=question_loc)
     attachmentsList = list()
 
     for attachment in attachments:
@@ -1538,15 +1561,19 @@ def grab_attachments_question(question_id):
 
     return attachmentsList
 
+
 # Returns a JSON response with only the attachment files and names
 def fetch_attachments_question(request, question_id):
     attachmentsList = grab_attachments_question(question_id)
     return JsonResponse({"attachments": attachmentsList})
 
+
 # Returns a JSON response with the attachment files and names and the LaTeX
 def fetch_attachments_inputs_question(request, question_id, part):
-    question =  get_object_or_404(Question, question_id = question_id)
-    question_loc = get_object_or_404(Question_Loc, question = question, lang_code = "ENG", dialect_code = "US")
+    question = get_object_or_404(Question, question_id=question_id)
+    question_loc = get_object_or_404(
+        Question_Loc, question=question, lang_code="ENG", dialect_code="US"
+    )
     attachmentsList = grab_attachments_question(question_id)
     if part == "question":
         input = question_loc.question_latex
@@ -1555,7 +1582,8 @@ def fetch_attachments_inputs_question(request, question_id, part):
     elif part == "rubric":
         input = question_loc.rubric_latex
 
-    return JsonResponse({"attachments": attachmentsList, "input" : input})
+    return JsonResponse({"attachments": attachmentsList, "input": input})
+
 
 def edit_question(request, question_id):
     question_object = get_object_or_404(Question, question_id=question_id)
@@ -1592,13 +1620,17 @@ def edit_question(request, question_id):
     ).distinct()
 
     chapter_object = chapter_locs[0]
-        
+
     if request.method == "POST":
 
         # TODO: question_object.creator = CURRENT USER
 
         if request.POST.get("command") == "deleteAttachment":
-            attachment = get_object_or_404(Question_Attachment, question = question_loc, filename = request.POST.get("filename"))
+            attachment = get_object_or_404(
+                Question_Attachment,
+                question=question_loc,
+                filename=request.POST.get("filename"),
+            )
             attachment.blob_key.delete()
             attachment.delete()
             return JsonResponse({"success": True})
@@ -1606,12 +1638,12 @@ def edit_question(request, question_id):
             question_loc.answer_latex = request.POST.get("input")
             question_loc.save()
             return JsonResponse({"success": True})
-        
+
         if request.POST.get("command") == "rubric":
             question_loc.rubric_latex = request.POST.get("input")
             question_loc.save()
             return JsonResponse({"success": True})
-        
+
         if request.POST.get("command") == "question":
             question_loc.question_latex = request.POST.get("input")
             question_loc.save()
@@ -1620,13 +1652,15 @@ def edit_question(request, question_id):
         if request.POST.get("command") == "upload":
             for filename, file in request.FILES.items():
                 name = filename
-                blob = Blob(file = file, content_type = file.content_type, filename= name)
-                attachment = Question_Attachment(question = question_loc, blob_key = blob, filename = name)
+                blob = Blob(file=file, content_type=file.content_type, filename=name)
+                attachment = Question_Attachment(
+                    question=question_loc, blob_key=blob, filename=name
+                )
                 blob.save()
                 attachment.save()
-            
+
             return JsonResponse({"success": True, "url": blob.file.url, "name": name})
-        
+
         if "submit-question" in request.POST:
 
             chapter_object = request.POST.get("chapter")
@@ -1645,9 +1679,8 @@ def edit_question(request, question_id):
             question_loc.answer_latex = answer
             question_loc.rubric_latex = grading
             # TODO: question_loc.creator = CURRENT USER
-        
-            question_loc.save()
 
+            question_loc.save()
 
             chapter_id = chapter_loc.chapter.chapter_id
 
@@ -1674,29 +1707,31 @@ def edit_question(request, question_id):
         },
     )
 
-def handles(request): 
-    if request.method == 'POST':
-        if request.POST.get("platform") == 'twitter':
+
+def handles(request):
+    if request.method == "POST":
+        if request.POST.get("platform") == "twitter":
             sitechoice = Site.objects.get(site_id=1)
-        elif request.POST.get("platform") == 'instagram':
+        elif request.POST.get("platform") == "instagram":
             sitechoice = Site.objects.get(site_id=2)
-        elif request.POST.get("platform") == 'linkedin':
+        elif request.POST.get("platform") == "linkedin":
             sitechoice = Site.objects.get(site_id=3)
-        elif request.POST.get("platform") == 'facebook':
+        elif request.POST.get("platform") == "facebook":
             sitechoice = Site.objects.get(site_id=4)
-        elif request.POST.get("platform") == 'github':
+        elif request.POST.get("platform") == "github":
             sitechoice = Site.objects.get(site_id=5)
-        elif request.POST.get("platform") == 'youtube':
+        elif request.POST.get("platform") == "youtube":
             sitechoice = Site.objects.get(site_id=6)
         new_handle = Handle(
-            site = sitechoice, 
-            handle = request.POST.get("username"),
-            user = request.user,
+            site=sitechoice,
+            handle=request.POST.get("username"),
+            user=request.user,
         )
         new_handle.save()
     user_handles = Handle.objects.filter(user=request.user)
-    context = {'user_handles': user_handles}
-    return render(request, 'mentapp/handles.html', context)
+    context = {"user_handles": user_handles}
+    return render(request, "mentapp/handles.html", context)
+
 
 def delete_handle(request, handle, site_id, user_id):
     curr_user = get_object_or_404(User, user_id=user_id)
