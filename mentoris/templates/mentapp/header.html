@@ -31,11 +31,17 @@
                         <button id="my-profile" class="my-profile">My Profile</button>
                         <img class="nav-logo" src="{% static 'profile_icon.svg' %}" />
                     </div>
-
-                    <div id="sign-in-button">
-                        <button id="sign-in" class="sign-in">Sign In</button>
-                        <img class="nav-logo" src="{% static 'sign-in.svg' %}" />
-                    </div>
+                    {% if user.is_authenticated %}
+                        <div id="sign-out-button">
+                            <button id="sign-out" class="sign-out">Sign Out</button>
+                            <img class="nav-logo" src="{% static 'sign-in.svg' %}" />
+                        </div>
+                    {% else %}
+                        <div id="sign-in-button">
+                            <button id="sign-in" class="sign-in">Sign In</button>
+                            <img class="nav-logo" src="{% static 'sign-in.svg' %}" />
+                        </div>
+                    {% endif %}
                 </div>
                 
         </div>
@@ -48,6 +54,10 @@
 
             document.getElementById("quizzes-button").addEventListener('click', function () {
                 window.top.location.href = "/main/";
+            });
+
+            document.getElementById("sign-out-button").addEventListener('click', function () {
+                window.top.location.href = "/logoutCustom/";
             });
 
             document.getElementById("sign-in-button").addEventListener('click', function () {

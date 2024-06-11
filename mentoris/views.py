@@ -3,7 +3,7 @@ import json, os, random
 from datetime import date
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.base import ContentFile
@@ -1727,6 +1727,7 @@ def handles(request):
             handle=request.POST.get("username"),
             user=request.user,
         )
+    return render(request, "mentapp/login.html")
         new_handle.save()
     user_handles = Handle.objects.filter(user=request.user)
     context = {"user_handles": user_handles}
@@ -1741,3 +1742,7 @@ def delete_handle(request, handle, site_id, user_id):
         handle.delete()
     # Redirect to the referring page, or a default page if no referrer is found
     return redirect(request.META.get("HTTP_REFERER", "/"))
+
+  def customLogout(request):
+    if request.method == "GET":
+        logout(request)

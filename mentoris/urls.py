@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from . import views
 from django.conf.urls.static import static
+from django.contrib.auth.views import LogoutView
 from django.conf import settings
 
 
@@ -33,6 +34,7 @@ urlpatterns = [
     path("latex_window/question/<int:question_id>/<str:part>/<int:width>/", views.latex_window_question, name = "latex_window_question"),
     path("latex_window/support/<int:support_id>/<int:width>/", views.latex_window_support, name="latex_window_support"),
     path("login/", views.customLogin, name="login"),
+    path('logoutCustom/', views.customLogout, name='logoutCustom'),
     path("signUp/", views.sign_up, name="sign_up"),
     path("verify_email/", views.verify_email, name="verify_email"),
     path(
