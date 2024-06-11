@@ -1746,3 +1746,4 @@ def delete_handle(request, handle, site_id, user_id):
 def customLogout(request):
     if request.method == "GET":
         logout(request)
+    return render(request, "mentapp/login.html")
