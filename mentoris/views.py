@@ -371,7 +371,7 @@ def sign_up(request):
     else:
         return render(request, "mentapp/sign_up.html")
 
-
+@login_required
 def profile(request):
     template = loader.get_template("mentapp/profile.html")
     return HttpResponse(template.render())
@@ -1727,8 +1727,8 @@ def handles(request):
             handle=request.POST.get("username"),
             user=request.user,
         )
-    return render(request, "mentapp/login.html")
-        new_handle.save()
+        return render(request, "mentapp/login.html")
+    new_handle.save()
     user_handles = Handle.objects.filter(user=request.user)
     context = {"user_handles": user_handles}
     return render(request, "mentapp/handles.html", context)
@@ -1743,6 +1743,6 @@ def delete_handle(request, handle, site_id, user_id):
     # Redirect to the referring page, or a default page if no referrer is found
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
-  def customLogout(request):
+def customLogout(request):
     if request.method == "GET":
         logout(request)
