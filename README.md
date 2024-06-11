@@ -161,6 +161,12 @@ Things an Admin needs to be able to do:
 -   Change primary language
 -   Give lotitude/longitude
 -   Change country code
+  
+#### Handles page
+
+-    Link accounts
+-    Delete linked accounts
+-    Click account to be taken to page
 
 #### Quiz feedback page
 
