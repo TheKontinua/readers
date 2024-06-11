@@ -7,7 +7,7 @@ The mentors for the students using this curriculum will need quizzes
 (and answer keys) for each chapter. Mentoris is the web app that will
 supply them with those quizzes and answer keys.
 
-Here is our [Technical Specification](https://docs.google.com/document/d/1gqyTfjpYk12v72GUw912kEI0EFNYl_ET/edit?usp=sharing&ouid=118232505108273987896&rtpof=true&sd=true) which outlines the entire project in more detail.
+Here is our [Technical Specification](https://docs.google.com/document/d/1gqyTfjpYk12v72GUw912kEI0EFNYl_ET/edit?usp=sharing&ouid=118232505108273987896&rtpof=true&sd=true) and [Beta Site](https://calpolykontinua.gitbook.io/mentoris/)  which outlines the entire project in more detail.
 
 ## Set Up
 1. Install Python 3.11 [Python Release Python 3.11.0 | Python.org](https://www.python.org/downloads/release/python-3110/)
