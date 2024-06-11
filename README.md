@@ -46,9 +46,9 @@ written in Python using the Django web framework.
 We will be using PostgreSQL as the backend database.
 
 The questions and answers will be stored as LaTeX segments. The complete quiz will
-need to be typeset using TeX. Preview will be done with LaTex.js.
+need to be typeset using TeX. Preview will be done with LaTeX.js.
 
-We will deploy the system on Amazon Services.
+We will deploy the system on Amazon Services (RDS, SES and EB).
 
 ## Requirements
 
