@@ -16,10 +16,6 @@
         <link rel="stylesheet" href="{% static "/css/quiz_styles.css"%}">
 
         <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
-        <script>
-            customElements.define("latex-js", latexjs.LaTeXJSComponent);
-        </script>
 
         <style>
 
@@ -264,7 +260,8 @@
                 
                 if(index != list.length-1){
                     let temp = quiz_state.get(index);
-
+                    temp["ordering"] = index + 1;
+                    quiz_state.get(index + 1)["ordering"] = index;
                     quiz_state.set(index, quiz_state.get(index + 1));
                     quiz_state.set(index + 1, temp);
 
@@ -288,11 +285,15 @@
                         index = i;
                     }
                 }
+
                 
                 if(index != 0){
                     let temp = quiz_state.get(index);
+                    temp["ordering"] = index - 1;
+                    quiz_state.get(index - 1)["ordering"] = index;
                     quiz_state.set(index, quiz_state.get(index - 1));
                     quiz_state.set(index -1, temp);
+
                     
                     list_element =  document.getElementById("questions_list")
                     redisplay_questions("questions_list", create_buttons, quiz_state);
