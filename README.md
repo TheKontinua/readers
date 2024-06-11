@@ -13,7 +13,7 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1gqyTfj
 1. Install Python 3.11 [Python Release Python 3.11.0 | Python.org](https://www.python.org/downloads/release/python-3110/)
 2. Follow the Django installation guide: [Quick install guide | Django documentation | Django (djangoproject.com)](https://docs.djangoproject.com/en/5.0/intro/install/). We are using Django version 4.2.5
 3. Install the Elastic Beanstalk CLI: Install the [EB CLI - AWS Elastic Beanstalk (amazon.com)](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html)
-4. Locate the config file in the `.AWS folder` (location varies based on operating system, usually in the home directory). Ask the team for the AWS Elastic Beanstalk credentials
+4. Locate the config file in the `.AWS folder` (location varies based on operating system, usually in the home directory). Ask the team for the AWS Elastic Beanstalk credentials (put in "config" file) and AWS SES credentials (put in "credentials" file)
     - Run the command `eb init` in the root directory of the project
         - Select 3 `(us-west-2 : US West (Oregon))`
         - Select 1 `(mentoris)`
@@ -27,11 +27,11 @@ Here is our [Technical Specification](https://docs.google.com/document/d/1gqyTfj
 6. Meet with the team to get tasks for your first sprint.
 7. You are now ready to start writing code!
 8. Pull from main on: [Kontinua Mentoris Github: GitHub - TheKontinua/mentoris: The web app for mentors](https://github.com/TheKontinua/mentoris)
-9. Ask the team for the AWS RDS credentials to use in settings.py
+9. Ask the team for the AWS RDS and SES credentials to use in settings.py
 10. Perform tasks using your IDE or text editor of choice
     a. Write clean code with comments as needed
     b. Test the code before making a pull request
-11. Remove the AWS RDS credentials before making a pull request
+11. Remove the AWS RDS and SES credentials before making a pull request
 12. Make a pull request and wait for it to be approved by another team member
 13. Once the pull request has been merged to main the code is ready to be deployed to Elastic Beanstalk!
 
