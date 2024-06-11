@@ -434,7 +434,7 @@ def customLogin(request):
         user = authenticate(request, username=email, password=password)
         if user is not None and user.is_verified:
             login(request, user)
-            return render(request, "mentapp/main.html")
+            return redirect("main")
         elif user is not None and not user.is_verified:
             login(request, user)
             return redirect(f"/profile/{user.user_id}")
@@ -1002,7 +1002,7 @@ def edit_quiz(request, quiz_id):
                         )
                         support_list.append(support_content)
 
-            latex_to_pdf(question_list, support_list, quiz_instance)
+            #latex_to_pdf(question_list, support_list, quiz_instance)
             return JsonResponse({"success": True})
     else:
         if request.GET.get("command") == "fetch_quiz_questions":

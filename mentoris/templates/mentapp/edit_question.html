@@ -21,13 +21,6 @@
     <link rel="stylesheet" href="{% static '/css/quiz_styles.css'%}">
     <script src= "{% static "/scripts/generate_quiz_html.js" %}"></script>
 
-    <base href="../../dist/" />
-
-    <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
-    <script>
-        customElements.define("latex-js", latexjs.LaTeXJSComponent);
-    </script>
-
     <style>
         /* Define a custom class for your textarea */
         .latex-input-field {
@@ -49,6 +42,7 @@
 
         textarea {
             font-size: .8em;
+            padding: 10px;
         }
 
         .content {
