@@ -1,40 +1,6 @@
 import SwiftUI
 import PDFKit
 
-struct DocumentView: UIViewRepresentable {
-    var pdfDocument: PDFDocument?
-    // Binding directly connects the PDF components state with the parent, content view.
-    @Binding var currentPageIndex: Int
-
-    func makeUIView(context: Context) -> PDFKit.PDFView {
-        let pdfView = PDFKit.PDFView()
-        configurePDFView(pdfView)
-        return pdfView
-    }
-
-    func updateUIView(_ uiView: PDFKit.PDFView, context: Context) {
-        guard let pdfDocument = pdfDocument else { return }
-        if uiView.document != pdfDocument {
-            uiView.document = pdfDocument
-        }
-        goToPage(in: uiView)
-    }
-
-    private func configurePDFView(_ pdfView: PDFKit.PDFView) {
-        pdfView.autoScales = true
-        pdfView.displayMode = .singlePage
-        pdfView.displayDirection = .horizontal
-        pdfView.document = pdfDocument
-        goToPage(in: pdfView)
-    }
-
-    private func goToPage(in pdfView: PDFKit.PDFView) {
-        if let page = pdfDocument?.page(at: currentPageIndex) {
-            pdfView.go(to: page)
-        }
-    }
-}
-
 struct PDFView: View {
     let PDF_URL = "http://localhost:8000/wb1.pdf";
     @State private var pdfDocument: PDFDocument? = nil
@@ -49,7 +15,7 @@ struct PDFView: View {
             } else {
                 Text("Loading PDF...")
                     .onAppear {
-                        loadPDF(from: PDF_URL)
+                        loadPDFFromURL(from: PDF_URL)
                     }
             }
         }
@@ -77,7 +43,7 @@ struct PDFView: View {
         }
     }
 
-    private func loadPDF(from urlString: String) {
+    private func loadPDFFromURL(from urlString: String) {
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
             return
@@ -90,7 +56,7 @@ struct PDFView: View {
             }
 
             guard let data = data, let document = PDFDocument(data: data) else {
-                print("No data found or invalid PDF")
+                print("No data found or invalid PDF from \(url).")
                 return
             }
 
@@ -101,3 +67,4 @@ struct PDFView: View {
         }.resume()
     }
 }
+
