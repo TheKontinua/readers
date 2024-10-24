@@ -15,3 +15,7 @@ struct ReaderIOSApp: App {
         }
     }
 }
+
+#Preview {
+    PDFView()
+}
