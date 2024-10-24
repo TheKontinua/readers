@@ -20,7 +20,7 @@ struct PDFView: View {
             }
         }
     }
-
+    
     private func dragGesture() -> some Gesture {
         DragGesture().onEnded { value in
             if value.translation.width < 0 {
