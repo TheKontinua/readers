@@ -6,9 +6,39 @@ struct PDFView: View {
     let startingPage: Int
     @State private var pdfDocument: PDFDocument? = nil
     @State private var currentPageIndex: Int = 0
+    
+    @State private var selectedDuration: TimeInterval = 0
+    @State private var progress: Double = 0
+    @State private var timer: Timer?
 
     var body: some View {
         VStack {
+            // Timer Button
+            HStack {
+                Menu {
+                    Button("15 Minutes") { startTimer(duration: 15 * 60) }
+                    Button("20 Minutes") { startTimer(duration: 20 * 60) }
+                    Button("25 Minutes") { startTimer(duration: 25 * 60) }
+                } label: {
+                    Text("Set Timer")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            }
+            .padding()
+
+            // Progress Bar
+            GeometryReader { geometry in
+                Rectangle()
+                    .fill(progress >= 1 ? Color.green : Color.red)
+                    .frame(width: geometry.size.width * CGFloat(progress), height: 4)
+                    .animation(.linear(duration: 0.1), value: progress)
+            }
+            .frame(height: 4)
+            
+            
             if let pdfDocument = pdfDocument {
                 DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex)
                     .edgesIgnoringSafeArea(.all)
@@ -72,4 +102,18 @@ struct PDFView: View {
             }
         }.resume()
     }
+    
+    private func startTimer(duration: TimeInterval) {
+           selectedDuration = duration
+           progress = 0
+           timer?.invalidate() // Stop any existing timer
+
+           timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+               progress += 1 / duration
+               if progress >= 1 {
+                   timer?.invalidate()
+                   timer = nil
+               }
+           }
+       }
 }
