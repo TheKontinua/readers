@@ -57,7 +57,7 @@ struct TableOfContents: View {
             }
             .navigationTitle("Table of Contents")
         } else {
-            Text("Fetching workbooks...")
+            ProgressView("Fetching Workbooks")
                 .onAppear {
                     fetchWorkbooks()
                 }
