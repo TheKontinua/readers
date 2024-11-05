@@ -2,7 +2,8 @@ import SwiftUI
 import PDFKit
 
 struct PDFView: View {
-    let PDF_URL = "http://localhost:8000/wb1.pdf";
+    let fileName: String
+    let startingPage: Int
     @State private var pdfDocument: PDFDocument? = nil
     @State private var currentPageIndex: Int = 0
 
@@ -12,10 +13,13 @@ struct PDFView: View {
                 DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex)
                     .edgesIgnoringSafeArea(.all)
                     .gesture(dragGesture())
+                    .onAppear {
+                        currentPageIndex = startingPage
+                    }
             } else {
                 Text("Loading PDF...")
                     .onAppear {
-                        loadPDFFromURL(from: PDF_URL)
+                        loadPDFFromURL()
                     }
             }
         }
@@ -43,9 +47,11 @@ struct PDFView: View {
         }
     }
 
-    private func loadPDFFromURL(from urlString: String) {
+    private func loadPDFFromURL() {
+        let baseURL = "http://localhost:8000/"
+        let urlString = baseURL + fileName
         guard let url = URL(string: urlString) else {
-            print("Invalid URL")
+            print("Invalid URL for file: \(fileName)")
             return
         }
 
@@ -62,9 +68,8 @@ struct PDFView: View {
 
             DispatchQueue.main.async {
                 self.pdfDocument = document
-                self.currentPageIndex = 0
+                self.currentPageIndex = startingPage
             }
         }.resume()
     }
 }
-

@@ -11,11 +11,14 @@ import SwiftUI
 struct ReaderIOSApp: App {
     var body: some Scene {
         WindowGroup {
-            PDFView()
+            NavigationStack {
+                TableOfContents()
+            }
         }
     }
 }
 
+
 #Preview {
-    PDFView()
+    TableOfContents()
 }

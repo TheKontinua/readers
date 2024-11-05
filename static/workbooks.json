@@ -1,40 +1,397 @@
-{
-    "workbooks": [
-        "workbook-01-en_US.pdf",
-        "workbook-02-en_US.pdf",
-        "workbook-03-en_US.pdf",
-        "workbook-04-en_US.pdf",
-        "workbook-05-en_US.pdf",
-        "workbook-06-en_US.pdf",
-        "workbook-07-en_US.pdf",
-        "workbook-08-en_US.pdf",
-        "workbook-09-en_US.pdf",
-        "workbook-10-en_US.pdf",
-        "workbook-11-en_US.pdf",
-        "workbook-12-en_US.pdf",
-        "workbook-13-en_US.pdf",
-        "workbook-14-en_US.pdf",
-        "workbook-15-en_US.pdf",
-        "workbook-16-en_US.pdf",
-        "workbook-17-en_US.pdf",
-        "workbook-18-en_US.pdf",
-        "workbook-19-en_US.pdf",
-        "workbook-20-en_US.pdf",
-        "workbook-21-en_US.pdf",
-        "workbook-22-en_US.pdf",
-        "workbook-23-en_US.pdf",
-        "workbook-24-en_US.pdf",
-        "workbook-25-en_US.pdf",
-        "workbook-26-en_US.pdf",
-        "workbook-27-en_US.pdf",
-        "workbook-28-en_US.pdf",
-        "workbook-29-en_US.pdf",
-        "workbook-30-en_US.pdf",
-        "workbook-31-en_US.pdf",
-        "workbook-32-en_US.pdf",
-        "workbook-33-en_US.pdf",
-        "workbook-34-en_US.pdf",
-        "workbook-35-en_US.pdf",
-        "workbook-36-en_US.pdf"
-    ]
-}
+[{
+      "name": "Workbook 1",
+      "fileName": "workbook-01-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 2",
+      "fileName": "workbook-02-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 3",
+      "fileName": "workbook-03-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 4",
+      "fileName": "workbook-04-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 5",
+      "fileName": "workbook-05-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 6",
+      "fileName": "workbook-06-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 7",
+      "fileName": "workbook-07-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 8",
+      "fileName": "workbook-08-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 9",
+      "fileName": "workbook-09-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 10",
+      "fileName": "workbook-10-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 11",
+      "fileName": "workbook-11-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 12",
+      "fileName": "workbook-12-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 13",
+      "fileName": "workbook-13-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 14",
+      "fileName": "workbook-14-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 15",
+      "fileName": "workbook-15-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 16",
+      "fileName": "workbook-16-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 17",
+      "fileName": "workbook-17-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 18",
+      "fileName": "workbook-18-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 19",
+      "fileName": "workbook-19-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 20",
+      "fileName": "workbook-20-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 21",
+      "fileName": "workbook-21-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 22",
+      "fileName": "workbook-22-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 23",
+      "fileName": "workbook-23-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 24",
+      "fileName": "workbook-24-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 25",
+      "fileName": "workbook-25-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 26",
+      "fileName": "workbook-26-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 27",
+      "fileName": "workbook-27-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 28",
+      "fileName": "workbook-28-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 29",
+      "fileName": "workbook-29-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 30",
+      "fileName": "workbook-30-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 31",
+      "fileName": "workbook-31-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 32",
+      "fileName": "workbook-32-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 33",
+      "fileName": "workbook-33-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 34",
+      "fileName": "workbook-34-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 35",
+      "fileName": "workbook-35-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    },
+    {
+      "name": "Workbook 36",
+      "fileName": "workbook-36-en_US.pdf",
+      "chapters": [
+        {
+          "name": "Chapter 1",
+          "number": 1,
+          "firstPage": 1
+        }
+      ]
+    }
+  ]
