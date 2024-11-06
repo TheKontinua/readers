@@ -17,7 +17,7 @@ struct PDFView: View {
                         currentPageIndex = startingPage
                     }
             } else {
-                ProgressView("Fetching PDF")
+                ProgressView("Getting Workbook")
                     .onAppear {
                         loadPDFFromURL()
                     }

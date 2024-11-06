@@ -12,6 +12,7 @@ struct Chapter: Codable {
     var firstPage: Int
 }
 
+// Used to represent workbook contents.
 struct OutlineItem: Identifiable {
     let id = UUID()
     var name: String
@@ -70,6 +71,7 @@ struct TableOfContents: View {
             return
         }
 
+        // No cache please.
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
 
@@ -81,7 +83,7 @@ struct TableOfContents: View {
 
         let task = session.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Error fetching workbooks from url: \(error)")
+                print("Error fetching workbooks.")
                 return
             }
 
