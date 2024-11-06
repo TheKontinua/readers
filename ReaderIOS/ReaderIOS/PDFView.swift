@@ -2,12 +2,12 @@ import SwiftUI
 import PDFKit
 
 struct PDFView: View {
-    //where we are serving the pdfs
-    let PDF_URL = "http://localhost:8000/wb1.pdf";
+    let fileName: String
+    let startingPage: Int
     @State private var pdfDocument: PDFDocument? = nil
     @State private var currentPageIndex: Int = 0
-    
-    //state variables for timer stuff
+
+    // State variables for timer.
     @State private var selectedDuration: TimeInterval = 0
     @State private var progress: Double = 0
     @State private var timer: Timer?
@@ -16,7 +16,6 @@ struct PDFView: View {
 
     var body: some View {
         VStack {
-            //set timer button
             HStack {
                 Menu {
                     Button("15 Minutes") { startTimer(duration: 15 * 60) }
@@ -56,15 +55,18 @@ struct PDFView: View {
                 DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex)
                     .edgesIgnoringSafeArea(.all)
                     .gesture(dragGesture())
-            } else {
-                Text("Loading PDF...")
                     .onAppear {
-                        loadPDFFromURL(from: PDF_URL)
+                        currentPageIndex = startingPage
+                    }
+            } else {
+                ProgressView("Getting Workbook")
+                    .onAppear {
+                        loadPDFFromURL()
                     }
             }
         }
     }
-
+    
     private func dragGesture() -> some Gesture {
         DragGesture().onEnded { value in
             if value.translation.width < 0 {
@@ -87,9 +89,11 @@ struct PDFView: View {
         }
     }
 
-    private func loadPDFFromURL(from urlString: String) {
+    private func loadPDFFromURL() {
+        let baseURL = "http://localhost:8000/"
+        let urlString = baseURL + fileName
         guard let url = URL(string: urlString) else {
-            print("Invalid URL")
+            print("Invalid URL for file: \(fileName)")
             return
         }
 
@@ -106,7 +110,7 @@ struct PDFView: View {
 
             DispatchQueue.main.async {
                 self.pdfDocument = document
-                self.currentPageIndex = 0
+                self.currentPageIndex = startingPage
             }
         }.resume()
     }
@@ -134,4 +138,3 @@ struct PDFView: View {
            timerIsRunning = false
        }
 }
-

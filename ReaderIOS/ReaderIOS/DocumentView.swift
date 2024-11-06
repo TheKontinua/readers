@@ -34,4 +34,3 @@ struct DocumentView: UIViewRepresentable {
         }
     }
 }
-
