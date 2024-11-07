@@ -9,6 +9,7 @@ struct PDFView: View {
 
     //State variables for zoom.
     @State private var resetZoom = false;
+    @State private var zoomedIn = false;
     
     // State variables for timer.
     @State private var selectedDuration: TimeInterval = 0
@@ -48,6 +49,7 @@ struct PDFView: View {
                             .cornerRadius(8)
                     }
                 }
+                
                 Button(action: enableScribble) {
                     Text(scribbleEnabled ? "Scribble Off" : "Scribble")
                         .padding()
@@ -55,6 +57,7 @@ struct PDFView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
+                
                 if scribbleEnabled{
                     Button(action: eraseScribble){
                         Text("Erase")
@@ -65,10 +68,14 @@ struct PDFView: View {
                     }
                 }
                 
-                Button("Reset Zoom") { resetZoom = true}
+                //Reset zoom button
+                if zoomedIn{
+                    Button("Reset Zoom") {
+                        resetZoom = true
+                    }
+                }
             }
             .padding()
-
 
             // Progress Bar
             GeometryReader { geometry in
@@ -82,7 +89,7 @@ struct PDFView: View {
             if let pdfDocument = pdfDocument {
 
                 ZStack{
-                    DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom)
+                    DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
                         .edgesIgnoringSafeArea(.all)
                         .gesture(dragGesture())
                         .onChange(of: currentPageIndex) {
@@ -109,7 +116,7 @@ struct PDFView: View {
     }
     
     private func dragGesture() -> some Gesture {
-        if pageChangeEnabled{
+        if pageChangeEnabled && !zoomedIn{
             DragGesture().onEnded { value in
                 if value.translation.width < 0 {
                     goToNextPage()
