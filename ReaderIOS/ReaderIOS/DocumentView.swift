@@ -97,8 +97,11 @@ struct DocumentView: UIViewRepresentable {
              
              // Toggle zoom level between a zoomed-in scale and the default scale
              if pdfView.scaleFactor == pdfView.scaleFactorForSizeToFit {
-                 pdfView.scaleFactor = min(pdfView.maxScaleFactor, pdfView.scaleFactor * 2)  // Zoom in
+                 /*
+                  disabling zoom in for now, needs location of tap detection
+                  pdfView.scaleFactor = min(pdfView.maxScaleFactor, pdfView.scaleFactor * 2)  // Zoom in
                  parent.zoomedIn = true
+                  */
              } else {
                  pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit  // Reset zoom
                  parent.zoomedIn = false
