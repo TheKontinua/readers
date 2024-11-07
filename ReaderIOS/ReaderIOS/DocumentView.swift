@@ -6,6 +6,8 @@ struct DocumentView: UIViewRepresentable {
     // Binding directly connects the PDF components state with the parent, content view.
     @Binding var currentPageIndex: Int
     @Binding var resetZoom: Bool
+    @Binding var zoomedIn: Bool
+    
 
     func makeUIView(context: Context) -> PDFKit.PDFView {
         let pdfView = PDFKit.PDFView()
@@ -18,7 +20,12 @@ struct DocumentView: UIViewRepresentable {
           // Add a pinch gesture recognizer to the overlay
           let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
           overlayView.addGestureRecognizer(pinchGesture)
-          
+        
+        // Add double-tap gesture recognizer
+               let doubleTapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleDoubleTap(_:)))
+               doubleTapGesture.numberOfTapsRequired = 2
+               overlayView.addGestureRecognizer(doubleTapGesture)
+        
           // Add the overlay on top of the PDFView
           pdfView.addSubview(overlayView)
               
@@ -35,8 +42,10 @@ struct DocumentView: UIViewRepresentable {
         // Check if resetZoom is triggered
         if resetZoom {
             uiView.scaleFactor = uiView.scaleFactorForSizeToFit  // Reset scale factor
+            
             DispatchQueue.main.async {
                 self.resetZoom = false  // Reset the binding to avoid repeated resets
+                self.zoomedIn = false
             }
         }
     
@@ -76,11 +85,25 @@ struct DocumentView: UIViewRepresentable {
             
             // Constrain the scale factor within limits
             pdfView.scaleFactor = max(min(newScaleFactor, pdfView.maxScaleFactor), pdfView.minScaleFactor)
-            print(pdfView.scaleFactor)
+            
+            parent.zoomedIn = !(pdfView.scaleFactor == pdfView.scaleFactorForSizeToFit)
             
             // Reset the gesture scale to avoid compounding the scale each time
             sender.scale = 1.0
         }
+        
+        @objc func handleDoubleTap(_ sender: UITapGestureRecognizer) {
+             guard let pdfView = sender.view?.superview as? PDFKit.PDFView else { return }
+             
+             // Toggle zoom level between a zoomed-in scale and the default scale
+             if pdfView.scaleFactor == pdfView.scaleFactorForSizeToFit {
+                 pdfView.scaleFactor = min(pdfView.maxScaleFactor, pdfView.scaleFactor * 2)  // Zoom in
+                 parent.zoomedIn = true
+             } else {
+                 pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit  // Reset zoom
+                 parent.zoomedIn = false
+             }
+         }
     }
     
     
