@@ -43,10 +43,12 @@ struct PDFView: View {
                                            .cornerRadius(8)
                                    }
                                }
+                
+                Button("Reset Zoom") { resetZoom = true}
                            }
                             .padding()
             
-            Button("Reset Zoom") { resetZoom = true}
+            
 
             // Progress Bar
             GeometryReader { geometry in
