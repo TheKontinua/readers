@@ -7,6 +7,9 @@ struct PDFView: View {
     @State private var pdfDocument: PDFDocument? = nil
     @State private var currentPageIndex: Int = 0
 
+    //State variables for zoom.
+    @State private var resetZoom = false;
+    
     // State variables for timer.
     @State private var selectedDuration: TimeInterval = 0
     @State private var progress: Double = 0
@@ -29,6 +32,8 @@ struct PDFView: View {
                         .cornerRadius(8)
                 }
               
+                
+                
                 if timerIsRunning {
                                    Button(action: cancelTimer) {
                                        Text("Cancel")
@@ -40,6 +45,8 @@ struct PDFView: View {
                                }
                            }
                             .padding()
+            
+            Button("Reset Zoom") { resetZoom = true}
 
             // Progress Bar
             GeometryReader { geometry in
@@ -52,7 +59,7 @@ struct PDFView: View {
             
             
             if let pdfDocument = pdfDocument {
-                DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex)
+                DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom)
                     .edgesIgnoringSafeArea(.all)
                     .gesture(dragGesture())
                     .onAppear {
@@ -64,6 +71,7 @@ struct PDFView: View {
                         loadPDFFromURL()
                     }
             }
+            
         }
     }
     
@@ -131,10 +139,12 @@ struct PDFView: View {
                }
            }
        }
+    
     private func cancelTimer() {
            timer?.invalidate()
            timer = nil
            progress = 0
            timerIsRunning = false
        }
+    
 }
