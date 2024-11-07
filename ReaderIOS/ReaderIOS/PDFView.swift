@@ -15,7 +15,13 @@ struct PDFView: View {
     @State private var progress: Double = 0
     @State private var timer: Timer?
     @State private var timerIsRunning: Bool = false
-
+    
+    // Variables for scribble
+    @State private var scribbleEnabled: Bool = false
+    @State private var pageChangeEnabled: Bool = true
+    @State private var currentPath = UIBezierPath()
+    @State private var pagePaths: [Int: [UIBezierPath]] = [:]
+    @State private var eraseEnabled: Bool = false
 
     var body: some View {
         VStack {
@@ -31,24 +37,38 @@ struct PDFView: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
-              
-                
+
                 
                 if timerIsRunning {
-                                   Button(action: cancelTimer) {
-                                       Text("Cancel")
-                                           .padding()
-                                           .background(Color.red)
-                                           .foregroundColor(.white)
-                                           .cornerRadius(8)
-                                   }
-                               }
+                    Button(action: cancelTimer) {
+                        Text("Cancel")
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                }
+                Button(action: enableScribble) {
+                    Text(scribbleEnabled ? "Scribble Off" : "Scribble")
+                        .padding()
+                        .background(scribbleEnabled ? Color.red : Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                if scribbleEnabled{
+                    Button(action: eraseScribble){
+                        Text("Erase")
+                            .padding()
+                            .background(eraseEnabled ? Color.red : Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                }
                 
                 Button("Reset Zoom") { resetZoom = true}
-                           }
-                            .padding()
-            
-            
+            }
+            .padding()
+
 
             // Progress Bar
             GeometryReader { geometry in
@@ -59,14 +79,25 @@ struct PDFView: View {
             }
             .frame(height: 4)
             
-            
             if let pdfDocument = pdfDocument {
-                DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom)
-                    .edgesIgnoringSafeArea(.all)
-                    .gesture(dragGesture())
-                    .onAppear {
-                        currentPageIndex = startingPage
+
+                ZStack{
+                    DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom)
+                        .edgesIgnoringSafeArea(.all)
+                        .gesture(dragGesture())
+                        .onChange(of: currentPageIndex) {
+                            loadPathsForPage(currentPageIndex)
+                        }
+                    if scribbleEnabled {
+                        DrawingCanvas(currentPath: $currentPath,
+                                      pagePaths: $pagePaths,
+                                      currentPageIndex: currentPageIndex,
+                                      eraseEnabled: $eraseEnabled)
                     }
+                }
+                .onAppear {
+                    currentPageIndex = startingPage
+                }
             } else {
                 ProgressView("Getting Workbook")
                     .onAppear {
@@ -78,12 +109,16 @@ struct PDFView: View {
     }
     
     private func dragGesture() -> some Gesture {
-        DragGesture().onEnded { value in
-            if value.translation.width < 0 {
-                goToNextPage()
-            } else if value.translation.width > 0 {
-                goToPreviousPage()
+        if pageChangeEnabled{
+            DragGesture().onEnded { value in
+                if value.translation.width < 0 {
+                    goToNextPage()
+                } else if value.translation.width > 0 {
+                    goToPreviousPage()
+                }
             }
+        } else{
+            DragGesture().onEnded {_ in}
         }
     }
 
@@ -131,7 +166,6 @@ struct PDFView: View {
            timer?.invalidate() // Stop any existing timer
             timerIsRunning = true
 
-
            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                progress += 1 / duration
                if progress >= 1 {
@@ -149,4 +183,22 @@ struct PDFView: View {
            timerIsRunning = false
        }
     
+    private func enableScribble(){
+        scribbleEnabled = !scribbleEnabled
+        pageChangeEnabled = !pageChangeEnabled
+        if eraseEnabled {
+            eraseEnabled = !eraseEnabled
+        }
+    }
+    
+    private func loadPathsForPage(_ pageIndex: Int) {
+            if pagePaths[pageIndex] == nil {
+                pagePaths[pageIndex] = []
+            }
+    }
+    
+    private func eraseScribble(){
+        eraseEnabled = !eraseEnabled
+    }
+
 }
