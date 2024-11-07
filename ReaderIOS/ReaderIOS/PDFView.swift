@@ -26,56 +26,67 @@ struct PDFView: View {
 
     var body: some View {
         VStack {
-            HStack {
-                Menu {
-                    Button("15 Minutes") { startTimer(duration: 15 * 60) }
-                    Button("20 Minutes") { startTimer(duration: 20 * 60) }
-                    Button("25 Minutes") { startTimer(duration: 25 * 60) }
-                } label: {
-                    Text("Start Timer")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
+            ZStack{
+                HStack{
+                    Spacer()
                 }
-
                 
-                if timerIsRunning {
-                    Button(action: cancelTimer) {
-                        Text("Cancel")
+                HStack {
+                    Menu {
+                        Button("15 Minutes") { startTimer(duration: 15 * 60) }
+                        Button("20 Minutes") { startTimer(duration: 20 * 60) }
+                        Button("25 Minutes") { startTimer(duration: 25 * 60) }
+                    } label: {
+                        Text("Start Timer")
                             .padding()
-                            .background(Color.red)
+                            .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(8)
                     }
-                }
-                
-                Button(action: enableScribble) {
-                    Text(scribbleEnabled ? "Scribble Off" : "Scribble")
-                        .padding()
-                        .background(scribbleEnabled ? Color.red : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                
-                if scribbleEnabled{
-                    Button(action: eraseScribble){
-                        Text("Erase")
+                    
+                    
+                    if timerIsRunning {
+                        Button(action: cancelTimer) {
+                            Text("Cancel")
+                                .padding()
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                    }
+                    
+                    Button(action: enableScribble) {
+                        Text(scribbleEnabled ? "Scribble Off" : "Scribble")
                             .padding()
-                            .background(eraseEnabled ? Color.red : Color.blue)
+                            .background(scribbleEnabled ? Color.red : Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
-                }
-                
-                //Reset zoom button
-                if zoomedIn{
-                    Button("Reset Zoom") {
-                        resetZoom = true
+                    
+                    if scribbleEnabled{
+                        Button(action: eraseScribble){
+                            Text("Erase")
+                                .padding()
+                                .background(eraseEnabled ? Color.red : Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
                     }
-                }
+                 
+                }.padding()
+                
+                HStack{
+                    Spacer()
+                    
+                    //Reset zoom button
+                    if zoomedIn{
+                        Button("Reset Zoom") {
+                            resetZoom = true
+                        }
+                    }
+                }.padding()
             }
-            .padding()
+
 
             // Progress Bar
             GeometryReader { geometry in
