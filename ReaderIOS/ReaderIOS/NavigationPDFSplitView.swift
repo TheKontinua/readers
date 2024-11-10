@@ -58,7 +58,7 @@ struct NavigationPDFSplitView: View {
                         .tag(chapter.id)
                 }
             } else {
-                Text("Select a workbook.")
+                ProgressView()
             }
         } detail: {
             // Detail view for PDF
@@ -69,7 +69,7 @@ struct NavigationPDFSplitView: View {
                     Text("Select a chapter.")
                 }
             } else {
-                Text("Select a workbook.")
+                ProgressView("Getting the latest workbook.")
             }
         }
     }
