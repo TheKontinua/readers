@@ -23,6 +23,9 @@ struct PDFView: View {
     @State private var currentPath = UIBezierPath()
     @State private var pagePaths: [Int: [UIBezierPath]] = [:]
     @State private var eraseEnabled: Bool = false
+    
+    @State private var isBookmarked: Bool = false
+
 
     var body: some View {
         VStack {
@@ -77,6 +80,17 @@ struct PDFView: View {
                 
                 HStack{
                     Spacer()
+                    
+                    // Bookmark toggle button
+                    Button(action: {
+                        isBookmarked.toggle()
+                    }) {
+                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(isBookmarked ? .yellow : .gray)
+                            .padding()
+                    }
                     
                     //Reset zoom button
                     if zoomedIn{
