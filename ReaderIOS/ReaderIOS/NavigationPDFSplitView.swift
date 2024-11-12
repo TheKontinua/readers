@@ -115,6 +115,7 @@ struct NavigationPDFSplitView: View {
                 DispatchQueue.main.async {
                     self.workbooks = workbookResponse
                     // By default, for now, lets set workbook 1 chapter 1 as default.
+                    // Later we should store the last workbook/chapter and load this.
                     
                     if let firstWorkbook = workbooks?.first {
                         if let firstChapter = firstWorkbook.chapters.first {
