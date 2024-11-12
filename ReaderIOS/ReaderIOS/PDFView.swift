@@ -91,9 +91,26 @@ struct PDFView: View {
                 }
                 
                 Menu {
-                    Button("Pen") { selectScribbleTool("Pen") }
-                    Button("Highlight") { selectScribbleTool("Highlight") }
-                    Button("Erase") { selectScribbleTool("Erase") }
+                    Button("Pen") {
+                        selectScribbleTool("Pen")
+                        scribbleEnabled = true
+                        eraseEnabled = false
+                    }
+                    Button("Highlight") {
+                        selectScribbleTool("Highlight")
+                        scribbleEnabled = true
+                        eraseEnabled = false
+                    }
+                    Button("Erase") {
+                        selectScribbleTool("Erase")
+                        eraseEnabled = true
+                        scribbleEnabled = false
+                    }
+                    Button("Exit") {
+                        selectScribbleTool("")
+                        scribbleEnabled = false
+                        eraseEnabled = false
+                    }
                 } label: {
                     Text("Markup: \(selectedScribbleTool)")
                         .padding(10)
@@ -123,7 +140,6 @@ struct PDFView: View {
                     }
                 }
             }
-//            .padding()
 
             // Display the progress bar
             GeometryReader { geometry in
