@@ -7,7 +7,6 @@ struct DocumentView: UIViewRepresentable {
     @Binding var currentPageIndex: Int
     @Binding var resetZoom: Bool
     @Binding var zoomedIn: Bool
-    
 
     func makeUIView(context: Context) -> PDFKit.PDFView {
         let pdfView = PDFKit.PDFView()
@@ -57,6 +56,7 @@ struct DocumentView: UIViewRepresentable {
         pdfView.displayDirection = .horizontal
         pdfView.document = pdfDocument
         pdfView.autoScales = true
+        
         
         goToPage(in: pdfView)
     }

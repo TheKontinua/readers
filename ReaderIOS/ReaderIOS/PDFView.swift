@@ -76,22 +76,9 @@ struct PDFView: View {
                         }
                     }
                  
-                }.padding()
+                }
                 
                 HStack{
-                    Spacer()
-                    
-                    // Bookmark toggle button
-                    Button(action: {
-                        isBookmarked.toggle()
-                    }) {
-                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(isBookmarked ? .yellow : .gray)
-                            .padding()
-                    }
-                    
                     //Reset zoom button
                     if zoomedIn{
                         Button("Reset Zoom") {
@@ -113,19 +100,36 @@ struct PDFView: View {
             
             if let pdfDocument = pdfDocument {
 
-                ZStack{
+                ZStack(alignment: .topTrailing) {
+                    // The PDF document view
                     DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
                         .edgesIgnoringSafeArea(.all)
                         .gesture(dragGesture())
                         .onChange(of: currentPageIndex) {
                             loadPathsForPage(currentPageIndex)
                         }
+                    
+                    // Drawing canvas for scribbles
                     if scribbleEnabled {
                         DrawingCanvas(currentPath: $currentPath,
                                       pagePaths: $pagePaths,
                                       currentPageIndex: currentPageIndex,
                                       eraseEnabled: $eraseEnabled)
                     }
+                    
+                    // Bookmark toggle button in the top-right corner
+                    Button(action: {
+                        isBookmarked.toggle()
+                    }) {
+                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                            .resizable()
+                            .frame(width: 40, height: 60)
+                            .padding(20)
+                            .foregroundColor(.yellow)
+                    }
+                }
+                .onAppear {
+                    currentPageIndex = startingPage
                 }
                 .onAppear {
                     currentPageIndex = startingPage
@@ -233,4 +237,8 @@ struct PDFView: View {
         eraseEnabled = !eraseEnabled
     }
 
+}
+
+#Preview {
+    NavigationPDFSplitView()
 }
