@@ -1,3 +1,11 @@
+//
+//  TimerManager.swift
+//  ReaderIOS
+//
+//  Created by Molly Sandler on 11/12/24.
+//
+
+
 import SwiftUI
 
 class TimerManager: ObservableObject {
