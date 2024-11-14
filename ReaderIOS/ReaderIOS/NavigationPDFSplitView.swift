@@ -29,6 +29,7 @@ struct Chapter: Codable, Identifiable, Hashable {
 }
 
 
+
 struct NavigationPDFSplitView: View {
     
     @State private var workbooks: [Workbook]? = nil
@@ -65,11 +66,41 @@ struct NavigationPDFSplitView: View {
             if let selectedWorkbook {
                 if let selectedChapter {
                     PDFView(fileName: selectedWorkbook.fileName, startingPage: selectedChapter.firstPage)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button(action: {
+                                    print("Add button in detail view tapped")
+                                }) {
+                                    Image(systemName: "plus")
+                                        .accessibilityLabel("Add in Detail View")
+                                }
+                            }
+                        }
                 } else {
                     Text("Select a chapter.")
+                        .toolbar {
+                            ToolbarItem() {
+                                Button(action: {
+                                    print("Add button in detail view tapped")
+                                }) {
+                                    Image(systemName: "plus")
+                                        .accessibilityLabel("Add in Detail View")
+                                }
+                            }
+                        }
                 }
             } else {
                 ProgressView("Getting the latest workbook.")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(action: {
+                                print("Add button in detail view tapped")
+                            }) {
+                                Image(systemName: "plus")
+                                    .accessibilityLabel("Add in Detail View")
+                            }
+                        }
+                    }
             }
         }
     }
@@ -114,16 +145,12 @@ struct NavigationPDFSplitView: View {
 
                 DispatchQueue.main.async {
                     self.workbooks = workbookResponse
-                    // By default, for now, lets set workbook 1 chapter 1 as default.
-                    // Later we should store the last workbook/chapter and load this.
-                    
                     if let firstWorkbook = workbooks?.first {
                         if let firstChapter = firstWorkbook.chapters.first {
-                            selectedWorkbookID = firstWorkbook.id;
-                            selectedChapterID = firstChapter.id;
+                            selectedWorkbookID = firstWorkbook.id
+                            selectedChapterID = firstChapter.id
                         }
                     }
-                    
                 }
 
             } catch {
@@ -133,4 +160,8 @@ struct NavigationPDFSplitView: View {
 
         task.resume()
     }
+}
+
+#Preview {
+    NavigationPDFSplitView()
 }

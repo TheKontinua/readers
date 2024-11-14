@@ -21,12 +21,10 @@ struct DocumentView: UIViewRepresentable {
           let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
           overlayView.addGestureRecognizer(pinchGesture)
         
-        // Add double-tap gesture recognizer
                let doubleTapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleDoubleTap(_:)))
                doubleTapGesture.numberOfTapsRequired = 2
                overlayView.addGestureRecognizer(doubleTapGesture)
         
-          // Add the overlay on top of the PDFView
           pdfView.addSubview(overlayView)
               
         return pdfView
@@ -39,12 +37,11 @@ struct DocumentView: UIViewRepresentable {
             uiView.document = pdfDocument
         }
         
-        // Check if resetZoom is triggered
         if resetZoom {
-            uiView.scaleFactor = uiView.scaleFactorForSizeToFit  // Reset scale factor
+            uiView.scaleFactor = uiView.scaleFactorForSizeToFit
             
             DispatchQueue.main.async {
-                self.resetZoom = false  // Reset the binding to avoid repeated resets
+                self.resetZoom = false
                 self.zoomedIn = false
             }
         }
