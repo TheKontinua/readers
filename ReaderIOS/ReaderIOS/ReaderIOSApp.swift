@@ -12,13 +12,12 @@ struct ReaderIOSApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                TableOfContents()
+                NavigationPDFSplitView()
             }
         }
     }
 }
 
-
 #Preview {
-    TableOfContents()
+    NavigationPDFSplitView()
 }
