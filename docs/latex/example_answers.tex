@@ -1,0 +1,108 @@
+\documentclass[letterpaper,12pt,addpoints]{exam}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage[top=0.5in, bottom=1in, left=0.75in, right=0.75in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{mdframed}
+\usepackage{graphicx}
+
+\pagestyle{headandfoot}
+\firstpageheader{}{}{}
+\firstpagefooter{}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}
+\runningfooter{\fontfamily{phv}\selectfont Kontinua 26 (3/5)}{\fontfamily{phv}\selectfont\thepage\ of \numpages}{\fontfamily{phv}\selectfont 8A23B1CC5}
+
+
+\begin{document}
+
+{\fontfamily{phv}\selectfont
+
+
+
+
+\textbf{Kontinua 26 (3/5)}
+
+\Large \textbf{The Physics of Gases}
+
+\vspace{2mm}
+
+Answer Key
+} 
+\parbox{0.35\textwidth}{
+
+} %Ends helvetica
+
+
+\begin{enumerate}
+
+\item (3 points) In a particular game, a fair die is tossed.  If the number of spots showing is either 4 or 5 you win \$1, if the number of spots showing is 6 you win \$4, and if the number of spots showing is 1, 2, or 3 you win nothing.  Let X be the amount that you win. 
+What is the expected value of X?
+
+\vspace{0.2cm}
+\begin{center}
+\includegraphics[width=2cm]{dice_simple.png}
+\end{center}
+
+\textit{Answer:} You must enumerate the possibilities:
+\begin{itemize}
+\item There is a probability of 1/3 that you will win \$1.  
+\item There is a probability of 1/6 that you will win \$4.
+\item There is a probability of 1/2 that you will win \$0.
+\end{itemize}
+
+So:
+
+$$\mathbb{E}[X] = \frac{1}{3}(1) + \frac{1}{6}(4) +  \frac{1}{2}(0) = \frac{6}{6} = 1 $$
+
+\item (4 points) The weight of written reports produced in a certain department has a Normal distribution with mean 60 g and standard deviation 12 g.  What probability that the next report will weigh less than 48 g?
+
+\textit{Answer:}  50\% of the reports will weigh more than 60 g.  48g is one standard deviation from the mean, so 34.1\% of the reports will weigh between 48 and 60 grams.  Thus,  84.1\% of the reports weigh more than 48 grams.  Thus 15.9\% of the reports will weigh less than 48 grams.
+
+There is a 15.9\% chance that the next report will weigh less than 48 grams.
+
+\item (4 points) Complete these equations: (2 points per equation)
+
+\begin{enumerate}
+\item (2 points) 
+\begin{equation*}
+\frac{2}{5} + \frac{3}{7} = 
+\end{equation*}
+
+\textit{Answer:}  First you must find the common divisor:
+
+$$\frac{2}{5} + \frac{3}{7} = \frac{14}{35} + \frac{15}{35} =   \frac{29}{35}$$
+
+\item (2 points)
+\begin{equation*}
+\frac{2}{5} + \frac{3}{7} = 
+\end{equation*}
+
+\textit{Answer:}  First you must find the common divisor:
+
+$$\frac{2}{5} + \frac{3}{7} = \frac{14}{35} + \frac{15}{35} =   \frac{29}{35}$$
+
+\end{enumerate}
+
+\item A reservation service receives requests according to a Poisson process with an mean rate of 6 per minute.
+\begin{enumerate}
+\item (3 points) What is the probability that during a given 1-min period the service center receives 3 requests?
+
+\textit{Answer:} The Poisson distribution for $k$ events in a period, given the average rate of events is $\lambda$ is given by:
+
+$$P(k) = \frac{\lambda^{k}e^{-\lambda}}{k!}$$
+
+Substituting in:
+
+$$P(3) = \frac{6^{3}e^{-6}}{3!} =  \frac{216e^{-6}}{6} = \frac{36}{e^6}$$
+
+That is a perfectly good answer.  If you used a calculator, you could give an approximation:
+
+$$P(3) = \frac{6^{3}e^{-6}}{3!} = \frac{36}{e^6} \approx 0.089$$
+
+The answer, then, would be "There is an 8.9\% chance that the center would get exactly 3 calls in a minute.
+
+\item (3 points) What is the probability that during a given 1-min period, exactly four of the five operators receive no requests?(\textit{Hint}: treat either as a binomial process of 5 trials with 4 successes or consider 5 combinations of Poisson processes, e.g. only 1st operation receives a request  or only 2nd operation receives a request and so on)
+\end{enumerate}
+
+\end{enumerate}
+\end{document}

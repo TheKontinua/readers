@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+    <link rel="stylesheet" type="text/css" 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">  <link rel="stylesheet" type="text/css">
+    <style>
+      .form-group.required .control-label:after {
+        content:"*";
+        color:red;
+      }
+    </style>
+</head>
+<<<<<<< HEAD
+<body style="padding-left: 100px; padding-right: 100px;">
+<<<<<<< HEAD
+  <div class="bg-info container" style="height: 130px; margin-top: 20px; margin-bottom: 30px; padding: 10px;">
+    <div class="row mb-5">
+      <div class="col-md-6">
+        {% load static %}
+        <img src="{% static 'kontinua_foundation_logo.png' %}" alt="Responsive image" style="width: 450px;">
+      </div>
+      <div class="col-md-6" style="margin-top: 20px;">
+        {% load static %}
+        <img src="{% static 'default-profile.png' %}" alt="Responsive image"
+          style="float: right; padding: 10px; width: 100px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <form class="needs-validation" novalidate>
+      <div class="row">
+        <div class="col-md-6">
+<<<<<<< HEAD
+            <div class="list-group">
+              <div class="form-group required mb-3">
+                <label for="full-name" class="control-label">Full Name</label>
+                <input type="text" class="form-control" id="full-name" value = "{{ user_profile.full_name }}" required>
+                <div class="invalid-feedback">
+                  Please enter your full name.
+                </div>
+<<<<<<< HEAD
+                  
+                <div class="form-group required mb-3">
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 1becb50 (Works, but no functionality for other emails)
+                  <label for="user-password" class="control-label">Password</label>
+                  <input
+                        type="password"
+                        class="form-control"
+                        id="user-password"
+                        name="password_hash"
+                        value = "{{ user_profile.password_hash }}"
+                        required
+                    />
+<<<<<<< HEAD
+=======
+                  <label for="password" class="control-label">Password</label>
+                  <input type="password" class="form-control" name="password" id="password" value = "{{ user_profile.password_hash }}" required>
+>>>>>>> 62301bf (Updates username but the logic is not good)
+=======
+>>>>>>> 1becb50 (Works, but no functionality for other emails)
+                  <div class="invalid-feedback">
+                    Please enter your password.
+                  </div>
+                </div>
+                  
+                <div class="form-group required mb-3">
+                  <label for="org-name" >Organization Name</label>
+                  <input type="text" class="form-control" name="org_name" id="organization" value = "{{ user_profile.org_name }}" >  
+=======
+              </div>
+                
+              <div class="form-group required mb-3">
+                <label for="password" class="control-label">Password</label>
+                <input type="password" class="form-control" id="password" value = "{{ user_profile.password_hash }}" required>
+                <div class="invalid-feedback">
+                  Please enter your password.
+>>>>>>> 7fc2710 (main page volume + chapter selector)
+                </div>
+              </div>
+                
+              <div class="form-group required mb-3">
+                <label for="org-name" >Organization Name</label>
+                <input type="text" class="form-control" id="org-name" value = "{{ user_profile.org_name }}" >  
+=======
+          <div class="list-group">
+            <div class="form-group required mb-3">
+              <label for="full-name" class="control-label">Full Name</label>
+              <input type="text" class="form-control" id="full-name" value="{{ user_profile.full_name }}" required>
+              <div class="invalid-feedback">
+                Please enter your full name.
+>>>>>>> 15bc873 (pr fixes)
+              </div>
+            </div>
+
+<<<<<<< HEAD
+              <div class="form-group required mb-3">
+                <label for="primary-email" class="control-label">Primary email</label>
+                <input type="text" class="form-control" id="primary-email" value = "{{ email.email_address }}"  required>
+                <div class="invalid-feedback">
+                  Please enter your primary email.
+                </div>
+<<<<<<< HEAD
+                    <div class="input-group">
+                      <span class="input-group-text">Other Email Addresses</span>
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+                      <input type="email" multiple class="form-control" name="other_emails" aria-label="other-emails" value = "{{other_email}}" placeholder="email1@email.com, email2@email.com"></input>
+=======
+                      <input type="email" multiple class="form-control" aria-label="other-emails" placeholder="email1@email.com, email2@email.com"></input>
+>>>>>>> 62301bf (Updates username but the logic is not good)
+=======
+                      <input type="email" multiple class="form-control" aria-label="other-emails" value = "{{other_email}}" placeholder="email1@email.com, email2@email.com"></input>
+>>>>>>> 3a78790 (Added loading of other emails)
+=======
+                      <input type="email" multiple class="form-control" name="other_emails" aria-label="other-emails" value = "{{other_email}}" placeholder="email1@email.com, email2@email.com"></input>
+>>>>>>> fdab078 (Everything working now in the edit page)
+                    </div>
+                </div> 
+          </div>
+          <div class="col-md-6">
+              <button type="button" class="btn btn-primary">Edit Handles</button>
+              <div class="row gy-2">
+              <div class="col-6">
+                <div class="p-2"></div>
+=======
+>>>>>>> 7fc2710 (main page volume + chapter selector)
+              </div>
+                  <div class="input-group">
+                    <span class="input-group-text">Other Email Addresses</span>
+                    <textarea class="form-control" aria-label="other-emails" placeholder="email1@email.com, email2@email.com"></textarea>
+                  </div>
+<<<<<<< HEAD
+              </div>
+              
+              <div class="form-group required">
+                  <div class="input-group mb-3">
+                      <label class="input-group-text control-label" for="country-code">Country Code</label>
+                      <select class="form-select" id="country-code" name="country_code">
+                        <option value="US" {% if user_profile.country_code == 'US' %} selected {% endif %}>US</option>
+                        <option value="AUS" {% if user_profile.country_code == 'AUS' %} selected {% endif %}>AUS</option>
+                        <option value="UK" {% if user_profile.country_code == 'UK' %} selected {% endif %}>UK</option>
+                      </select>
+                    </div>
+                  
+                  <div class="form-group required mb-3" >
+                    <label for="latitude">Latitude</label>
+<<<<<<< HEAD
+<<<<<<< HEAD
+                    <input type="text" class="form-control" id="latitude" name="latitude" value = "{{ user_profile.latitude }}" placeholder="36.7783° N">  
+=======
+                    <input type="text" class="form-control" id="latitude" value = "{{ user_profile.latitude }}" placeholder="36.7783° N">  
+>>>>>>> 62301bf (Updates username but the logic is not good)
+=======
+                    <input type="text" class="form-control" id="latitude" name="latitude" value = "{{ user_profile.latitude }}" placeholder="36.7783° N">  
+>>>>>>> 1becb50 (Works, but no functionality for other emails)
+                  </div>
+                  
+                  <div class="form-group required mb-3">
+                    <label for="longitude">Longitude</label>
+<<<<<<< HEAD
+<<<<<<< HEAD
+                    <input type="text" class="form-control" id="longitude" name="longitude" value = "{{ user_profile.longitude }}" placeholder="119.4179° W">  
+=======
+                    <input type="text" class="form-control" id="longitude" value = "{{ user_profile.longitude }}" placeholder="119.4179° W">  
+>>>>>>> 62301bf (Updates username but the logic is not good)
+=======
+                    <input type="text" class="form-control" id="longitude" name="longitude" value = "{{ user_profile.longitude }}" placeholder="119.4179° W">  
+>>>>>>> 1becb50 (Works, but no functionality for other emails)
+                  </div>
+                  
+                  <div class="input-group mb-3" >
+                    <label class="input-group-text control-label" for="primary-language">Primary Language</label>
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 1becb50 (Works, but no functionality for other emails)
+                    <select class="form-select" id="primary_lang_code" name="primary_lang_code">
+                      <option value="ENG" {% if user_profile.primary_lang_code == 'ENG' %} selected {% endif %}>ENG</option>
+                      <option value="ESP" {% if user_profile.primary_lang_code == 'ESP' %} selected {% endif %}>ESP</option>
+                      <option value="FRA" {% if user_profile.primary_lang_code == 'FRA' %} selected {% endif %}>FRA</option>
+<<<<<<< HEAD
+=======
+                    <select class="form-select" name="primary_language" id="primary-language" >
+                      <option value="ENG" {% if user_profile.primary_language == 'ENG' %} selected {% endif %}>ENG</option>
+                      <option value="ESP" {% if user_profile.primary_language == 'ESP' %} selected {% endif %}>ESP</option>
+                      <option value="FRA" {% if user_profile.primary_language == 'FRA' %} selected {% endif %}>FRA</option>
+>>>>>>> 62301bf (Updates username but the logic is not good)
+=======
+>>>>>>> 1becb50 (Works, but no functionality for other emails)
+                    </select>
+                  </div>
+                  <div class="input-group mb-3" >
+                    <label class="input-group-text control-label" for="primary-dialect">Primary Dialect</label>
+                    <select class="form-select" id="primary_dialect_code" name="primary_dialect_code">
+                      <option value="EN" {% if user_profile.primary_dialect_code == 'EN' %} selected {% endif %}>EN</option>
+                      <option value="ES" {% if user_profile.primary_dialect_code == 'ES' %} selected {% endif %}>ES</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-left: 585px;">Save</button>
+          </div>
+          </div>
+=======
+              </div> 
+>>>>>>> 7fc2710 (main page volume + chapter selector)
+=======
+            <div class="form-group required mb-3">
+              <label for="password" class="control-label">Password</label>
+              <input type="password" class="form-control" id="password" value=""
+                required>
+              <div class="invalid-feedback">
+                Please enter your password.
+              </div>
+            </div>
+
+            <div class="form-group required mb-3">
+              <label for="org-name">Organization Name</label>
+              <input type="text" class="form-control" id="org-name" value="{{ user_profile.org_name }}">
+            </div>
+
+            <div class="form-group required mb-3">
+              <label for="primary-email" class="control-label">Primary email</label>
+              <input type="text" class="form-control" id="primary-email" value="{{ email.email_address }}" required>
+              <div class="invalid-feedback">
+                Please enter your primary email.
+              </div>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text">Other Email Addresses</span>
+              <textarea class="form-control" aria-label="other-emails"
+                placeholder="email1@email.com, email2@email.com"></textarea>
+            </div>
+=======
+    <div class="bg-info container" style="height: 130px; margin-top: 20px; margin-bottom: 30px; padding: 10px;">
+        <div class="row mb-5">
+          <div class="col-md-6">
+            {% load static %}
+            <img src="{% static 'kontinua_foundation_logo.png' %}" alt="Responsive image" style="width: 450px;">
+          </div>
+          <div class="col-md-6" style="margin-top: 20px;">
+                {% load static %}
+                <img src="{% static 'default-profile.png' %}" alt="Responsive image" style="float: right; padding: 10px; width: 100px;">
+>>>>>>> 907cfd2 (Edit changes)
+          </div>
+>>>>>>> 15bc873 (pr fixes)
+        </div>
+      </div>
+<<<<<<< HEAD
+
+=======
+    
+>>>>>>> def2fe5 (Update profile.html)
+      <div class="container-fluid">
+=======
+<body >
+    <iframe src="header.html" width="100%" height="95px" frameBorder="0"
+      style="display: block; padding: 0px; margin: 0px;"></iframe>
+    
+      <div style="padding: 40px 100px 0px 100px;" class="container-fluid">
+>>>>>>> c2e8da3 (header)
+        <form
+        class="needs-validation"
+        novalidate
+        method="POST"
+        action="{% url 'user_edit' user_id=user_profile.user_id %}"
+        >
+          {% csrf_token %}
+          <div class="row">
+          <div class="col-md-6">
+              <div class="list-group">
+                <div class="form-group required mb-3">
+                  <label for="full-name" class="control-label">Full Name</label>
+                  <input type="text" name="full_name" class="form-control" id="full-name" value = "{{ user_profile.full_name }}" required>
+                  <div class="invalid-feedback">
+                    Please enter your full name.
+                  </div>
+                </div>
+                  
+                <div class="form-group required mb-3">
+                  <label for="org-name" >Organization Name</label>
+                  <input type="text" class="form-control" name="org_name" id="organization" value = "{{ user_profile.org_name }}" >  
+                </div>
+
+                <div class="form-group required mb-3">
+                  <label for="primary-email" class="control-label">Primary email</label>
+                  <input type="text" class="form-control" name="primary_email" id="email-address" value = "{{ email.email_address }}"  required>
+                  <div class="invalid-feedback">
+                    Please enter your primary email.
+                  </div>
+                </div>
+                    <div class="input-group">
+                      <span class="input-group-text">Other Email Addresses</span>
+                      <input type="email" multiple class="form-control" name="other_emails" aria-label="other-emails" value = "{{other_email}}" placeholder="email1@email.com, email2@email.com"></input>
+                    </div>
+                </div>
+
+                {% load static %}
+                {% for handle in handles %}
+                  <div class="container" style="margin-top: 15px"></div>
+                  <div>
+                  {% if handle.site.site_id == "github" %}
+                  <div class="form-group mb-3">
+                    <div class="input-group">
+                      <img
+                        src="{% static 'github-icon.png' %}"
+                        alt="GitHub Icon"
+                        height="30"
+                    />
+                    <input type="text" class="form-control" name="github" id="github" value ="{{ handle.handle }}" style="cursor: not-allowed" readonly>
+                    
+                    </div>
+                  </div>
+                  {% elif handle.site.site_id == "x" %}
+                  <div class="form-group mb-3">
+                    <div class="input-group">
+                      <img
+                        src="{% static 'x-icon.png' %}"
+                        alt="X Icon"
+                        height="30"
+                    />
+                    <input type="text" class="form-control" name="x" id="x" value ="{{ handle.handle }}" style="cursor: not-allowed" readonly>
+                    
+                    </div>
+                  </div>
+                  {% endif %}
+                  </div>
+                {% endfor %}
+          </div>
+          <div class="col-md-6" style="margin-top: 23px;">
+              
+              <div class="form-group required">
+                  <div class="input-group mb-3">
+                      <label class="input-group-text control-label" for="country-code">Country Code</label>
+                      <select class="form-select" id="country-code" name="country_code">
+                        <option value="US" {% if user_profile.country_code == 'US' %} selected {% endif %}>US</option>
+                        <option value="AUS" {% if user_profile.country_code == 'AUS' %} selected {% endif %}>AUS</option>
+                        <option value="UK" {% if user_profile.country_code == 'UK' %} selected {% endif %}>UK</option>
+                      </select>
+                    </div>
+                  
+                  <div class="form-group required mb-3" >
+                    <label for="latitude">Latitude</label>
+                    <input type="text" class="form-control" id="latitude" name="latitude" value = "{{ user_profile.latitude }}" placeholder="36.7783° N">  
+                  </div>
+                  
+                  <div class="form-group required mb-3">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" class="form-control" id="longitude" name="longitude" value = "{{ user_profile.longitude }}" placeholder="119.4179° W">  
+                  </div>
+                  
+                  <div class="input-group mb-3" >
+                    <label class="input-group-text control-label" for="primary-language">Primary Language</label>
+                    <select class="form-select" id="primary_lang_code" name="primary_lang_code">
+                      <option value="ENG" {% if user_profile.primary_lang_code == 'ENG' %} selected {% endif %}>ENG</option>
+                      <option value="ESP" {% if user_profile.primary_lang_code == 'ESP' %} selected {% endif %}>ESP</option>
+                      <option value="FRA" {% if user_profile.primary_lang_code == 'FRA' %} selected {% endif %}>FRA</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="button-container" style="display: flex; margin-top: 43px; justify-content: space-between;">
+                  <button type="button" onclick="window.location.href='/reset_password'" class="btn btn-primary">Reset Password</button>
+                  <button type="button" onclick="window.location.href='/handles'" class="btn btn-primary">Edit Handles</button>
+                  <button id="request-btn" class="btn btn-primary">{{ request_btn }}</button>
+                  <button type="submit" class="btn btn-primary" style="margin-left: 100px;">Save</button>
+                </div>
+          </div>
+          </div>
+          <hr/>
+          <div id="request_status"></div>
+        </div>
+    </form>
+    <iframe src="footer.html" width="100%" height="50px" style="position: absolute; bottom: 0;" frameborder="0"></iframe>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+      (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+          .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+              if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+              }
+
+              form.classList.add('was-validated')
+            }, false)
+          })
+      })()
+    </script>
+    <script type = "text/javascript">
+      $(document).ready(function() {
+          $('#request-btn').on('click', function(e){
+            e.preventDefault();
+            let request = $.ajax({
+                type: "POST",
+                url: "/profile/{{ user_profile.user_id }}/",
+                dataType: 'json',
+                data: {
+                  csrfmiddlewaretoken: "{{csrf_token}}",
+                  command: "request-auth"
+                }
+            });
+
+            request.done(function() {
+                const request_status = document.getElementById("request_status");
+                const request_date = new Date();
+                request_status.innerHTML = "Your promotion request has been submitted at " + request_date.toString() + ". We will update you on your status shortly.";
+            });
+
+            request.fail(function(){
+                const request_status = document.getElementById("request_status");
+                const request_date = new Date();
+                request_status.innerHTML = "There was an error submitting your promotion request at " + request_date.toString() + ".";
+            });
+          });
+      });
+    </script>
+  </body>
+</html>
