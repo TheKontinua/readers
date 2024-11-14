@@ -16,11 +16,17 @@ struct PDFView: View {
     
     // Variables for scribble
     @State private var scribbleEnabled: Bool = false
+    @State private var eraseEnabled: Bool = false
+    @State private var highlightEnabled: Bool = false
+    @State private var textEnabled: Bool = false
+
+    @State private var selectedScribbleTool: String = ""
+
+    @State private var scribbleColor: Color = .red
+    
     @State private var pageChangeEnabled: Bool = true
     @State private var currentPath = UIBezierPath()
     @State private var pagePaths: [Int: [UIBezierPath]] = [:]
-    @State private var eraseEnabled: Bool = false
-    @State private var selectedScribbleTool: String = "Pen"
     
     @State private var isBookmarked: Bool = false
 
@@ -41,7 +47,7 @@ struct PDFView: View {
                         Image(systemName: "arrow.clockwise.circle")
                             .resizable()
                             .frame(width: 24, height: 24)
-                            .foregroundColor(.green)
+                            .foregroundColor(.blue)
                     }
 
                     // Cancel button
@@ -82,7 +88,7 @@ struct PDFView: View {
                         Button("25 Minutes") { timerManager.startTimer(duration: 25 * 60) }
                         Button("Clear Timer") {timerManager.cancelTimer() }
                     } label: {
-                        Text("New Timer")
+                        Text("Timer")
                             .padding(10)
                             .background(Color.blue)
                             .foregroundColor(.white)
@@ -94,27 +100,43 @@ struct PDFView: View {
                     Button("Pen") {
                         selectScribbleTool("Pen")
                         scribbleEnabled = true
+                        highlightEnabled = false
+                        textEnabled = false
                         eraseEnabled = false
                     }
                     Button("Highlight") {
                         selectScribbleTool("Highlight")
-                        scribbleEnabled = true
+                        highlightEnabled = true
+                        scribbleEnabled = false
+                        textEnabled = false
                         eraseEnabled = false
                     }
                     Button("Erase") {
                         selectScribbleTool("Erase")
                         eraseEnabled = true
                         scribbleEnabled = false
+                        highlightEnabled = false
+                        textEnabled = false
+
+                    }
+                    Button("Text") {
+                        selectScribbleTool("Text")
+                        scribbleEnabled = false
+                        eraseEnabled = false
+                        highlightEnabled = false
+                        textEnabled = true
                     }
                     Button("Exit") {
                         selectScribbleTool("")
                         scribbleEnabled = false
                         eraseEnabled = false
+                        highlightEnabled = false
+                        textEnabled = false
                     }
                 } label: {
-                    Text("Markup: \(selectedScribbleTool)")
+                    Text(selectedScribbleTool.isEmpty ? "Markup" : selectedScribbleTool)
                         .padding(10)
-                        .background(scribbleEnabled ? Color.red : Color.blue)
+                        .background(scribbleEnabled || highlightEnabled || eraseEnabled || textEnabled ? Color.red : Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -128,18 +150,30 @@ struct PDFView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
+                // Bookmark toggle button
+                Button(action: {
+                    isBookmarked.toggle()
+                }) {
+                    Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(isBookmarked ? .yellow : .yellow)
+                        .padding()
+                }
+    //            HStack {
+    //                Spacer()
+                    
+                    // Reset zoom button
+                    if zoomedIn {
+                        Button("Reset Zoom") {
+                            resetZoom = true
+                        }
+                    }
+                
             }
             
-            HStack {
-                Spacer()
-                
-                // Reset zoom button
-                if zoomedIn {
-                    Button("Reset Zoom") {
-                        resetZoom = true
-                    }
-                }
-            }
+            
+//            }
 
             // Display the progress bar
             GeometryReader { geometry in
