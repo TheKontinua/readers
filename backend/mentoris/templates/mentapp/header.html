@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Header</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static '/css/colors.css'%}">
+        <link rel="stylesheet" href="{% static '/css/header.css'%}">
+        
+    </head>
+
+    <body>
+        <div class="container">
+                {% load static %}
+                <img
+                    src="{% static 'kontinua_foundation_logo.png' %}"
+                    alt="Responsive image"
+                    class="kontinua-logo"
+                    height="45"
+                />
+                <div class="nav-container">
+
+                    <div id="quizzes-button">
+                        <button id="quizzes" class="quizzes">Quizzes</button>
+                        <img class="nav-logo" src="{% static 'quizzes_icon.svg' %}" />
+                    </div>
+
+                    <div id="my-profile-button">
+                        <button id="my-profile" class="my-profile">My Profile</button>
+                        <img class="nav-logo" src="{% static 'profile_icon.svg' %}" />
+                    </div>
+                    {% if user.is_authenticated %}
+                        <div id="sign-out-button">
+                            <button id="sign-out" class="sign-out">Sign Out</button>
+                            <img class="nav-logo" src="{% static 'sign-in.svg' %}" />
+                        </div>
+                    {% else %}
+                        <div id="sign-in-button">
+                            <button id="sign-in" class="sign-in">Sign In</button>
+                            <img class="nav-logo" src="{% static 'sign-in.svg' %}" />
+                        </div>
+                    {% endif %}
+                </div>
+                
+        </div>
+
+        <script>
+            document.getElementById("my-profile-button").addEventListener('click', function(){
+                var user = '{{ user.user_id }}';
+                window.top.location.href="/profile/"+user;
+            });
+
+            document.getElementById("quizzes-button").addEventListener('click', function () {
+                window.top.location.href = "/main/";
+            });
+
+            document.getElementById("sign-out-button").addEventListener('click', function () {
+                window.top.location.href = "/logoutCustom/";
+            });
+
+            document.getElementById("sign-in-button").addEventListener('click', function () {
+                window.top.location.href = "/login/";
+            });
+
+        </script>
+    </body>
+</html>
