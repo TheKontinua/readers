@@ -7,6 +7,13 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ("email", "user_id", "is_admin")
 
 
+@admin.register(AppFeedback)
+class AppFeedbackAdmin(admin.ModelAdmin):
+    list_display = ("email", "date_created", "resolved")
+    list_filter = ("resolved", "date_created")
+    search_fields = ("email", "feedback_text")
+
+
 admin.site.register(Volume)
 admin.site.register(Chapter)
 admin.site.register(Chapter_Loc)

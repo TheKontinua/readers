@@ -2,8 +2,13 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 import uuid
-from django.contrib.auth.models import AbstractBaseUser,  PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    PermissionsMixin,
+    BaseUserManager,
+)
 from django.urls import reverse
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, user_id=None, password=None, **extra_fields):
@@ -259,10 +264,12 @@ class Handle(models.Model):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
     handle = models.CharField(max_length=50, default="handle")
     is_verified = models.BooleanField(default=False)
+
     class Meta:
-        unique_together = ('user', 'handle', 'site')
+        unique_together = ("user", "handle", "site")
+
     def get_absolute_url(self):
-        return reverse('delete_handle', args=[str(self.id)])
+        return reverse("delete_handle", args=[str(self.id)])
 
 
 class Verification(models.Model):
@@ -337,10 +344,7 @@ class Support_Loc(models.Model):
         related_name="created_support_loc",
     )
     approver = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
-        null=True,
-        related_name="approved_support_loc"
+        User, on_delete=models.CASCADE, null=True, related_name="approved_support_loc"
     )
 
     class Meta:
@@ -383,3 +387,14 @@ class Quiz_Support(models.Model):
                 name="quiz_support_comp_pkey",
             )
         ]
+
+
+class AppFeedback(models.Model):
+    feedback_id = models.AutoField(primary_key=True)
+    email = models.EmailField()
+    feedback_text = models.TextField()
+    date_created = models.DateTimeField(default=now)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.email} - {self.date_created.strftime('%Y-%m-%d')}"
