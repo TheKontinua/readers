@@ -57,10 +57,10 @@ struct NavigationPDFSplitView: View {
     
     @State private var currentPage: Int = 0
     @State private var currentPdfFileName: String? = nil
+    @State private var isShowingBookmarks: Bool = false
     
     var body: some View {
         NavigationSplitView {
-            // Workbook selection
             if let workbooks = workbooks {
                 List(workbooks, selection: $selectedWorkbookID) { workbook in
                     Text(workbook.id)
@@ -72,20 +72,39 @@ struct NavigationPDFSplitView: View {
                         fetchWorkbooks()
                     }
             }
+            
+            
         }
         content: {
-            // Chapter selection
-            if let chapters = chapters {
-                List(chapters, selection: $selectedChapterID) { chapter in
-                    Text(chapter.title)
-                        .tag(chapter.id)
+            
+            Group {
+                if (!isShowingBookmarks) {
+                    if let chapters = chapters {
+                        List(chapters, selection: $selectedChapterID) { chapter in
+                            Text(chapter.title)
+                                .tag(chapter.id)
+                        }
+                    } else {
+                        ProgressView()
+                            .onAppear(perform: fetchChapters)
+                    }
+                } else {
+                    Text("Bookmarks coming soon!")
                 }
-            } else {
-                ProgressView()
-                    .onAppear(perform: fetchChapters)
             }
+                .toolbar {
+                    ToolbarItem(placement: .automatic) {
+                        Toggle(isOn: $isShowingBookmarks) {
+                            Image(systemName: isShowingBookmarks ? "bookmark.fill" : "bookmark")
+                                .foregroundColor(.accentColor)
+                        }
+                        .toggleStyle(.button)
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(isShowingBookmarks ? "Show All Chapters" : "Show Bookmarked Chapters")
+                    }
+                }
+
         } detail: {
-            // Detail view for PDF
             if currentPdfFileName != nil {
                 PDFView(fileName: $currentPdfFileName, currentPageIndex: $currentPage, covers: $covers)
             } else {
@@ -157,6 +176,7 @@ struct NavigationPDFSplitView: View {
                     chapters = chapterResponse
                     selectedChapterID = chapters?.first?.id
                 }
+                
             } catch {
                 print("Error decoding chapters: \(error)")
             }
