@@ -42,9 +42,9 @@ struct Reference: Identifiable, Codable {
 }
 
 struct Workbook: Codable, Hashable, Identifiable {
-    let id: String;
-    let metaName: String;
-    let pdfName: String;
+    let id: String
+    let metaName: String
+    let pdfName: String
 }
 
 struct NavigationPDFSplitView: View {
@@ -55,7 +55,7 @@ struct NavigationPDFSplitView: View {
     @State private var selectedChapterID: String?
     
     @State private var currentPage: Int = 0
-    @State private var currentPdfFileName: String? = nil;
+    @State private var currentPdfFileName: String? = nil
     
     var body: some View {
         NavigationSplitView {
@@ -71,8 +71,6 @@ struct NavigationPDFSplitView: View {
                         fetchWorkbooks()
                     }
             }
-            
-            
         }
         content: {
             // Chapter selection
@@ -87,132 +85,126 @@ struct NavigationPDFSplitView: View {
             }
         } detail: {
             // Detail view for PDF
-            if let currentPdfFileName = currentPdfFileName {
-                    PDFView(fileName: $currentPdfFileName, currentPageIndex: $currentPage)
+            if currentPdfFileName != nil {
+                PDFView(fileName: $currentPdfFileName, currentPageIndex: $currentPage)
             } else {
                 ProgressView("Getting the latest workbook.")
             }
         }
-        
         .onChange(of: selectedWorkbookID) {
+            guard let selectedWorkbook = selectedWorkbook else { return }
+            
+            if currentPdfFileName != selectedWorkbook.pdfName {
+                currentPdfFileName = selectedWorkbook.pdfName
+            }
+            
             fetchChapters()
-            if let selectedWorkbook = selectedWorkbook {
-                currentPdfFileName = selectedWorkbook.pdfName;
-                print("Opened \(String(describing: currentPdfFileName))")
-            }
         }
-        .onChange(of: selectedChapterID){
+        .onChange(of: selectedChapterID) {
             if let chapter = selectedChapter {
-                currentPage = chapter.startPage - 1;
+                currentPage = chapter.startPage - 1
             }
         }
-        
     }
     
     var selectedWorkbook: Workbook? {
         workbooks?.first(where: { $0.id == selectedWorkbookID })
     }
     
+    // TODO: Selected chapter should be based on the current page number.
     var selectedChapter: Chapter? {
         chapters?.first(where: { $0.id == selectedChapterID })
     }
     
     func fetchChapters() {
-        
         guard let fileName = selectedWorkbook?.metaName else {
-            return;
+            return
         }
-
+        
         guard let url = URL(string: "http://localhost:8000/meta/\(fileName)") else {
-            print("Invalid chapter meta url.")
+            print("Invalid chapter meta URL.")
             return
         }
         
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
-
+        
         let config = URLSessionConfiguration.default
         config.urlCache = nil
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
-
+        
         let session = URLSession(configuration: config)
-
-        let task = session.dataTask(with: request, completionHandler: { data, response, error in
+        
+        let task = session.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Error fetching workbooks: \(error)")
+                print("Error fetching chapters: \(error)")
                 return
             }
-
+            
             guard let data = data else {
-                print("No data received from url.")
+                print("No data received from URL.")
                 return
             }
-
+            
             do {
                 let decoder = JSONDecoder()
                 let chapterResponse = try decoder.decode([Chapter].self, from: data)
-
+                
                 DispatchQueue.main.async {
                     chapters = chapterResponse
                     selectedChapterID = chapters?.first?.id
                 }
-
             } catch {
                 print("Error decoding chapters: \(error)")
             }
-        })
-
+        }
+        
         task.resume()
-
-        
-        
     }
     
     func fetchWorkbooks() {
         guard let url = URL(string: "http://localhost:8000/workbooks.json") else {
-            print("Invalid workbooks url.")
+            print("Invalid workbooks URL.")
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
-
+        
         let config = URLSessionConfiguration.default
         config.urlCache = nil
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
-
+        
         let session = URLSession(configuration: config)
-
-        let task = session.dataTask(with: request, completionHandler: { data, response, error in
+        
+        let task = session.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Error fetching workbooks: \(error)")
                 return
             }
-
+            
             guard let data = data else {
-                print("No data received from url.")
+                print("No data received from URL.")
                 return
             }
-
+            
             do {
                 let decoder = JSONDecoder()
                 let workbookResponse = try decoder.decode([Workbook].self, from: data)
-
+                
                 DispatchQueue.main.async {
                     workbooks = workbookResponse
                     if let id = workbooks?.first?.id {
                         selectedWorkbookID = id
                     }
                 }
-
             } catch {
                 print("Error decoding workbooks: \(error)")
             }
-        })
-
+        }
+        
         task.resume()
     }
-
 }
 
 #Preview {
