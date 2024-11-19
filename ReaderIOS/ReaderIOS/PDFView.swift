@@ -16,18 +16,13 @@ struct PDFView: View {
     @ObservedObject private var timerManager = TimerManager()
     
     // Variables for scribble
-    @State private var scribbleEnabled: Bool = false
-    @State private var eraseEnabled: Bool = false
-    @State private var highlightEnabled: Bool = false
-    @State private var textEnabled: Bool = false
+    @State private var annotationsEnabled: Bool = false
+    @State private var exitNotSelected: Bool = false
 
     @State private var selectedScribbleTool: String = ""
-
-    @State private var scribbleColor: Color = .red
     
     @State private var pageChangeEnabled: Bool = true
-    @State private var currentPath = UIBezierPath()
-    @State private var pagePaths: [Int: [UIBezierPath]] = [:]
+    @State private var pagePaths: [Int: [Path]] = [:]
     
     @State private var isBookmarked: Bool = false
 
@@ -100,44 +95,32 @@ struct PDFView: View {
                 Menu {
                     Button("Pen") {
                         selectScribbleTool("Pen")
-                        scribbleEnabled = true
-                        highlightEnabled = false
-                        textEnabled = false
-                        eraseEnabled = false
+                        annotationsEnabled = true
+                        exitNotSelected = true
                     }
                     Button("Highlight") {
                         selectScribbleTool("Highlight")
-                        highlightEnabled = true
-                        scribbleEnabled = false
-                        textEnabled = false
-                        eraseEnabled = false
+                        annotationsEnabled = true
+                        exitNotSelected = true
                     }
                     Button("Erase") {
                         selectScribbleTool("Erase")
-                        eraseEnabled = true
-                        scribbleEnabled = false
-                        highlightEnabled = false
-                        textEnabled = false
-
+                        annotationsEnabled = true
+                        exitNotSelected = true
                     }
                     Button("Text") {
                         selectScribbleTool("Text")
-                        scribbleEnabled = false
-                        eraseEnabled = false
-                        highlightEnabled = false
-                        textEnabled = true
+                        annotationsEnabled = true
+                        exitNotSelected = true
                     }
                     Button("Exit") {
                         selectScribbleTool("")
-                        scribbleEnabled = false
-                        eraseEnabled = false
-                        highlightEnabled = false
-                        textEnabled = false
+                        exitNotSelected = false
                     }
                 } label: {
                     Text(selectedScribbleTool.isEmpty ? "Markup" : selectedScribbleTool)
                         .padding(10)
-                        .background(scribbleEnabled || highlightEnabled || eraseEnabled || textEnabled ? Color.red : Color.blue)
+                        .background(exitNotSelected ? Color.red : Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -195,11 +178,12 @@ struct PDFView: View {
                             loadPathsForPage(currentPageIndex)
                         }
                     
-                    if scribbleEnabled {
-                        DrawingCanvas(currentPath: $currentPath,
-                                      pagePaths: $pagePaths,
+                    if annotationsEnabled {
+                        DrawingCanvas(pagePaths: $pagePaths,
                                       currentPageIndex: currentPageIndex,
-                                      eraseEnabled: $eraseEnabled)
+                                      selectedScribbleTool: $selectedScribbleTool,
+                                      nextPage: {goToNextPage()},
+                                      previousPage: {goToPreviousPage()})
                     }
                 }
             } else {
@@ -271,11 +255,6 @@ struct PDFView: View {
 
     private func selectScribbleTool(_ tool: String) {
         selectedScribbleTool = tool
-        if tool == "Erase" {
-            eraseEnabled = true
-        } else {
-            eraseEnabled = false
-        }
     }
 
     private func loadPathsForPage(_ pageIndex: Int) {

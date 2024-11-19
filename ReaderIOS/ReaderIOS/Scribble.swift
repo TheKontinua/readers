@@ -2,10 +2,12 @@ import SwiftUI
 import PDFKit
 
 struct DrawingCanvas: View {
-    @Binding var currentPath: UIBezierPath
-    @Binding var pagePaths: [Int: [UIBezierPath]]
+    @Binding var pagePaths: [Int: [Path]]
     var currentPageIndex: Int
-    @Binding var eraseEnabled: Bool
+    @Binding var selectedScribbleTool: String
+    var nextPage: (() -> Void)?
+    var previousPage: (() -> Void)?
+    @State private var liveDrawingPath: Path = Path()
 
     var body: some View {
         Canvas { context, size in
@@ -14,27 +16,33 @@ struct DrawingCanvas: View {
                     context.stroke(Path(path.cgPath), with: .color(.black), lineWidth: 2)
                 }
             }
-            context.stroke(Path(currentPath.cgPath), with: .color(.black), lineWidth: 2)
+            context.stroke(Path(liveDrawingPath.cgPath), with: .color(.blue), lineWidth: 2)
+            if let paths = pagePaths[currentPageIndex] {
+                for path in paths {
+                    context.stroke(Path(path.cgPath), with: .color(.yellow.opacity(0.5)), lineWidth: 5)
+                }
+            }
+            context.stroke(Path(liveDrawingPath.cgPath), with: .color(.blue.opacity(0.5)), lineWidth: 5)
         }
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { value in
-                    if eraseEnabled {
+                    if selectedScribbleTool == "Erase" {
                         erasePath(at: value.location)
-                    } else{
-                        if currentPath.isEmpty {
-                            currentPath.move(to: value.location)
-                        } else {
-                            currentPath.addLine(to: value.location)
-                        }
+                    } else if selectedScribbleTool == "Pen" || selectedScribbleTool == "Highlight"{
+                        updateLivePath(with: value.location)
                     }
                 }
-                .onEnded { _ in
-                    if pagePaths[currentPageIndex] == nil {
-                        pagePaths[currentPageIndex] = []
+                .onEnded { value in
+                    if selectedScribbleTool != ""{
+                        finalizeCurrentPath()
+                    } else {
+                        if value.translation.width < 0 {
+                            nextPage?()
+                        } else if value.translation.width > 0 {
+                            previousPage?()
+                        }
                     }
-                    pagePaths[currentPageIndex]?.append(currentPath)
-                    currentPath = UIBezierPath()
                 }
         )
     }
@@ -47,6 +55,21 @@ struct DrawingCanvas: View {
                     break
                 }
             }
+        }
+    }
+    
+    private func updateLivePath(with point: CGPoint) {
+        if liveDrawingPath.isEmpty {
+            liveDrawingPath.move(to: point)
+        } else {
+            liveDrawingPath.addLine(to: point)
+        }
+    }
+    
+    private func finalizeCurrentPath() {
+        if !liveDrawingPath.isEmpty {
+            pagePaths[currentPageIndex, default: []].append(liveDrawingPath)
+            liveDrawingPath = Path()
         }
     }
 }
