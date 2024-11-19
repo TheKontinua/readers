@@ -9,8 +9,8 @@ struct PDFView: View {
     @State private var pdfDocument: PDFDocument? = nil
 
     //State variables for zoom
-    @State private var resetZoom = false;
-    @State private var zoomedIn = false;
+    @State private var resetZoom = false
+    @State private var zoomedIn = false
     
     // Timer class
     @ObservedObject private var timerManager = TimerManager()
@@ -32,188 +32,162 @@ struct PDFView: View {
     @State private var isBookmarked: Bool = false
 
     var body: some View {
-        VStack {
-            HStack() {
-                if timerManager.isTimerRunning {
-                    // Pause button
-                    Button(action: timerManager.pauseTimer) {
-                        Image(systemName: "pause.circle")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.yellow)
+        NavigationStack {
+            VStack {
+                if let pdfDocument = pdfDocument {
+                    ZStack {
+                        DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
+                            .edgesIgnoringSafeArea(.all)
+                            .gesture(dragGesture())
+                            .onChange(of: currentPageIndex) {
+                                loadPathsForPage(currentPageIndex)
+                            }
+                        
+                        if scribbleEnabled {
+                            DrawingCanvas(currentPath: $currentPath,
+                                          pagePaths: $pagePaths,
+                                          currentPageIndex: currentPageIndex,
+                                          eraseEnabled: $eraseEnabled)
+                        }
                     }
-
-                    // Restart button
-                    Button(action: timerManager.restartTimer) {
-                        Image(systemName: "arrow.clockwise.circle")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.blue)
-                    }
-
-                    // Cancel button
-                    Button(action: timerManager.cancelTimer) {
-                        Image(systemName: "xmark.circle")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.red)
-                    }
-                } else if timerManager.isPaused {
-                    // Unpause button
-                    Button(action: timerManager.unpauseTimer) {
-                        Image(systemName: "play.circle")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.green)
-                    }
-                    // Restart button
-                    Button(action: timerManager.restartTimer) {
-                        Image(systemName: "arrow.clockwise.circle")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.blue)
-                    }
-
-                    // Cancel button
-                    Button(action: timerManager.cancelTimer) {
-                        Image(systemName: "xmark.circle")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.red)
+                    .toolbar {
+                        // Timer Controls
+                        ToolbarItemGroup(placement: .navigationBarTrailing) {
+                            if timerManager.isTimerRunning {
+                                Button(action: timerManager.pauseTimer) {
+                                    Image(systemName: "pause.circle")
+                                        .foregroundColor(.yellow)
+                                }
+                                Button(action: timerManager.restartTimer) {
+                                    Image(systemName: "arrow.clockwise.circle")
+                                        .foregroundColor(.blue)
+                                }
+                                Button(action: timerManager.cancelTimer) {
+                                    Image(systemName: "xmark.circle")
+                                        .foregroundColor(.red)
+                                }
+                            } else if timerManager.isPaused {
+                                Button(action: timerManager.unpauseTimer) {
+                                    Image(systemName: "play.circle")
+                                        .foregroundColor(.green)
+                                }
+                                Button(action: timerManager.restartTimer) {
+                                    Image(systemName: "arrow.clockwise.circle")
+                                        .foregroundColor(.blue)
+                                }
+                                Button(action: timerManager.cancelTimer) {
+                                    Image(systemName: "xmark.circle")
+                                        .foregroundColor(.red)
+                                }
+                            } else {
+                                Menu {
+                                    Button("15 Minutes") { timerManager.startTimer(duration: 15 * 1) }
+                                    Button("20 Minutes") { timerManager.startTimer(duration: 20 * 60) }
+                                    Button("25 Minutes") { timerManager.startTimer(duration: 25 * 60) }
+                                    Button("Clear Timer") { timerManager.cancelTimer() }
+                                } label: {
+                                    Text("Timer")
+                                        .padding(5)
+                                        .foregroundColor(.blue)
+                                        .cornerRadius(8)
+                                }
+                            }
+                        }
+                        
+                        // Markup Tools
+                        ToolbarItemGroup(placement: .navigationBarTrailing) {
+                            // Markup Tools
+                            Menu {
+                                Button("Pen") {
+                                    selectScribbleTool("Pen")
+                                    scribbleEnabled = true
+                                    highlightEnabled = false
+                                    textEnabled = false
+                                    eraseEnabled = false
+                                }
+                                Button("Highlight") {
+                                    selectScribbleTool("Highlight")
+                                    highlightEnabled = true
+                                    scribbleEnabled = false
+                                    textEnabled = false
+                                    eraseEnabled = false
+                                }
+                                Button("Erase") {
+                                    selectScribbleTool("Erase")
+                                    eraseEnabled = true
+                                    scribbleEnabled = false
+                                    highlightEnabled = false
+                                    textEnabled = false
+                                }
+                                Button("Text") {
+                                    selectScribbleTool("Text")
+                                    scribbleEnabled = false
+                                    eraseEnabled = false
+                                    highlightEnabled = false
+                                    textEnabled = true
+                                }
+                                Button("Exit") {
+                                    selectScribbleTool("")
+                                    scribbleEnabled = false
+                                    eraseEnabled = false
+                                    highlightEnabled = false
+                                    textEnabled = false
+                                }
+                            } label: {
+                                Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
+                                    .padding(5)
+                                    .foregroundColor(scribbleEnabled || highlightEnabled || eraseEnabled || textEnabled ? Color.pink : Color.gray)
+                                    .cornerRadius(8)
+                            }
+                            
+                            // Digital Resources
+                            Button(action: {
+                                print("Digital Resources button tapped")
+                            }) {
+                                Text("Digital Resources")
+                                    .padding(5)
+                                    .foregroundColor(.purple)
+                                    .cornerRadius(8)
+                            }
+                            
+                            // Bookmark
+                            Button(action: {
+                                isBookmarked.toggle()
+                            }) {
+                                Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                                    .foregroundColor(.yellow)
+                            }
+                            
+                            // Reset Zoom
+                            if zoomedIn {
+                                Button("Reset Zoom") {
+                                    resetZoom = true
+                                }
+                            }
+                        }
+                        // Progress Bar as a Toolbar Item
+                        ToolbarItem(placement: .bottomBar) {
+                            GeometryReader { geometry in
+                                Rectangle()
+                                    .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
+                                    .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
+                                    .animation(.linear(duration: 0.1), value: timerManager.progress)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: 4)
+                        }
                     }
                 } else {
-                    // Start Timer menu
-                    Menu {
-                        Button("15 Minutes") { timerManager.startTimer(duration: 15 * 1) }
-                        Button("20 Minutes") { timerManager.startTimer(duration: 20 * 60) }
-                        Button("25 Minutes") { timerManager.startTimer(duration: 25 * 60) }
-                        Button("Clear Timer") {timerManager.cancelTimer() }
-                    } label: {
-                        Text("Timer")
-                            .padding(10)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
-                }
-                
-                Menu {
-                    Button("Pen") {
-                        selectScribbleTool("Pen")
-                        scribbleEnabled = true
-                        highlightEnabled = false
-                        textEnabled = false
-                        eraseEnabled = false
-                    }
-                    Button("Highlight") {
-                        selectScribbleTool("Highlight")
-                        highlightEnabled = true
-                        scribbleEnabled = false
-                        textEnabled = false
-                        eraseEnabled = false
-                    }
-                    Button("Erase") {
-                        selectScribbleTool("Erase")
-                        eraseEnabled = true
-                        scribbleEnabled = false
-                        highlightEnabled = false
-                        textEnabled = false
-
-                    }
-                    Button("Text") {
-                        selectScribbleTool("Text")
-                        scribbleEnabled = false
-                        eraseEnabled = false
-                        highlightEnabled = false
-                        textEnabled = true
-                    }
-                    Button("Exit") {
-                        selectScribbleTool("")
-                        scribbleEnabled = false
-                        eraseEnabled = false
-                        highlightEnabled = false
-                        textEnabled = false
-                    }
-                } label: {
-                    Text(selectedScribbleTool.isEmpty ? "Markup" : selectedScribbleTool)
-                        .padding(10)
-                        .background(scribbleEnabled || highlightEnabled || eraseEnabled || textEnabled ? Color.red : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                Button(action: {
-                    // Placeholder action for now
-                    print("Digital Resources button tapped")
-                }) {
-                    Text("Digital Resources")
-                        .padding(10)
-                        .background(Color.purple)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                // Bookmark toggle button
-                Button(action: {
-                    isBookmarked.toggle()
-                }) {
-                    Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(isBookmarked ? .yellow : .yellow)
-                        .padding()
-                }
-    //            HStack {
-    //                Spacer()
-                    
-                    // Reset zoom button
-                    if zoomedIn {
-                        Button("Reset Zoom") {
-                            resetZoom = true
+                    ProgressView("Getting Workbook")
+                        .onAppear {
+                            loadPDFFromURL()
                         }
-                    }
-                
-            }
-            
-            
-//            }
-
-            // Display the progress bar
-            GeometryReader { geometry in
-                Rectangle()
-                    .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
-                    .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
-                    .animation(.linear(duration: 0.1), value: timerManager.progress)
-            }
-            .frame(height: 4)
-            
-            if let pdfDocument = pdfDocument {
-                ZStack {
-                    DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom, zoomedIn: $zoomedIn
-)
-                        .edgesIgnoringSafeArea(.all)
-                        .gesture(dragGesture())
-                        .onChange(of: currentPageIndex) {
-                            loadPathsForPage(currentPageIndex)
-                        }
-                    
-                    if scribbleEnabled {
-                        DrawingCanvas(currentPath: $currentPath,
-                                      pagePaths: $pagePaths,
-                                      currentPageIndex: currentPageIndex,
-                                      eraseEnabled: $eraseEnabled)
-                    }
                 }
-            } else {
-                ProgressView("Getting Workbook")
-                    .onAppear {
-                        loadPDFFromURL()
-                    }
             }
         }
         .onChange(of: fileName) {
             loadPDFFromURL()
         }
     }
-    
     private func dragGesture() -> some Gesture {
         if pageChangeEnabled && !zoomedIn {
             return DragGesture().onEnded { value in
