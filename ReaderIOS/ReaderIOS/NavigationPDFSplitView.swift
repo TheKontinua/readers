@@ -6,41 +6,63 @@
 //
 import SwiftUI
 
-struct Workbook: Codable, Identifiable, Hashable {
-    let id: UUID = UUID()
-    var name: String
-    var fileName: String
-    var chapters: [Chapter]
+struct Chapter: Identifiable, Codable {
+    let id: String
+    let title: String
+    let book: String
+    let chapNum: Int
+    let covers: [Cover]
+    let startPage: Int
+    let requires: [String]?
     
-    private enum CodingKeys: String, CodingKey {
-        case name, fileName, chapters
+    enum CodingKeys: String, CodingKey {
+        case id, title, book, covers, requires
+        case chapNum = "chap_num"
+        case startPage = "start_page"
     }
 }
 
-struct Chapter: Codable, Identifiable, Hashable {
-    let id: UUID = UUID()
-    var name: String
-    var number: Int
-    var firstPage: Int
-    
-    private enum CodingKeys: String, CodingKey {
-        case name, number, firstPage
-    }
+struct Cover: Identifiable, Codable {
+    let id: String
+    let desc: String
+    let videos: [Video]?
+    let references: [Reference]?
 }
 
+struct Video: Identifiable, Codable {
+    let id = UUID()
+    let link: String
+    let title: String
+}
+
+struct Reference: Identifiable, Codable {
+    let id = UUID()
+    let link: String
+    let title: String
+}
+
+struct Workbook: Codable, Hashable, Identifiable {
+    let id: String
+    let metaName: String
+    let pdfName: String
+}
 
 struct NavigationPDFSplitView: View {
     
     @State private var workbooks: [Workbook]? = nil
-    @State private var selectedWorkbookID: UUID?
-    @State private var selectedChapterID: UUID?
+    @State private var chapters: [Chapter]? = nil
+    @State private var selectedWorkbookID: String?
+    @State private var selectedChapterID: String?
+    
+    @State private var currentPage: Int = 0
+    @State private var currentPdfFileName: String? = nil
     
     var body: some View {
         NavigationSplitView {
             // Workbook selection
             if let workbooks = workbooks {
                 List(workbooks, selection: $selectedWorkbookID) { workbook in
-                    Text(workbook.name)
+                    Text(workbook.id)
                         .tag(workbook.id)
                 }
             } else {
@@ -49,27 +71,38 @@ struct NavigationPDFSplitView: View {
                         fetchWorkbooks()
                     }
             }
-            
-        } content: {
+        }
+        content: {
             // Chapter selection
-            if let workbook = selectedWorkbook {
-                List(workbook.chapters, selection: $selectedChapterID) { chapter in
-                    Text(chapter.name)
+            if let chapters = chapters {
+                List(chapters, selection: $selectedChapterID) { chapter in
+                    Text(chapter.title)
                         .tag(chapter.id)
                 }
             } else {
                 ProgressView()
+                    .onAppear(perform: fetchChapters)
             }
         } detail: {
             // Detail view for PDF
-            if let selectedWorkbook {
-                if let selectedChapter {
-                    PDFView(fileName: selectedWorkbook.fileName, startingPage: selectedChapter.firstPage)
-                } else {
-                    Text("Select a chapter.")
-                }
+            if currentPdfFileName != nil {
+                PDFView(fileName: $currentPdfFileName, currentPageIndex: $currentPage)
             } else {
                 ProgressView("Getting the latest workbook.")
+            }
+        }
+        .onChange(of: selectedWorkbookID) {
+            guard let selectedWorkbook = selectedWorkbook else { return }
+            
+            if currentPdfFileName != selectedWorkbook.pdfName {
+                currentPdfFileName = selectedWorkbook.pdfName
+            }
+            
+            fetchChapters()
+        }
+        .onChange(of: selectedChapterID) {
+            if let chapter = selectedChapter {
+                currentPage = chapter.startPage - 1
             }
         }
     }
@@ -78,59 +111,102 @@ struct NavigationPDFSplitView: View {
         workbooks?.first(where: { $0.id == selectedWorkbookID })
     }
     
+    // TODO: Selected chapter should be based on the current page number.
     var selectedChapter: Chapter? {
-        selectedWorkbook?.chapters.first(where: { $0.id == selectedChapterID })
+        chapters?.first(where: { $0.id == selectedChapterID })
+    }
+    
+    func fetchChapters() {
+        guard let fileName = selectedWorkbook?.metaName else {
+            return
+        }
+        
+        guard let url = URL(string: "http://localhost:8000/meta/\(fileName)") else {
+            print("Invalid chapter meta URL.")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        
+        let config = URLSessionConfiguration.default
+        config.urlCache = nil
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        
+        let session = URLSession(configuration: config)
+        
+        let task = session.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error fetching chapters: \(error)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received from URL.")
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let chapterResponse = try decoder.decode([Chapter].self, from: data)
+                
+                DispatchQueue.main.async {
+                    chapters = chapterResponse
+                    selectedChapterID = chapters?.first?.id
+                }
+            } catch {
+                print("Error decoding chapters: \(error)")
+            }
+        }
+        
+        task.resume()
     }
     
     func fetchWorkbooks() {
         guard let url = URL(string: "http://localhost:8000/workbooks.json") else {
-            print("Invalid workbooks url.")
+            print("Invalid workbooks URL.")
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
-
+        
         let config = URLSessionConfiguration.default
         config.urlCache = nil
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
-
+        
         let session = URLSession(configuration: config)
-
+        
         let task = session.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Error fetching workbooks: \(error)")
                 return
             }
-
+            
             guard let data = data else {
-                print("No data received from url.")
+                print("No data received from URL.")
                 return
             }
-
+            
             do {
                 let decoder = JSONDecoder()
                 let workbookResponse = try decoder.decode([Workbook].self, from: data)
-
+                
                 DispatchQueue.main.async {
-                    self.workbooks = workbookResponse
-                    // By default, for now, lets set workbook 1 chapter 1 as default.
-                    // Later we should store the last workbook/chapter and load this.
-                    
-                    if let firstWorkbook = workbooks?.first {
-                        if let firstChapter = firstWorkbook.chapters.first {
-                            selectedWorkbookID = firstWorkbook.id;
-                            selectedChapterID = firstChapter.id;
-                        }
+                    workbooks = workbookResponse
+                    if let id = workbooks?.first?.id {
+                        selectedWorkbookID = id
                     }
-                    
                 }
-
             } catch {
-                print("Error decoding JSON: \(error)")
+                print("Error decoding workbooks: \(error)")
             }
         }
-
+        
         task.resume()
     }
+}
+
+#Preview {
+    NavigationPDFSplitView()
 }
