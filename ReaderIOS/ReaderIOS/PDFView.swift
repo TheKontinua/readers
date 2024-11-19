@@ -2,10 +2,11 @@ import SwiftUI
 import PDFKit
 
 struct PDFView: View {
-    let fileName: String
-    let startingPage: Int
+    // The fileName and the page index depend on the navigation split view.
+    @Binding var fileName: String?
+    @Binding var currentPageIndex: Int
+    
     @State private var pdfDocument: PDFDocument? = nil
-    @State private var currentPageIndex: Int = 0
 
     //State variables for zoom
     @State private var resetZoom = false
@@ -48,9 +49,6 @@ struct PDFView: View {
                                           currentPageIndex: currentPageIndex,
                                           eraseEnabled: $eraseEnabled)
                         }
-                    }
-                    .onAppear {
-                        currentPageIndex = startingPage
                     }
                     .toolbar {
                         // Timer Controls
@@ -186,6 +184,9 @@ struct PDFView: View {
                 }
             }
         }
+        .onChange(of: fileName) {
+            loadPDFFromURL()
+        }
     }
     private func dragGesture() -> some Gesture {
         if pageChangeEnabled && !zoomedIn {
@@ -214,7 +215,11 @@ struct PDFView: View {
     }
 
     private func loadPDFFromURL() {
-        let baseURL = "http://localhost:8000/"
+        guard let fileName = fileName else {
+            return;
+        }
+        
+        let baseURL = "http://localhost:8000/pdfs/"
         let urlString = baseURL + fileName
         guard let url = URL(string: urlString) else {
             print("Invalid URL for file: \(fileName)")
@@ -234,7 +239,6 @@ struct PDFView: View {
 
             DispatchQueue.main.async {
                 self.pdfDocument = document
-                self.currentPageIndex = startingPage
             }
         }.resume()
     }
