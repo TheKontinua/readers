@@ -22,8 +22,8 @@ struct PDFView: View {
     @State private var selectedScribbleTool: String = ""
     
     @State private var pageChangeEnabled: Bool = true
-    @State private var pagePaths: [Int: [Path]] = [:]
-    @State private var highlightPaths: [Int: [Path]] = [:]
+    @State private var pagePaths: [String: [Path]] = [:]
+    @State private var highlightPaths: [String: [Path]] = [:]
     
     @State private var isBookmarked: Bool = false
 
@@ -40,12 +40,12 @@ struct PDFView: View {
                             }
                         
                         if annotationsEnabled {
-                          DrawingCanvas(pagePaths: $pagePaths,
-                                        highlightPaths: $highlightPaths,
-                                        currentPageIndex: currentPageIndex,
-                                        selectedScribbleTool: $selectedScribbleTool,
-                                        nextPage: {goToNextPage()},
-                                        previousPage: {goToPreviousPage()})
+                            DrawingCanvas(pagePaths: $pagePaths,
+                                          highlightPaths: $highlightPaths,
+                                          key: uniqueKey(for: currentPageIndex),
+                                          selectedScribbleTool: $selectedScribbleTool,
+                                          nextPage: {goToNextPage()},
+                                          previousPage: {goToPreviousPage()})
                         }
                     }
                     .toolbar {
@@ -151,6 +151,11 @@ struct PDFView: View {
                                     resetZoom = true
                                 }
                             }
+                            if annotationsEnabled{
+                                Button("Clear"){
+                                    clearMarkup()
+                                }
+                            }
                         }
                         // Progress Bar as a Toolbar Item
                         ToolbarItem(placement: .bottomBar) {
@@ -235,8 +240,22 @@ struct PDFView: View {
     }
 
     private func loadPathsForPage(_ pageIndex: Int) {
-        if pagePaths[pageIndex] == nil {
-            pagePaths[pageIndex] = []
+        let key = uniqueKey(for: pageIndex)
+        if pagePaths[key] == nil {
+            pagePaths[key] = []
         }
+        if highlightPaths[key] == nil {
+            highlightPaths[key] = []
+        }
+    }
+    
+    private func uniqueKey(for pageIndex: Int) -> String {
+        guard let fileName = fileName else { return "\(pageIndex)" }
+        return "\(fileName)-\(pageIndex)"
+    }
+    
+    private func clearMarkup() {
+        highlightPaths.removeValue(forKey: uniqueKey(for: currentPageIndex))
+        pagePaths.removeValue(forKey: uniqueKey(for: currentPageIndex))
     }
 }
