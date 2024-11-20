@@ -16,7 +16,7 @@ struct PDFView: View {
     
     //State variables for opening WebView for DRs
     @State private var selectedLink: URLItem? = nil
-
+    
     //State variables for zoom
     @State private var resetZoom = false
     @State private var zoomedIn = false
@@ -27,7 +27,7 @@ struct PDFView: View {
     // Variables for scribble
     @State private var annotationsEnabled: Bool = false
     @State private var exitNotSelected: Bool = false
-
+    
     @State private var selectedScribbleTool: String = ""
     
     @State private var pageChangeEnabled: Bool = true
@@ -35,7 +35,7 @@ struct PDFView: View {
     @State private var highlightPaths: [Int: [Path]] = [:]
     
     @State private var isBookmarked: Bool = false
-
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -49,12 +49,12 @@ struct PDFView: View {
                             }
                         
                         if annotationsEnabled {
-                          DrawingCanvas(pagePaths: $pagePaths,
-                                        highlightPaths: $highlightPaths,
-                                        currentPageIndex: currentPageIndex,
-                                        selectedScribbleTool: $selectedScribbleTool,
-                                        nextPage: {goToNextPage()},
-                                        previousPage: {goToPreviousPage()})
+                            DrawingCanvas(pagePaths: $pagePaths,
+                                          highlightPaths: $highlightPaths,
+                                          currentPageIndex: currentPageIndex,
+                                          selectedScribbleTool: $selectedScribbleTool,
+                                          nextPage: {goToNextPage()},
+                                          previousPage: {goToPreviousPage()})
                         }
                     }
                     .toolbar {
@@ -105,90 +105,81 @@ struct PDFView: View {
                         ToolbarItemGroup(placement: .navigationBarTrailing) {
                             // Markup Tools
                             Menu {
-                              Button("Pen") {
-                                selectScribbleTool("Pen")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Highlight") {
-                                selectScribbleTool("Highlight")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Erase") {
-                                selectScribbleTool("Erase")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Text") {
-                                selectScribbleTool("Text")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Exit") {
-                                selectScribbleTool("")
-                                exitNotSelected = false
-                              }
-                             } label: {
-                               Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
-                               .padding(5)
-                               .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
-                               .cornerRadius(8)
-                             }
+                                Button("Pen") {
+                                    selectScribbleTool("Pen")
+                                    annotationsEnabled = true
+                                    exitNotSelected = true
+                                }
+                                Button("Highlight") {
+                                    selectScribbleTool("Highlight")
+                                    annotationsEnabled = true
+                                    exitNotSelected = true
+                                }
+                                Button("Erase") {
+                                    selectScribbleTool("Erase")
+                                    annotationsEnabled = true
+                                    exitNotSelected = true
+                                }
+                                Button("Text") {
+                                    selectScribbleTool("Text")
+                                    annotationsEnabled = true
+                                    exitNotSelected = true
+                                }
+                                Button("Exit") {
+                                    selectScribbleTool("")
+                                    exitNotSelected = false
+                                }
+                            } label: {
+                                Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
+                                    .padding(5)
+                                    .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
+                                    .cornerRadius(8)
+                            }
                             
                             // Digital Resources
-                            /*Button(action: {
-                                print("Digital Resources button tapped")
-                            }) {
-                                Text("Digital Resources")
-                                    .padding(5)
-                                    .foregroundColor(.purple)
-                                    .cornerRadius(8)
-                            }*/
-                            
                             Menu {
-                               if let covers = covers, !covers.isEmpty {
-                                   ForEach(covers) { cover in
-                                       Menu {
-                                           if let videos = cover.videos, !videos.isEmpty {
-                                               Section(header: Text("Videos")) {
-                                                   ForEach(videos) { video in
-                                                       Button(action: {
-                                                           if let url = URL(string: video.link) {
-                                                              selectedLink = URLItem(url: url)
-                                                          }
-                                                       }) {
-                                                           Text(video.title)
-                                                       }
-                                                   }
-                                               }
-                                           }
-
-                                           if let references = cover.references, !references.isEmpty {
-                                               Section(header: Text("References")) {
-                                                   ForEach(references) { reference in
-                                                       Button(action: {
-                                                           if let url = URL(string: reference.link) {
-                                                               selectedLink = URLItem(url: url)
-                                                           }
-                                                       }) {
-                                                           Text(reference.title)
-                                                       }
-                                                   }
-                                               }
-                                           }
-
-                                           if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
-                                               Text("No Videos or References Available")
-                                           }
-                                       } label: {
-                                           Text(cover.desc)
-                                       }
-                                   }
-                               } else {
-                                   Text("No Digital Resources Available")
-                               }
-                          } label: {
+                                if let covers = covers, !covers.isEmpty {
+                                    ForEach(covers) { cover in
+                                        Menu {
+                                            if let videos = cover.videos, !videos.isEmpty {
+                                                Section(header: Text("Videos")) {
+                                                    ForEach(videos) { video in
+                                                        Button(action: {
+                                                            if let url = URL(string: video.link) {
+                                                                selectedLink = URLItem(url: url)
+                                                            }
+                                                        }) {
+                                                            Text(video.title)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if let references = cover.references, !references.isEmpty {
+                                                Section(header: Text("References")) {
+                                                    ForEach(references) { reference in
+                                                        Button(action: {
+                                                            if let url = URL(string: reference.link) {
+                                                                selectedLink = URLItem(url: url)
+                                                            }
+                                                        }) {
+                                                            Text(reference.title)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
+                                                Text("No Videos or References Available")
+                                            }
+                                        } label: {
+                                            Text(cover.desc)
+                                        }
+                                    }
+                                } else {
+                                    Text("No Digital Resources Available")
+                                }
+                            } label: {
                                 Text("Digital Resources")
                                     .padding(5)
                                     .foregroundColor(.purple)
@@ -211,6 +202,7 @@ struct PDFView: View {
                                 }
                             }
                         }
+                        
                         // Progress Bar as a Toolbar Item
                         ToolbarItem(placement: .bottomBar) {
                             GeometryReader { geometry in
@@ -230,7 +222,9 @@ struct PDFView: View {
                 }
             }
         }
-        .sheet(item: $selectedLink) { linkItem in
+        .sheet(item: $selectedLink, onDismiss: {
+            print("WebView dismissed. Cleaning up resources.")
+        }) { linkItem in
             WebView(url: linkItem.url)
         }
         .onChange(of: fileName) {
@@ -251,19 +245,19 @@ struct PDFView: View {
             return DragGesture().onEnded { _ in }
         }
     }
-
+    
     private func goToNextPage() {
         if let pdfDocument = pdfDocument, currentPageIndex < pdfDocument.pageCount - 1 {
             currentPageIndex += 1
         }
     }
-
+    
     private func goToPreviousPage() {
         if currentPageIndex > 0 {
             currentPageIndex -= 1
         }
     }
-
+    
     private func loadPDFFromURL() {
         guard let fileName = fileName else {
             return;
@@ -275,28 +269,28 @@ struct PDFView: View {
             print("Invalid URL for file: \(fileName)")
             return
         }
-
+        
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
                 print("Error downloading PDF: \(error.localizedDescription)")
                 return
             }
-
+            
             guard let data = data, let document = PDFDocument(data: data) else {
                 print("No data found or invalid PDF from \(url).")
                 return
             }
-
+            
             DispatchQueue.main.async {
                 self.pdfDocument = document
             }
         }.resume()
     }
-
+    
     private func selectScribbleTool(_ tool: String) {
         selectedScribbleTool = tool
     }
-
+    
     private func loadPathsForPage(_ pageIndex: Int) {
         if pagePaths[pageIndex] == nil {
             pagePaths[pageIndex] = []
