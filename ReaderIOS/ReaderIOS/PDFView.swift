@@ -5,6 +5,7 @@ struct PDFView: View {
     // The fileName and the page index depend on the navigation split view.
     @Binding var fileName: String?
     @Binding var currentPageIndex: Int
+    @Binding var covers: [Cover]?
     
     @State private var pdfDocument: PDFDocument? = nil
 
@@ -128,9 +129,56 @@ struct PDFView: View {
                              }
                             
                             // Digital Resources
-                            Button(action: {
+                            /*Button(action: {
                                 print("Digital Resources button tapped")
                             }) {
+                                Text("Digital Resources")
+                                    .padding(5)
+                                    .foregroundColor(.purple)
+                                    .cornerRadius(8)
+                            }*/
+                            
+                            Menu {
+                                if let covers = covers, !covers.isEmpty {
+                                    ForEach(covers) { cover in
+                                        Menu {
+                                            if let videos = cover.videos, !videos.isEmpty {
+                                                Section(header: Text("Videos")) {
+                                                    ForEach(videos) { video in
+                                                        Button(action: {
+                                                            print("Selected video: \(video.title)")
+                                                            // Add actions to open video or handle selection
+                                                        }) {
+                                                            Text(video.title)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if let references = cover.references, !references.isEmpty {
+                                                Section(header: Text("References")) {
+                                                    ForEach(references) { reference in
+                                                        Button(action: {
+                                                            print("Selected reference: \(reference.title)")
+                                                            // Add actions to open reference or handle selection
+                                                        }) {
+                                                            Text(reference.title)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
+                                                Text("No Videos or References Available")
+                                            }
+                                        } label: {
+                                            Text(cover.desc)
+                                        }
+                                    }
+                                } else {
+                                    Text("No Digital Resources Available")
+                                }
+                            } label: {
                                 Text("Digital Resources")
                                     .padding(5)
                                     .foregroundColor(.purple)
@@ -175,11 +223,13 @@ struct PDFView: View {
             loadPDFFromURL()
         }
     }
+    
     private func dragGesture() -> some Gesture {
         if pageChangeEnabled && !zoomedIn {
             return DragGesture().onEnded { value in
                 if value.translation.width < 0 {
                     goToNextPage()
+                    print("Covers: \(covers)")
                 } else if value.translation.width > 0 {
                     goToPreviousPage()
                 }
