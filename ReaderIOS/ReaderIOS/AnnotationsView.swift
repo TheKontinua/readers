@@ -1,7 +1,7 @@
 import SwiftUI
 import PDFKit
 
-struct DrawingCanvas: View {
+struct AnnotationsView: View {
     @Binding var pagePaths: [String: [Path]]
     @Binding var highlightPaths: [String: [Path]]
     var key: String
