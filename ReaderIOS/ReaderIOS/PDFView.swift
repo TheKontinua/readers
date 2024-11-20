@@ -25,6 +25,9 @@ struct PDFView: View {
     @State private var pagePaths: [String: [Path]] = [:]
     @State private var highlightPaths: [String: [Path]] = [:]
     
+    //Class to save annotations
+    @ObservedObject private var annotationManager = AnnotationManager()
+    
     @State private var isBookmarked: Bool = false
 
     var body: some View {
@@ -40,12 +43,12 @@ struct PDFView: View {
                             }
                         
                         if annotationsEnabled {
-                            DrawingCanvas(pagePaths: $pagePaths,
-                                          highlightPaths: $highlightPaths,
-                                          key: uniqueKey(for: currentPageIndex),
-                                          selectedScribbleTool: $selectedScribbleTool,
-                                          nextPage: {goToNextPage()},
-                                          previousPage: {goToPreviousPage()})
+                            AnnotationsView(pagePaths: $pagePaths,
+                                            highlightPaths: $highlightPaths,
+                                            key: uniqueKey(for: currentPageIndex),
+                                            selectedScribbleTool: $selectedScribbleTool,
+                                            nextPage: {goToNextPage()},
+                                            previousPage: {goToPreviousPage()})
                         }
                     }
                     .toolbar {
@@ -119,6 +122,7 @@ struct PDFView: View {
                               Button("Exit") {
                                 selectScribbleTool("")
                                 exitNotSelected = false
+                                  annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
                               }
                              } label: {
                                Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
@@ -172,6 +176,10 @@ struct PDFView: View {
                     ProgressView("Getting Workbook")
                         .onAppear {
                             loadPDFFromURL()
+                            annotationManager.loadAnnotations(pagePaths: &pagePaths, highlightPaths: &highlightPaths)
+                            if !pagePaths.isEmpty || !highlightPaths.isEmpty{
+                                annotationsEnabled = true
+                            }
                         }
                 }
             }
