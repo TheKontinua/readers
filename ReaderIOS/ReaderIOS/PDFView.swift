@@ -16,18 +16,14 @@ struct PDFView: View {
     @ObservedObject private var timerManager = TimerManager()
     
     // Variables for scribble
-    @State private var scribbleEnabled: Bool = false
-    @State private var eraseEnabled: Bool = false
-    @State private var highlightEnabled: Bool = false
-    @State private var textEnabled: Bool = false
+    @State private var annotationsEnabled: Bool = false
+    @State private var exitNotSelected: Bool = false
 
     @State private var selectedScribbleTool: String = ""
-
-    @State private var scribbleColor: Color = .red
     
     @State private var pageChangeEnabled: Bool = true
-    @State private var currentPath = UIBezierPath()
-    @State private var pagePaths: [Int: [UIBezierPath]] = [:]
+    @State private var pagePaths: [Int: [Path]] = [:]
+    @State private var highlightPaths: [Int: [Path]] = [:]
     
     @State private var isBookmarked: Bool = false
 
@@ -43,11 +39,13 @@ struct PDFView: View {
                                 loadPathsForPage(currentPageIndex)
                             }
                         
-                        if scribbleEnabled {
-                            DrawingCanvas(currentPath: $currentPath,
-                                          pagePaths: $pagePaths,
-                                          currentPageIndex: currentPageIndex,
-                                          eraseEnabled: $eraseEnabled)
+                        if annotationsEnabled {
+                          DrawingCanvas(pagePaths: $pagePaths,
+                                        highlightPaths: $highlightPaths,
+                                        currentPageIndex: currentPageIndex,
+                                        selectedScribbleTool: $selectedScribbleTool,
+                                        nextPage: {goToNextPage()},
+                                        previousPage: {goToPreviousPage()})
                         }
                     }
                     .toolbar {
@@ -98,47 +96,36 @@ struct PDFView: View {
                         ToolbarItemGroup(placement: .navigationBarTrailing) {
                             // Markup Tools
                             Menu {
-                                Button("Pen") {
-                                    selectScribbleTool("Pen")
-                                    scribbleEnabled = true
-                                    highlightEnabled = false
-                                    textEnabled = false
-                                    eraseEnabled = false
-                                }
-                                Button("Highlight") {
-                                    selectScribbleTool("Highlight")
-                                    highlightEnabled = true
-                                    scribbleEnabled = false
-                                    textEnabled = false
-                                    eraseEnabled = false
-                                }
-                                Button("Erase") {
-                                    selectScribbleTool("Erase")
-                                    eraseEnabled = true
-                                    scribbleEnabled = false
-                                    highlightEnabled = false
-                                    textEnabled = false
-                                }
-                                Button("Text") {
-                                    selectScribbleTool("Text")
-                                    scribbleEnabled = false
-                                    eraseEnabled = false
-                                    highlightEnabled = false
-                                    textEnabled = true
-                                }
-                                Button("Exit") {
-                                    selectScribbleTool("")
-                                    scribbleEnabled = false
-                                    eraseEnabled = false
-                                    highlightEnabled = false
-                                    textEnabled = false
-                                }
-                            } label: {
-                                Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
-                                    .padding(5)
-                                    .foregroundColor(scribbleEnabled || highlightEnabled || eraseEnabled || textEnabled ? Color.pink : Color.gray)
-                                    .cornerRadius(8)
-                            }
+                              Button("Pen") {
+                                selectScribbleTool("Pen")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Highlight") {
+                                selectScribbleTool("Highlight")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Erase") {
+                                selectScribbleTool("Erase")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Text") {
+                                selectScribbleTool("Text")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Exit") {
+                                selectScribbleTool("")
+                                exitNotSelected = false
+                              }
+                             } label: {
+                               Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
+                               .padding(5)
+                               .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
+                               .cornerRadius(8)
+                             }
                             
                             // Digital Resources
                             Button(action: {
@@ -245,11 +232,6 @@ struct PDFView: View {
 
     private func selectScribbleTool(_ tool: String) {
         selectedScribbleTool = tool
-        if tool == "Erase" {
-            eraseEnabled = true
-        } else {
-            eraseEnabled = false
-        }
     }
 
     private func loadPathsForPage(_ pageIndex: Int) {
