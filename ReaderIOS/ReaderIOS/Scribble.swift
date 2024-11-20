@@ -3,6 +3,7 @@ import PDFKit
 
 struct DrawingCanvas: View {
     @Binding var pagePaths: [Int: [Path]]
+    @Binding var highlightPaths: [Int: [Path]]
     var currentPageIndex: Int
     @Binding var selectedScribbleTool: String
     var nextPage: (() -> Void)?
@@ -16,13 +17,12 @@ struct DrawingCanvas: View {
                     context.stroke(Path(path.cgPath), with: .color(.black), lineWidth: 2)
                 }
             }
-            context.stroke(Path(liveDrawingPath.cgPath), with: .color(.blue), lineWidth: 2)
-            if let paths = pagePaths[currentPageIndex] {
-                for path in paths {
+            if let hPaths = highlightPaths[currentPageIndex] {
+                for path in hPaths {
                     context.stroke(Path(path.cgPath), with: .color(.yellow.opacity(0.5)), lineWidth: 5)
                 }
             }
-            context.stroke(Path(liveDrawingPath.cgPath), with: .color(.blue.opacity(0.5)), lineWidth: 5)
+            context.stroke(Path(liveDrawingPath.cgPath), with: selectedScribbleTool == "Highlight" ? .color(.blue.opacity(0.5)) : .color(.blue), lineWidth: selectedScribbleTool == "Highlight" ? 5 : 2)
         }
         .gesture(
             DragGesture(minimumDistance: 0)
@@ -34,9 +34,11 @@ struct DrawingCanvas: View {
                     }
                 }
                 .onEnded { value in
-                    if selectedScribbleTool != ""{
-                        finalizeCurrentPath()
-                    } else {
+                    if selectedScribbleTool == "Pen"{
+                        finalizeCurrentPath(for: &pagePaths)
+                    } else if selectedScribbleTool == "Highlight"{
+                        finalizeCurrentPath(for: &highlightPaths)
+                    } else if selectedScribbleTool == ""{
                         if value.translation.width < 0 {
                             nextPage?()
                         } else if value.translation.width > 0 {
@@ -66,9 +68,9 @@ struct DrawingCanvas: View {
         }
     }
     
-    private func finalizeCurrentPath() {
+    private func finalizeCurrentPath(for pathDirectory: inout [Int: [Path]]) {
         if !liveDrawingPath.isEmpty {
-            pagePaths[currentPageIndex, default: []].append(liveDrawingPath)
+            pathDirectory[currentPageIndex, default: []].append(liveDrawingPath)
             liveDrawingPath = Path()
         }
     }
