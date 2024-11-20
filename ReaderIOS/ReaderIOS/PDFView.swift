@@ -23,6 +23,7 @@ struct PDFView: View {
     
     @State private var pageChangeEnabled: Bool = true
     @State private var pagePaths: [Int: [Path]] = [:]
+    @State private var highlightPaths: [Int: [Path]] = [:]
     
     @State private var isBookmarked: Bool = false
 
@@ -180,6 +181,7 @@ struct PDFView: View {
                     
                     if annotationsEnabled {
                         DrawingCanvas(pagePaths: $pagePaths,
+                                      highlightPaths: $highlightPaths,
                                       currentPageIndex: currentPageIndex,
                                       selectedScribbleTool: $selectedScribbleTool,
                                       nextPage: {goToNextPage()},
