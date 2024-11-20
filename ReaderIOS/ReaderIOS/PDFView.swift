@@ -1,6 +1,11 @@
 import SwiftUI
 import PDFKit
 
+struct URLItem: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
 struct PDFView: View {
     // The fileName and the page index depend on the navigation split view.
     @Binding var fileName: String?
@@ -8,6 +13,9 @@ struct PDFView: View {
     @Binding var covers: [Cover]?
     
     @State private var pdfDocument: PDFDocument? = nil
+    
+    //State variables for opening WebView for DRs
+    @State private var selectedLink: URLItem? = nil
 
     //State variables for zoom
     @State private var resetZoom = false
@@ -139,51 +147,54 @@ struct PDFView: View {
                             }*/
                             
                             Menu {
-                                if let covers = covers, !covers.isEmpty {
-                                    ForEach(covers) { cover in
-                                        Menu {
-                                            if let videos = cover.videos, !videos.isEmpty {
-                                                Section(header: Text("Videos")) {
-                                                    ForEach(videos) { video in
-                                                        Button(action: {
-                                                            print("Selected video: \(video.title)")
-                                                            // Add actions to open video or handle selection
-                                                        }) {
-                                                            Text(video.title)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            
-                                            if let references = cover.references, !references.isEmpty {
-                                                Section(header: Text("References")) {
-                                                    ForEach(references) { reference in
-                                                        Button(action: {
-                                                            print("Selected reference: \(reference.title)")
-                                                            // Add actions to open reference or handle selection
-                                                        }) {
-                                                            Text(reference.title)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            
-                                            if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
-                                                Text("No Videos or References Available")
-                                            }
-                                        } label: {
-                                            Text(cover.desc)
-                                        }
-                                    }
-                                } else {
-                                    Text("No Digital Resources Available")
-                                }
-                            } label: {
+                               if let covers = covers, !covers.isEmpty {
+                                   ForEach(covers) { cover in
+                                       Menu {
+                                           if let videos = cover.videos, !videos.isEmpty {
+                                               Section(header: Text("Videos")) {
+                                                   ForEach(videos) { video in
+                                                       Button(action: {
+                                                           if let url = URL(string: video.link) {
+                                                              selectedLink = URLItem(url: url)
+                                                          }
+                                                       }) {
+                                                           Text(video.title)
+                                                       }
+                                                   }
+                                               }
+                                           }
+
+                                           if let references = cover.references, !references.isEmpty {
+                                               Section(header: Text("References")) {
+                                                   ForEach(references) { reference in
+                                                       Button(action: {
+                                                           if let url = URL(string: reference.link) {
+                                                               selectedLink = URLItem(url: url)
+                                                           }
+                                                       }) {
+                                                           Text(reference.title)
+                                                       }
+                                                   }
+                                               }
+                                           }
+
+                                           if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
+                                               Text("No Videos or References Available")
+                                           }
+                                       } label: {
+                                           Text(cover.desc)
+                                       }
+                                   }
+                               } else {
+                                   Text("No Digital Resources Available")
+                               }
+                          } label: {
                                 Text("Digital Resources")
                                     .padding(5)
                                     .foregroundColor(.purple)
                                     .cornerRadius(8)
                             }
+                            
                             
                             // Bookmark
                             Button(action: {
@@ -219,6 +230,9 @@ struct PDFView: View {
                 }
             }
         }
+        .sheet(item: $selectedLink) { linkItem in
+            WebView(url: linkItem.url)
+        }
         .onChange(of: fileName) {
             loadPDFFromURL()
         }
@@ -229,7 +243,6 @@ struct PDFView: View {
             return DragGesture().onEnded { value in
                 if value.translation.width < 0 {
                     goToNextPage()
-                    print("Covers: \(covers)")
                 } else if value.translation.width > 0 {
                     goToPreviousPage()
                 }
