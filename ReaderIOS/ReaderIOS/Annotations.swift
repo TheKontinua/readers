@@ -2,9 +2,9 @@ import SwiftUI
 import PDFKit
 
 struct DrawingCanvas: View {
-    @Binding var pagePaths: [Int: [Path]]
-    @Binding var highlightPaths: [Int: [Path]]
-    var currentPageIndex: Int
+    @Binding var pagePaths: [String: [Path]]
+    @Binding var highlightPaths: [String: [Path]]
+    var key: String
     @Binding var selectedScribbleTool: String
     var nextPage: (() -> Void)?
     var previousPage: (() -> Void)?
@@ -12,12 +12,12 @@ struct DrawingCanvas: View {
 
     var body: some View {
         Canvas { context, size in
-            if let paths = pagePaths[currentPageIndex] {
+            if let paths = pagePaths[key] {
                 for path in paths {
                     context.stroke(Path(path.cgPath), with: .color(.black), lineWidth: 2)
                 }
             }
-            if let hPaths = highlightPaths[currentPageIndex] {
+            if let hPaths = highlightPaths[key] {
                 for path in hPaths {
                     context.stroke(Path(path.cgPath), with: .color(.yellow.opacity(0.5)), lineWidth: 5)
                 }
@@ -50,10 +50,18 @@ struct DrawingCanvas: View {
     }
     
     private func erasePath(at location: CGPoint) {
-        if let pagePathsForCurrentPage = pagePaths[currentPageIndex] {
+        if let pagePathsForCurrentPage = pagePaths[key] {
             for (index, path) in pagePathsForCurrentPage.enumerated() {
                 if path.contains(location) {
-                    pagePaths[currentPageIndex]?.remove(at: index)
+                    pagePaths[key]?.remove(at: index)
+                    break
+                }
+            }
+        }
+        if let highlightPathsForCurrentPage = highlightPaths[key] {
+            for (index, path) in highlightPathsForCurrentPage.enumerated() {
+                if path.contains(location) {
+                    highlightPaths[key]?.remove(at: index)
                     break
                 }
             }
@@ -68,9 +76,9 @@ struct DrawingCanvas: View {
         }
     }
     
-    private func finalizeCurrentPath(for pathDirectory: inout [Int: [Path]]) {
+    private func finalizeCurrentPath(for pathDirectory: inout [String: [Path]]) {
         if !liveDrawingPath.isEmpty {
-            pathDirectory[currentPageIndex, default: []].append(liveDrawingPath)
+            pathDirectory[key, default: []].append(liveDrawingPath)
             liveDrawingPath = Path()
         }
     }
