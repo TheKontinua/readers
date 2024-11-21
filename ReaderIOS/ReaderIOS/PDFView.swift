@@ -5,22 +5,22 @@ struct PDFView: View {
     // The fileName and the page index depend on the navigation split view.
     @Binding var fileName: String?
     @Binding var currentPageIndex: Int
-    
     @State private var pdfDocument: PDFDocument? = nil
 
     //State variables for zoom
     @State private var resetZoom = false
     @State private var zoomedIn = false
-    
+
+    // Feedback
+    @State private var showingFeedback = false
+
     // Timer class
     @ObservedObject private var timerManager = TimerManager()
     
     // Variables for scribble
     @State private var annotationsEnabled: Bool = false
     @State private var exitNotSelected: Bool = false
-
     @State private var selectedScribbleTool: String = ""
-    
     @State private var pageChangeEnabled: Bool = true
     @State private var pagePaths: [String: [Path]] = [:]
     @State private var highlightPaths: [String: [Path]] = [:]
@@ -28,10 +28,12 @@ struct PDFView: View {
     //Class to save annotations
     @ObservedObject private var annotationManager = AnnotationManager()
     
+    // Bookmark
     @State private var isBookmarked: Bool = false
 
     var body: some View {
         NavigationStack {
+            ZStack {
             VStack {
                 if let pdfDocument = pdfDocument {
                     ZStack {
@@ -183,10 +185,35 @@ struct PDFView: View {
                         }
                 }
             }
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showingFeedback = true
+                        }) {
+                            Image(systemName: "message.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.blue)
+                                .padding(16)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                                .shadow(radius: 4)
+                        }
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 20)
+                        }
+                    }
+                }
+                .sheet(isPresented: $showingFeedback) {
+                    FeedbackView()
+                }
+            
         }
         .onChange(of: fileName) {
             loadPDFFromURL()
         }
+        
     }
     private func dragGesture() -> some Gesture {
         if pageChangeEnabled && !zoomedIn {
