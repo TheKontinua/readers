@@ -1,0 +1,19 @@
+name luahbtex
+category TLCore
+revision 70015
+shortdesc LuaTeX with HarfBuzz library for glyph shaping
+depend cm
+depend etex
+depend hyph-utf8
+depend hyphen-base
+depend knuth-lib
+depend luahbtex.ARCH
+depend luatex
+depend plain
+depend tex-ini-files
+depend unicode-data
+execute AddFormat name=luahbtex engine=luahbtex   patterns=language.def,language.dat.lua   options="luatex.ini"   fmttriggers=cm,etex,hyphen-base,knuth-lib,plain,tex-ini-files,unicode-data,hyph-utf8,luatex
+containersize 460
+containerchecksum b1c78727ecda90057331e0e465f5d0f17cac3ecd4102f55743c070af23b10daf783e00c15edf70362708cf2dfd947623183cc433742d090d6314c71401019b0c
+doccontainersize 30236
+doccontainerchecksum 026039bf8a112e331289adc92dc73cb38787d32455bcb39ac5eef040e8bebf7ac399c961db7cff13dd28f35afb0e7533700319854a840c98778c89a9887ee12b

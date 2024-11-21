@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        />
+        <link rel="stylesheet" type="text/css" />
+        {% load static %}
+        <link rel="stylesheet" href="{% static '/css/colors.css'%}">
+    </head>
+    <body>
+        <iframe src="header.html" width="100%" height="95px" frameBorder="0" style="display: block; padding: 0px; margin: 0px;"></iframe>
+        <div class="row mb-3" style="margin-top: 2%; align-items: center">
+            <div class="col-md-3">
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    onclick="window.location.href='/main/'"
+                    style="margin-left: 10%"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        class="bi bi-arrow-left"
+                        viewBox="0 0 16 16"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+                        />
+                    </svg>
+                    Back
+                </button>
+            </div>
+            <div class="col-md-6">
+                <h2 style="text-align: center">Pending Promotions</h2>
+            </div>
+        </div>
+        <div
+            class="container"
+            style="width: 100%; overflow-y: scroll"
+        >
+            <div>
+                <h5>New Users to Mentors</h5>
+                <div style="width: 100%; height: 100%; overflow-y: auto">
+                    <table class="table table-bordered">
+                        <tbody>
+                            {% for newbie in newbies %}
+                            <tr class="user">
+                                <td>
+                                    <b class="user-email">{{ newbie.1 }}</b>
+                                </td>
+                                <td>
+                                    <p class="text-secondary">
+                                        Endorsements: {{ newbie.2 }}, {{ newbie.3 }}
+                                    </p>
+                                </td>
+                                <td style="width: 15%">
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            class="promote-btn btn btn-success me-1"
+                                        >
+                                            Promote
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            Decline
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <h5>Mentors to Quiz Makers</h5>
+                <div style="width: 100%; height: 100%; overflow-y: auto">
+                    <table class="table table-bordered">
+                        <tbody>
+                            {% for mentor in mentors %}
+                            <tr class="user">
+                                <td>
+                                    <b class="user-email">{{ mentor.1 }}</b>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-info"
+                                            disabled
+                                        >
+                                            <b>Mentor</b>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-secondary">
+                                        Endorsements: {{ mentor.2 }}, {{ mentor.3 }}
+                                    </p>
+                                </td>
+                                <td style="width: 15%">
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            class="promote-btn btn btn-success me-1"
+                                        >
+                                            Promote
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            Decline
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <h5>Quiz Makers to Admins</h5>
+                <div style="width: 100%; height: 100%; overflow-y: auto">
+                    <table class="table table-bordered">
+                        <tbody>
+                            {% for quiz_maker in quiz_makers %}
+                            <tr class="user">
+                                <td>
+                                    <b class="user-email">{{ quiz_maker.1 }}</b>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-warning"
+                                            disabled
+                                        >
+                                            <b>Quiz Maker</b>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-secondary">
+                                        Endorsements: {{ quiz_maker.2 }}, {{ quiz_maker.3 }}
+                                    </p>
+                                </td>
+                                <td style="width: 15%">
+                                    <div class="d-flex justify-content-center">
+                                        <button
+                                            class="promote-btn btn btn-success me-1"
+                                        >
+                                            Promote
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            Decline
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <iframe src="footer.html" width="100%" frameBorder="0" style="margin-top: -200px; position: fixed; bottom: 0;"></iframe>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"
+        ></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // function to promote/decline users
+                $("tr").click(function (e) {
+                    var btn = e.target;
+                    table_cell = this.innerText;
+                    cell_data = this.innerText.split("\t");
+
+                    if (btn.innerHTML.search("Promote")  >= 0) {
+                        var request = $.ajax({
+                            type: "POST",
+                            url: "/promotion/",
+                            dataType: "json",
+                            data: {
+                                csrfmiddlewaretoken: "{{csrf_token}}",
+                                command: "promote",
+                                email: cell_data[0],
+                            },
+                        });
+
+                        request.done(function () {
+                            var row = btn.parentNode.parentNode.parentNode;
+                            row.parentNode.removeChild(row);
+                        });
+                    } else {
+                        var request = $.ajax({
+                            type: "POST",
+                            url: "/promotion/",
+                            dataType: "json",
+                            data: {
+                                csrfmiddlewaretoken: "{{csrf_token}}",
+                                command: "decline",
+                                email: cell_data[0],
+                            },
+                        });
+
+                        request.done(function () {
+                            var row = btn.parentNode.parentNode.parentNode;
+                            row.parentNode.removeChild(row);
+                        });
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
