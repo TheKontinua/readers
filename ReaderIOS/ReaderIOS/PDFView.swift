@@ -31,8 +31,11 @@ struct PDFView: View {
     @State private var selectedScribbleTool: String = ""
     
     @State private var pageChangeEnabled: Bool = true
-    @State private var pagePaths: [Int: [Path]] = [:]
-    @State private var highlightPaths: [Int: [Path]] = [:]
+    @State private var pagePaths: [String: [Path]] = [:]
+    @State private var highlightPaths: [String: [Path]] = [:]
+    
+    //Class to save annotations
+    @ObservedObject private var annotationManager = AnnotationManager()
     
     @State private var isBookmarked: Bool = false
     
@@ -49,12 +52,12 @@ struct PDFView: View {
                             }
                         
                         if annotationsEnabled {
-                            DrawingCanvas(pagePaths: $pagePaths,
-                                          highlightPaths: $highlightPaths,
-                                          currentPageIndex: currentPageIndex,
-                                          selectedScribbleTool: $selectedScribbleTool,
-                                          nextPage: {goToNextPage()},
-                                          previousPage: {goToPreviousPage()})
+                            AnnotationsView(pagePaths: $pagePaths,
+                                            highlightPaths: $highlightPaths,
+                                            key: uniqueKey(for: currentPageIndex),
+                                            selectedScribbleTool: $selectedScribbleTool,
+                                            nextPage: {goToNextPage()},
+                                            previousPage: {goToPreviousPage()})
                         }
                     }
                     .toolbar {
@@ -105,36 +108,37 @@ struct PDFView: View {
                         ToolbarItemGroup(placement: .navigationBarTrailing) {
                             // Markup Tools
                             Menu {
-                                Button("Pen") {
-                                    selectScribbleTool("Pen")
-                                    annotationsEnabled = true
-                                    exitNotSelected = true
-                                }
-                                Button("Highlight") {
-                                    selectScribbleTool("Highlight")
-                                    annotationsEnabled = true
-                                    exitNotSelected = true
-                                }
-                                Button("Erase") {
-                                    selectScribbleTool("Erase")
-                                    annotationsEnabled = true
-                                    exitNotSelected = true
-                                }
-                                Button("Text") {
-                                    selectScribbleTool("Text")
-                                    annotationsEnabled = true
-                                    exitNotSelected = true
-                                }
-                                Button("Exit") {
-                                    selectScribbleTool("")
-                                    exitNotSelected = false
-                                }
-                            } label: {
-                                Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
-                                    .padding(5)
-                                    .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
-                                    .cornerRadius(8)
-                            }
+                              Button("Pen") {
+                                selectScribbleTool("Pen")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Highlight") {
+                                selectScribbleTool("Highlight")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Erase") {
+                                selectScribbleTool("Erase")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Text") {
+                                selectScribbleTool("Text")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Exit") {
+                                selectScribbleTool("")
+                                exitNotSelected = false
+                                  annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
+                              }
+                             } label: {
+                               Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
+                               .padding(5)
+                               .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
+                               .cornerRadius(8)
+                             }
                             
                             // Digital Resources
                             Menu {
@@ -201,6 +205,11 @@ struct PDFView: View {
                                     resetZoom = true
                                 }
                             }
+                            if annotationsEnabled{
+                                Button("Clear"){
+                                    clearMarkup()
+                                }
+                            }
                         }
                         
                         // Progress Bar as a Toolbar Item
@@ -218,6 +227,10 @@ struct PDFView: View {
                     ProgressView("Getting Workbook")
                         .onAppear {
                             loadPDFFromURL()
+                            annotationManager.loadAnnotations(pagePaths: &pagePaths, highlightPaths: &highlightPaths)
+                            if !pagePaths.isEmpty || !highlightPaths.isEmpty{
+                                annotationsEnabled = true
+                            }
                         }
                 }
             }
@@ -292,8 +305,22 @@ struct PDFView: View {
     }
     
     private func loadPathsForPage(_ pageIndex: Int) {
-        if pagePaths[pageIndex] == nil {
-            pagePaths[pageIndex] = []
+        let key = uniqueKey(for: pageIndex)
+        if pagePaths[key] == nil {
+            pagePaths[key] = []
         }
+        if highlightPaths[key] == nil {
+            highlightPaths[key] = []
+        }
+    }
+    
+    private func uniqueKey(for pageIndex: Int) -> String {
+        guard let fileName = fileName else { return "\(pageIndex)" }
+        return "\(fileName)-\(pageIndex)"
+    }
+    
+    private func clearMarkup() {
+        highlightPaths.removeValue(forKey: uniqueKey(for: currentPageIndex))
+        pagePaths.removeValue(forKey: uniqueKey(for: currentPageIndex))
     }
 }
