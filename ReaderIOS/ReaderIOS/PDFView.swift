@@ -4,7 +4,8 @@ import PDFKit
 struct PDFView: View {
     // The fileName and the page index depend on the navigation split view.
     @Binding var fileName: String?
-    @Binding var currentPageIndex: Int
+    @Binding var currentPage: Int
+    @Binding var bookmarkLookup: Dictionary<String, Set<Int>>
     
     @State private var pdfDocument: PDFDocument? = nil
 
@@ -25,7 +26,32 @@ struct PDFView: View {
     @State private var pagePaths: [Int: [UIBezierPath]] = [:]
     @State private var eraseEnabled: Bool = false
     
-    @State private var isBookmarked: Bool = false
+    
+    var isCurrentPageBookmarked: Bool {
+        // TODO: Use file ID here instead when applicable!
+        if let fileName = fileName {
+            if let valueSet = bookmarkLookup[fileName] {
+                return valueSet.contains(currentPage)
+            }
+            return false
+        }
+        return false;
+    }
+    
+    private func toggleCurrentPageInBookmarks() {
+        if let fileName = fileName {
+            if var valueSet = bookmarkLookup[fileName] {
+                if valueSet.contains(currentPage) {
+                    valueSet.remove(currentPage)
+                } else {
+                    valueSet.insert(currentPage)
+                }
+                bookmarkLookup[fileName] = valueSet
+            } else {
+                bookmarkLookup[fileName] = Set([currentPage])
+            }
+        }
+    }
 
 
     var body: some View {
@@ -84,12 +110,12 @@ struct PDFView: View {
                     
                     // Bookmark toggle button
                     Button(action: {
-                        isBookmarked.toggle()
+                        toggleCurrentPageInBookmarks()
                     }) {
-                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                        Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
                             .resizable()
                             .frame(width: 24, height: 24)
-                            .foregroundColor(isBookmarked ? .yellow : .gray)
+                            .foregroundColor(isCurrentPageBookmarked ? .yellow : .gray)
                             .padding()
                     }
                     
@@ -115,16 +141,16 @@ struct PDFView: View {
             if let pdfDocument = pdfDocument {
 
                 ZStack{
-                    DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
+                    DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPage, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
                         .edgesIgnoringSafeArea(.all)
                         .gesture(dragGesture())
-                        .onChange(of: currentPageIndex) {
-                            loadPathsForPage(currentPageIndex)
+                        .onChange(of: currentPage) {
+                            loadPathsForPage(currentPage)
                         }
                     if scribbleEnabled {
                         DrawingCanvas(currentPath: $currentPath,
                                       pagePaths: $pagePaths,
-                                      currentPageIndex: currentPageIndex,
+                                      currentPageIndex: currentPage,
                                       eraseEnabled: $eraseEnabled)
                     }
                 }
@@ -156,14 +182,14 @@ struct PDFView: View {
     }
 
     private func goToNextPage() {
-        if let pdfDocument = pdfDocument, currentPageIndex < pdfDocument.pageCount - 1 {
-            currentPageIndex += 1
+        if let pdfDocument = pdfDocument, currentPage < pdfDocument.pageCount - 1 {
+            currentPage += 1
         }
     }
 
     private func goToPreviousPage() {
-        if currentPageIndex > 0 {
-            currentPageIndex -= 1
+        if currentPage > 0 {
+            currentPage -= 1
         }
     }
 
