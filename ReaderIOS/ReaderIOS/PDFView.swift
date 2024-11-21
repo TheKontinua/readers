@@ -9,7 +9,8 @@ struct URLItem: Identifiable {
 struct PDFView: View {
     // The fileName and the page index depend on the navigation split view.
     @Binding var fileName: String?
-    @Binding var currentPageIndex: Int
+    @Binding var currentPage: Int
+    @Binding var bookmarkLookup: Dictionary<String, Set<Int>>
     @Binding var covers: [Cover]?
     
     @State private var pdfDocument: PDFDocument? = nil
@@ -20,18 +21,15 @@ struct PDFView: View {
     //State variables for zoom
     @State private var resetZoom = false
     @State private var zoomedIn = false
-
-    // Feedback
-    @State private var showingFeedback = false
-
+    
     // Timer class
     @ObservedObject private var timerManager = TimerManager()
     
-    // Variables for scribble
     @State private var annotationsEnabled: Bool = false
     @State private var exitNotSelected: Bool = false
     
     @State private var selectedScribbleTool: String = ""
+    
     @State private var pageChangeEnabled: Bool = true
     @State private var pagePaths: [String: [Path]] = [:]
     @State private var highlightPaths: [String: [Path]] = [:]
@@ -39,26 +37,22 @@ struct PDFView: View {
     //Class to save annotations
     @ObservedObject private var annotationManager = AnnotationManager()
     
-    // Bookmark
-    @State private var isBookmarked: Bool = false
-    
     var body: some View {
         NavigationStack {
-            ZStack {
             VStack {
                 if let pdfDocument = pdfDocument {
                     ZStack {
-                        DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPageIndex, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
+                        DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPage, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
                             .edgesIgnoringSafeArea(.all)
                             .gesture(dragGesture())
-                            .onChange(of: currentPageIndex) {
-                                loadPathsForPage(currentPageIndex)
+                            .onChange(of: currentPage) {
+                                loadPathsForPage(currentPage)
                             }
                         
                         if annotationsEnabled {
                             AnnotationsView(pagePaths: $pagePaths,
                                             highlightPaths: $highlightPaths,
-                                            key: uniqueKey(for: currentPageIndex),
+                                            key: uniqueKey(for: currentPage),
                                             selectedScribbleTool: $selectedScribbleTool,
                                             nextPage: {goToNextPage()},
                                             previousPage: {goToPreviousPage()})
@@ -197,9 +191,9 @@ struct PDFView: View {
                             
                             // Bookmark
                             Button(action: {
-                                isBookmarked.toggle()
+                                toggleCurrentPageInBookmarks()
                             }) {
-                                Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                                Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
                                     .foregroundColor(.yellow)
                             }
                             
@@ -238,30 +232,6 @@ struct PDFView: View {
                         }
                 }
             }
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            showingFeedback = true
-                        }) {
-                            Image(systemName: "message.circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(.blue)
-                                .padding(16)
-                                .background(Color.white)
-                                .clipShape(Circle())
-                                .shadow(radius: 4)
-                        }
-                        .padding(.trailing, 20)
-                        .padding(.bottom, 20)
-                        }
-                    }
-                }
-                .sheet(isPresented: $showingFeedback) {
-                    FeedbackView()
-                }
-            
         }
         .sheet(item: $selectedLink, onDismiss: {
             print("WebView dismissed. Cleaning up resources.")
@@ -271,7 +241,6 @@ struct PDFView: View {
         .onChange(of: fileName) {
             loadPDFFromURL()
         }
-        
     }
     
     private func dragGesture() -> some Gesture {
@@ -289,14 +258,14 @@ struct PDFView: View {
     }
     
     private func goToNextPage() {
-        if let pdfDocument = pdfDocument, currentPageIndex < pdfDocument.pageCount - 1 {
-            currentPageIndex += 1
+        if let pdfDocument = pdfDocument, currentPage < pdfDocument.pageCount - 1 {
+            currentPage += 1
         }
     }
     
     private func goToPreviousPage() {
-        if currentPageIndex > 0 {
-            currentPageIndex -= 1
+        if currentPage > 0 {
+            currentPage -= 1
         }
     }
     
@@ -349,7 +318,37 @@ struct PDFView: View {
     }
     
     private func clearMarkup() {
-        highlightPaths.removeValue(forKey: uniqueKey(for: currentPageIndex))
-        pagePaths.removeValue(forKey: uniqueKey(for: currentPageIndex))
+        highlightPaths.removeValue(forKey: uniqueKey(for: currentPage))
+        pagePaths.removeValue(forKey: uniqueKey(for: currentPage))
     }
+        
+        var isCurrentPageBookmarked: Bool {
+            // TODO: Use file ID here instead when applicable!
+            if let fileName = fileName {
+                if let valueSet = bookmarkLookup[fileName] {
+                    return valueSet.contains(currentPage)
+                }
+                return false
+            }
+            return false;
+        }
+        
+        private func toggleCurrentPageInBookmarks() {
+            if let fileName = fileName {
+                if var valueSet = bookmarkLookup[fileName] {
+                    if valueSet.contains(currentPage) {
+                        valueSet.remove(currentPage)
+                    } else {
+                        valueSet.insert(currentPage)
+                    }
+                    bookmarkLookup[fileName] = valueSet
+                } else {
+                    bookmarkLookup[fileName] = Set([currentPage])
+                }
+            }
+        }
+}
+
+#Preview {
+    NavigationPDFSplitView()
 }
