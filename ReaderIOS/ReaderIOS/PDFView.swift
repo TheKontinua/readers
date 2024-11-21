@@ -21,6 +21,9 @@ struct PDFView: View {
     //State variables for zoom
     @State private var resetZoom = false
     @State private var zoomedIn = false
+
+    //State variable for feedback
+    @State private var showingFeedback = false
     
     // Timer class
     @ObservedObject private var timerManager = TimerManager()
@@ -39,8 +42,10 @@ struct PDFView: View {
     
     var body: some View {
         NavigationStack {
+            ZStack {
             VStack {
                 if let pdfDocument = pdfDocument {
+                    
                     ZStack {
                         DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPage, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
                             .edgesIgnoringSafeArea(.all)
@@ -232,6 +237,30 @@ struct PDFView: View {
                         }
                 }
             }
+                  VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showingFeedback = true
+                        }) {
+                            Image(systemName: "message.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                                .padding(15)
+                                .background(Color.blue)
+                                .clipShape(Circle())
+                                .shadow(radius: 4)
+                        }
+                        .padding(.trailing, 70)
+                        .padding(.bottom, 30)
+                        }
+                    }
+                }
+                .sheet(isPresented: $showingFeedback) {
+                    FeedbackView()
+                }
+            
         }
         .sheet(item: $selectedLink, onDismiss: {
             print("WebView dismissed. Cleaning up resources.")
