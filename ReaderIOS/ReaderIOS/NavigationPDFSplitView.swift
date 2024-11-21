@@ -59,6 +59,8 @@ struct NavigationPDFSplitView: View {
     @State private var currentPdfFileName: String? = nil
     @State private var isShowingBookmarks: Bool = false
     
+    @State private var bookmarkLookup = Dictionary<String, Set<Int>>()
+    
     var body: some View {
         NavigationSplitView {
             if let workbooks = workbooks {
@@ -76,7 +78,6 @@ struct NavigationPDFSplitView: View {
             
         }
         content: {
-            
             Group {
                 if (!isShowingBookmarks) {
                     if let chapters = chapters {
@@ -89,7 +90,25 @@ struct NavigationPDFSplitView: View {
                             .onAppear(perform: fetchChapters)
                     }
                 } else {
-                    Text("Bookmarks coming soon!")
+                    
+                    if let currentPdfFileName = currentPdfFileName,
+                       let bookmarks = bookmarkLookup[currentPdfFileName] {
+                        List(Array(bookmarks).sorted(), id: \.self) { bookmark in
+                            HStack {
+                                Text("Page \(bookmark+1)")
+                                Spacer()
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                currentPage = bookmark
+                            }
+                        }
+                    } else {
+                        Text("No bookmarks available")
+                            .font(.callout)
+                            .foregroundColor(.gray)
+                    }
+
                 }
             }
                 .toolbar {
@@ -106,7 +125,8 @@ struct NavigationPDFSplitView: View {
 
         } detail: {
             if currentPdfFileName != nil {
-                PDFView(fileName: $currentPdfFileName, currentPageIndex: $currentPage, covers: $covers)
+                // TODO: Only give access to bookmarks for current file.
+                PDFView(fileName: $currentPdfFileName, currentPage: $currentPage, bookmarkLookup: $bookmarkLookup, covers: $covers)
             } else {
                 ProgressView("Getting the latest workbook.")
             }
