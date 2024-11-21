@@ -8,6 +8,7 @@ struct AnnotationsView: View {
     @Binding var selectedScribbleTool: String
     var nextPage: (() -> Void)?
     var previousPage: (() -> Void)?
+    @ObservedObject var annotationManager = AnnotationManager()
     @State private var liveDrawingPath: Path = Path()
 
     var body: some View {
@@ -45,6 +46,7 @@ struct AnnotationsView: View {
                             previousPage?()
                         }
                     }
+                    annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
                 }
         )
     }

@@ -122,7 +122,6 @@ struct PDFView: View {
                               Button("Exit") {
                                 selectScribbleTool("")
                                 exitNotSelected = false
-                                  annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
                               }
                              } label: {
                                Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
@@ -158,6 +157,7 @@ struct PDFView: View {
                             if annotationsEnabled{
                                 Button("Clear"){
                                     clearMarkup()
+                                    annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
                                 }
                             }
                         }
