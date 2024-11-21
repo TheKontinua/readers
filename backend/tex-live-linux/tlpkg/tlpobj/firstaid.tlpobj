@@ -1,0 +1,26 @@
+name firstaid
+category Package
+revision 70308
+catalogue latex-firstaid
+shortdesc First aid for external LaTeX files and packages that need updating
+longdesc This package contains some first aid for LaTeX packages or
+longdesc classes that require updates because of internal changes to the
+longdesc LaTeX kernel that are not yet reflected in the package's or
+longdesc class's code. The file latex2e-first-aid-for-external-files.ltx
+longdesc provided by this package is meant to be loaded during format
+longdesc generation and not by the user.
+containersize 3328
+containerchecksum 884653f9c67d3cc7d9139856b9e773d652e649c666cdbfb1dcaaf0642ad2efad5808d333bd61d197fcbcdb1b9f371c21d27337397e5b5c5784ce531c33f39c2c
+doccontainersize 259812
+doccontainerchecksum 4dc37e149949753b3adf0d981f60aacceb4c7ee5af7d1d2e89d71686d1310c028aba40452da0dcc1b027aa1ce31e27d64e511fd3f08e9aa836410f0602e5899d
+srccontainersize 7716
+srccontainerchecksum 62fb7b01dd169b7396ea67299233e4f7ef2f699ce87fd685bc42bb0c0da96fb033c4b776423833e36fdd919faa75ce69c469050e7335f54720f4737eaeb4e1f7
+runfiles size=4
+ texmf-dist/tex/latex/firstaid/filehook-ltx.sty
+ texmf-dist/tex/latex/firstaid/latex2e-first-aid-for-external-files.ltx
+ texmf-dist/tex/latex/firstaid/underscore-ltx.sty
+catalogue-contact-home https://www.latex-project.org
+catalogue-ctan /macros/latex/required/firstaid
+catalogue-license lppl1.3c
+catalogue-topics format bugfix
+catalogue-version 1.1c

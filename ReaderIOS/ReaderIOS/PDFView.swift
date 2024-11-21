@@ -1,198 +1,306 @@
 import SwiftUI
 import PDFKit
 
+struct URLItem: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
 struct PDFView: View {
     // The fileName and the page index depend on the navigation split view.
     @Binding var fileName: String?
     @Binding var currentPage: Int
     @Binding var bookmarkLookup: Dictionary<String, Set<Int>>
+    @Binding var covers: [Cover]?
     
     @State private var pdfDocument: PDFDocument? = nil
+    
+    //State variables for opening WebView for DRs
+    @State private var selectedLink: URLItem? = nil
+    
+    //State variables for zoom
+    @State private var resetZoom = false
+    @State private var zoomedIn = false
 
-    //State variables for zoom.
-    @State private var resetZoom = false;
-    @State private var zoomedIn = false;
+    // Feedback
+    @State private var showingFeedback = false
+
+    // Timer class
+    @ObservedObject private var timerManager = TimerManager()
     
-    // State variables for timer.
-    @State private var selectedDuration: TimeInterval = 0
-    @State private var progress: Double = 0
-    @State private var timer: Timer?
-    @State private var timerIsRunning: Bool = false
+    @State private var annotationsEnabled: Bool = false
+    @State private var exitNotSelected: Bool = false
     
-    // Variables for scribble
-    @State private var scribbleEnabled: Bool = false
+    @State private var selectedScribbleTool: String = ""
     @State private var pageChangeEnabled: Bool = true
-    @State private var currentPath = UIBezierPath()
-    @State private var pagePaths: [Int: [UIBezierPath]] = [:]
-    @State private var eraseEnabled: Bool = false
+    @State private var pagePaths: [String: [Path]] = [:]
+    @State private var highlightPaths: [String: [Path]] = [:]
     
+    //Class to save annotations
+    @ObservedObject private var annotationManager = AnnotationManager()
     
-    var isCurrentPageBookmarked: Bool {
-        // TODO: Use file ID here instead when applicable!
-        if let fileName = fileName {
-            if let valueSet = bookmarkLookup[fileName] {
-                return valueSet.contains(currentPage)
-            }
-            return false
-        }
-        return false;
-    }
-    
-    private func toggleCurrentPageInBookmarks() {
-        if let fileName = fileName {
-            if var valueSet = bookmarkLookup[fileName] {
-                if valueSet.contains(currentPage) {
-                    valueSet.remove(currentPage)
-                } else {
-                    valueSet.insert(currentPage)
-                }
-                bookmarkLookup[fileName] = valueSet
-            } else {
-                bookmarkLookup[fileName] = Set([currentPage])
-            }
-        }
-    }
 
 
+    
+    
     var body: some View {
-        VStack {
-            ZStack{
-                HStack{
-                    Spacer()
+        NavigationStack {
+            ZStack {
+            VStack {
+                if let pdfDocument = pdfDocument {
+                    ZStack {
+                        DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPage, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
+                            .edgesIgnoringSafeArea(.all)
+                            .gesture(dragGesture())
+                            .onChange(of: currentPage) {
+                                loadPathsForPage(currentPage)
+                            }
+                        
+                        if annotationsEnabled {
+                            AnnotationsView(pagePaths: $pagePaths,
+                                            highlightPaths: $highlightPaths,
+                                            key: uniqueKey(for: currentPage),
+                                            selectedScribbleTool: $selectedScribbleTool,
+                                            nextPage: {goToNextPage()},
+                                            previousPage: {goToPreviousPage()})
+                        }
+                    }
+                    .toolbar {
+                        // Timer Controls
+                        ToolbarItemGroup(placement: .navigationBarTrailing) {
+                            if timerManager.isTimerRunning {
+                                Button(action: timerManager.pauseTimer) {
+                                    Image(systemName: "pause.circle")
+                                        .foregroundColor(.yellow)
+                                }
+                                Button(action: timerManager.restartTimer) {
+                                    Image(systemName: "arrow.clockwise.circle")
+                                        .foregroundColor(.blue)
+                                }
+                                Button(action: timerManager.cancelTimer) {
+                                    Image(systemName: "xmark.circle")
+                                        .foregroundColor(.red)
+                                }
+                            } else if timerManager.isPaused {
+                                Button(action: timerManager.unpauseTimer) {
+                                    Image(systemName: "play.circle")
+                                        .foregroundColor(.green)
+                                }
+                                Button(action: timerManager.restartTimer) {
+                                    Image(systemName: "arrow.clockwise.circle")
+                                        .foregroundColor(.blue)
+                                }
+                                Button(action: timerManager.cancelTimer) {
+                                    Image(systemName: "xmark.circle")
+                                        .foregroundColor(.red)
+                                }
+                            } else {
+                                Menu {
+                                    Button("15 Minutes") { timerManager.startTimer(duration: 15 * 1) }
+                                    Button("20 Minutes") { timerManager.startTimer(duration: 20 * 60) }
+                                    Button("25 Minutes") { timerManager.startTimer(duration: 25 * 60) }
+                                    Button("Clear Timer") { timerManager.cancelTimer() }
+                                } label: {
+                                    Text("Timer")
+                                        .padding(5)
+                                        .foregroundColor(.blue)
+                                        .cornerRadius(8)
+                                }
+                            }
+                        }
+                        
+                        // Markup Tools
+                        ToolbarItemGroup(placement: .navigationBarTrailing) {
+                            // Markup Tools
+                            Menu {
+                              Button("Pen") {
+                                selectScribbleTool("Pen")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Highlight") {
+                                selectScribbleTool("Highlight")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Erase") {
+                                selectScribbleTool("Erase")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Text") {
+                                selectScribbleTool("Text")
+                                annotationsEnabled = true
+                                exitNotSelected = true
+                              }
+                              Button("Exit") {
+                                selectScribbleTool("")
+                                exitNotSelected = false
+                                  annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
+                              }
+                             } label: {
+                               Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
+                               .padding(5)
+                               .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
+                               .cornerRadius(8)
+                             }
+                            
+                            // Digital Resources
+                            Menu {
+                                if let covers = covers, !covers.isEmpty {
+                                    ForEach(covers) { cover in
+                                        Menu {
+                                            if let videos = cover.videos, !videos.isEmpty {
+                                                Section(header: Text("Videos")) {
+                                                    ForEach(videos) { video in
+                                                        Button(action: {
+                                                            if let url = URL(string: video.link) {
+                                                                selectedLink = URLItem(url: url)
+                                                            }
+                                                        }) {
+                                                            Text(video.title)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if let references = cover.references, !references.isEmpty {
+                                                Section(header: Text("References")) {
+                                                    ForEach(references) { reference in
+                                                        Button(action: {
+                                                            if let url = URL(string: reference.link) {
+                                                                selectedLink = URLItem(url: url)
+                                                            }
+                                                        }) {
+                                                            Text(reference.title)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
+                                                Text("No Videos or References Available")
+                                            }
+                                        } label: {
+                                            Text(cover.desc)
+                                        }
+                                    }
+                                } else {
+                                    Text("No Digital Resources Available")
+                                }
+                            } label: {
+                                Text("Digital Resources")
+                                    .padding(5)
+                                    .foregroundColor(.purple)
+                                    .cornerRadius(8)
+                            }
+                            
+                            
+                            // Bookmark
+                            Button(action: {
+                                toggleCurrentPageInBookmarks()
+                            }) {
+                                Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
+                                    .foregroundColor(.yellow)
+                            }
+                            
+                            // Reset Zoom
+                            if zoomedIn {
+                                Button("Reset Zoom") {
+                                    resetZoom = true
+                                }
+                            }
+                            if annotationsEnabled{
+                                Button("Clear"){
+                                    clearMarkup()
+                                }
+                            }
+                        }
+                        
+                        // Progress Bar as a Toolbar Item
+                        ToolbarItem(placement: .bottomBar) {
+                            GeometryReader { geometry in
+                                Rectangle()
+                                    .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
+                                    .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
+                                    .animation(.linear(duration: 0.1), value: timerManager.progress)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: 4)
+                        }
+                    }
+                } else {
+                    ProgressView("Getting Workbook")
+                        .onAppear {
+                            loadPDFFromURL()
+                            annotationManager.loadAnnotations(pagePaths: &pagePaths, highlightPaths: &highlightPaths)
+                            if !pagePaths.isEmpty || !highlightPaths.isEmpty{
+                                annotationsEnabled = true
+                            }
+                        }
                 }
-                
-                HStack {
-                    Menu {
-                        Button("15 Minutes") { startTimer(duration: 15 * 60) }
-                        Button("20 Minutes") { startTimer(duration: 20 * 60) }
-                        Button("25 Minutes") { startTimer(duration: 25 * 60) }
-                    } label: {
-                        Text("Start Timer")
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
-                    
-                    
-                    if timerIsRunning {
-                        Button(action: cancelTimer) {
-                            Text("Cancel")
-                                .padding()
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
-                        }
-                    }
-                    
-                    Button(action: enableScribble) {
-                        Text(scribbleEnabled ? "Scribble Off" : "Scribble")
-                            .padding()
-                            .background(scribbleEnabled ? Color.red : Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    
-                    if scribbleEnabled{
-                        Button(action: eraseScribble){
-                            Text("Erase")
-                                .padding()
-                                .background(eraseEnabled ? Color.red : Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                    }
-                 
-                }.padding()
-                
-                HStack{
+            }
+                VStack {
                     Spacer()
-                    
-                    // Bookmark toggle button
-                    Button(action: {
-                        toggleCurrentPageInBookmarks()
-                    }) {
-                        Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(isCurrentPageBookmarked ? .yellow : .gray)
-                            .padding()
-                    }
-                    
-                    //Reset zoom button
-                    if zoomedIn{
-                        Button("Reset Zoom") {
-                            resetZoom = true
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showingFeedback = true
+                        }) {
+                            Image(systemName: "message.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.blue)
+                                .padding(16)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                                .shadow(radius: 4)
                         }
-                    }
-                }.padding()
-            }
-
-
-            // Progress Bar
-            GeometryReader { geometry in
-                Rectangle()
-                    .fill(progress >= 1 ? Color.green : Color.red)
-                    .frame(width: geometry.size.width * CGFloat(progress), height: 4)
-                    .animation(.linear(duration: 0.1), value: progress)
-            }
-            .frame(height: 4)
-            
-            if let pdfDocument = pdfDocument {
-
-                ZStack{
-                    DocumentView(pdfDocument: pdfDocument, currentPageIndex: $currentPage, resetZoom: $resetZoom, zoomedIn: $zoomedIn)
-                        .edgesIgnoringSafeArea(.all)
-                        .gesture(dragGesture())
-                        .onChange(of: currentPage) {
-                            loadPathsForPage(currentPage)
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 20)
                         }
-                    if scribbleEnabled {
-                        DrawingCanvas(currentPath: $currentPath,
-                                      pagePaths: $pagePaths,
-                                      currentPageIndex: currentPage,
-                                      eraseEnabled: $eraseEnabled)
                     }
                 }
-            } else {
-                ProgressView("Getting Workbook")
-                    .onAppear {
-                        loadPDFFromURL()
-                    }
-            }
+                .sheet(isPresented: $showingFeedback) {
+                    FeedbackView()
+                }
             
+        }
+        .sheet(item: $selectedLink, onDismiss: {
+            print("WebView dismissed. Cleaning up resources.")
+        }) { linkItem in
+            WebView(url: linkItem.url)
         }
         .onChange(of: fileName) {
             loadPDFFromURL()
         }
+        
     }
     
     private func dragGesture() -> some Gesture {
-        if pageChangeEnabled && !zoomedIn{
-            DragGesture().onEnded { value in
+        if pageChangeEnabled && !zoomedIn {
+            return DragGesture().onEnded { value in
                 if value.translation.width < 0 {
                     goToNextPage()
                 } else if value.translation.width > 0 {
                     goToPreviousPage()
                 }
             }
-        } else{
-            DragGesture().onEnded {_ in}
+        } else {
+            return DragGesture().onEnded { _ in }
         }
     }
-
+    
     private func goToNextPage() {
         if let pdfDocument = pdfDocument, currentPage < pdfDocument.pageCount - 1 {
             currentPage += 1
         }
     }
-
+    
     private func goToPreviousPage() {
         if currentPage > 0 {
             currentPage -= 1
         }
     }
-
+    
     private func loadPDFFromURL() {
         guard let fileName = fileName else {
             return;
@@ -204,63 +312,75 @@ struct PDFView: View {
             print("Invalid URL for file: \(fileName)")
             return
         }
-
+        
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
                 print("Error downloading PDF: \(error.localizedDescription)")
                 return
             }
-
+            
             guard let data = data, let document = PDFDocument(data: data) else {
                 print("No data found or invalid PDF from \(url).")
                 return
             }
-
+            
             DispatchQueue.main.async {
                 self.pdfDocument = document
             }
         }.resume()
     }
     
-    private func startTimer(duration: TimeInterval) {
-           selectedDuration = duration
-           progress = 0
-           timer?.invalidate() // Stop any existing timer
-            timerIsRunning = true
-
-           timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-               progress += 1 / duration
-               if progress >= 1 {
-                   timer?.invalidate()
-                   timer = nil
-                   timerIsRunning = false
-               }
-           }
-       }
-    
-    private func cancelTimer() {
-           timer?.invalidate()
-           timer = nil
-           progress = 0
-           timerIsRunning = false
-       }
-    
-    private func enableScribble(){
-        scribbleEnabled = !scribbleEnabled
-        pageChangeEnabled = !pageChangeEnabled
-        if eraseEnabled {
-            eraseEnabled = !eraseEnabled
-        }
+    private func selectScribbleTool(_ tool: String) {
+        selectedScribbleTool = tool
     }
     
     private func loadPathsForPage(_ pageIndex: Int) {
-            if pagePaths[pageIndex] == nil {
-                pagePaths[pageIndex] = []
-            }
+        let key = uniqueKey(for: pageIndex)
+        if pagePaths[key] == nil {
+            pagePaths[key] = []
+        }
+        if highlightPaths[key] == nil {
+            highlightPaths[key] = []
+        }
     }
     
-    private func eraseScribble(){
-        eraseEnabled = !eraseEnabled
+    private func uniqueKey(for pageIndex: Int) -> String {
+        guard let fileName = fileName else { return "\(pageIndex)" }
+        return "\(fileName)-\(pageIndex)"
     }
+    
+    private func clearMarkup() {
+        highlightPaths.removeValue(forKey: uniqueKey(for: currentPage))
+        pagePaths.removeValue(forKey: uniqueKey(for: currentPage))
+    }
+        
+        var isCurrentPageBookmarked: Bool {
+            // TODO: Use file ID here instead when applicable!
+            if let fileName = fileName {
+                if let valueSet = bookmarkLookup[fileName] {
+                    return valueSet.contains(currentPage)
+                }
+                return false
+            }
+            return false;
+        }
+        
+        private func toggleCurrentPageInBookmarks() {
+            if let fileName = fileName {
+                if var valueSet = bookmarkLookup[fileName] {
+                    if valueSet.contains(currentPage) {
+                        valueSet.remove(currentPage)
+                    } else {
+                        valueSet.insert(currentPage)
+                    }
+                    bookmarkLookup[fileName] = valueSet
+                } else {
+                    bookmarkLookup[fileName] = Set([currentPage])
+                }
+            }
+        }
+}
 
+#Preview {
+    NavigationPDFSplitView()
 }

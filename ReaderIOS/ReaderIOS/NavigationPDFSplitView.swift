@@ -51,6 +51,7 @@ struct NavigationPDFSplitView: View {
     
     @State private var workbooks: [Workbook]? = nil
     @State private var chapters: [Chapter]? = nil
+    @State private var covers: [Cover]? = nil
     @State private var selectedWorkbookID: String?
     @State private var selectedChapterID: String?
     
@@ -125,7 +126,7 @@ struct NavigationPDFSplitView: View {
         } detail: {
             if currentPdfFileName != nil {
                 // TODO: Only give access to bookmarks for current file.
-                PDFView(fileName: $currentPdfFileName, currentPage: $currentPage, bookmarkLookup: $bookmarkLookup)
+                PDFView(fileName: $currentPdfFileName, currentPage: $currentPage, bookmarkLookup: $bookmarkLookup, covers: $covers)
             } else {
                 ProgressView("Getting the latest workbook.")
             }
@@ -142,6 +143,8 @@ struct NavigationPDFSplitView: View {
         .onChange(of: selectedChapterID) {
             if let chapter = selectedChapter {
                 currentPage = chapter.startPage - 1
+                covers = chapter.covers
+                print("Updated covers: \(covers?.map { $0.desc } ?? [])")
             }
         }
     }
@@ -245,6 +248,7 @@ struct NavigationPDFSplitView: View {
         
         task.resume()
     }
+    
 }
 
 #Preview {
