@@ -57,10 +57,12 @@ struct NavigationPDFSplitView: View {
     
     @State private var currentPage: Int = 0
     @State private var currentPdfFileName: String? = nil
+    @State private var isShowingBookmarks: Bool = false
+    
+    @State private var bookmarkLookup = Dictionary<String, Set<Int>>()
     
     var body: some View {
         NavigationSplitView {
-            // Workbook selection
             if let workbooks = workbooks {
                 List(workbooks, selection: $selectedWorkbookID) { workbook in
                     Text(workbook.id)
@@ -72,22 +74,59 @@ struct NavigationPDFSplitView: View {
                         fetchWorkbooks()
                     }
             }
+            
+            
         }
         content: {
-            // Chapter selection
-            if let chapters = chapters {
-                List(chapters, selection: $selectedChapterID) { chapter in
-                    Text(chapter.title)
-                        .tag(chapter.id)
+            Group {
+                if (!isShowingBookmarks) {
+                    if let chapters = chapters {
+                        List(chapters, selection: $selectedChapterID) { chapter in
+                            Text(chapter.title)
+                                .tag(chapter.id)
+                        }
+                    } else {
+                        ProgressView()
+                            .onAppear(perform: fetchChapters)
+                    }
+                } else {
+                    
+                    if let currentPdfFileName = currentPdfFileName,
+                       let bookmarks = bookmarkLookup[currentPdfFileName] {
+                        List(Array(bookmarks).sorted(), id: \.self) { bookmark in
+                            HStack {
+                                Text("Page \(bookmark+1)")
+                                Spacer()
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                currentPage = bookmark
+                            }
+                        }
+                    } else {
+                        Text("No bookmarks available")
+                            .font(.callout)
+                            .foregroundColor(.gray)
+                    }
+
                 }
-            } else {
-                ProgressView()
-                    .onAppear(perform: fetchChapters)
             }
+                .toolbar {
+                    ToolbarItem(placement: .automatic) {
+                        Toggle(isOn: $isShowingBookmarks) {
+                            Image(systemName: isShowingBookmarks ? "bookmark.fill" : "bookmark")
+                                .foregroundColor(.accentColor)
+                        }
+                        .toggleStyle(.button)
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(isShowingBookmarks ? "Show All Chapters" : "Show Bookmarked Chapters")
+                    }
+                }
+
         } detail: {
-            // Detail view for PDF
             if currentPdfFileName != nil {
-                PDFView(fileName: $currentPdfFileName, currentPageIndex: $currentPage, covers: $covers)
+                // TODO: Only give access to bookmarks for current file.
+                PDFView(fileName: $currentPdfFileName, currentPage: $currentPage, bookmarkLookup: $bookmarkLookup, covers: $covers)
             } else {
                 ProgressView("Getting the latest workbook.")
             }
@@ -157,6 +196,7 @@ struct NavigationPDFSplitView: View {
                     chapters = chapterResponse
                     selectedChapterID = chapters?.first?.id
                 }
+                
             } catch {
                 print("Error decoding chapters: \(error)")
             }
