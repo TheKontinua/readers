@@ -39,4 +39,3 @@ struct WebView: UIViewRepresentable {
         print("WebView dismantled and cleaned up.")
     }
 }
-
