@@ -38,3 +38,6 @@ ReaderIOS/ReaderIOS.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcuserdata/
 *.xcworkspace/
 
+#Ignore Mac specific
+*.DS_Store
+

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Social Media</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 30px;
+            height: calc(100vh - 125px); /* Full height of the viewport minus the header and margin */
+            display: flex;
+            flex-direction: column;
+        }
+        .section {
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: flex;
+            align-items: center;
+        }
+        .form-label img {
+            margin-right: 10px;
+            width: 36px;
+            height: 36px;
+        }
+        .platform-icon {
+            margin-right: 10px;
+            width: 36px;
+            height: 36px;
+        }
+        .linked-platforms {
+            flex: 1 1 60%; /* 60% of container's height */
+            overflow-y: auto; /* enable vertical scrolling */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* align items at the start */
+        }
+        .linked-platforms ul {
+            width: 100%; /* make the ul take the full width */
+        }
+        .link-social-media {
+            flex: 1 1 40%; /* 40% of container's height */
+        }
+    </style>
+</head>
+<body>
+    <iframe src="header.html" width="100%" height="95px" frameborder="0" style="display: block; padding: 0; margin: 0;"></iframe>
+    <div class="container">
+        <div class="row linked-platforms section">
+            <h2>Linked Platforms</h2>
+            <ul class="list-group">
+                {% for handle in user_handles %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {% if handle.site.name == 'Twitter' %}
+                    <img src="https://img.icons8.com/color/48/000000/twitter.png" alt="Twitter Icon" class="platform-icon" />
+                    <a href="https://twitter.com/{{ handle.handle }}" target="_blank">{{ handle.handle }}</a>
+                    {% elif handle.site.name == 'Instagram' %}
+                    <img src="https://img.icons8.com/color/48/000000/instagram-new.png" alt="Instagram Icon" class="platform-icon" />
+                    <a href="https://www.instagram.com/{{ handle.handle }}" target="_blank">{{ handle.handle }}</a>
+                    {% elif handle.site.name == 'LinkedIn' %}
+                    <img src="https://img.icons8.com/color/48/000000/linkedin.png" alt="LinkedIn Icon" class="platform-icon" />
+                    <a href="https://www.linkedin.com/in/{{ handle.handle }}" target="_blank">{{ handle.handle }}</a>
+                    {% elif handle.site.name == 'Facebook' %}
+                    <img src="https://img.icons8.com/color/48/000000/facebook.png" alt="Facebook Icon" class="platform-icon" />
+                    <a href="https://www.facebook.com/{{ handle.handle }}" target="_blank">{{ handle.handle }}</a>
+                    {% elif handle.site.name == 'Github' %}
+                    <img src="https://img.icons8.com/nolan/64/github.png" alt="GitHub Icon" class="platform-icon" />
+                    <a href="https://github.com/{{ handle.handle }}" target="_blank">{{ handle.handle }}</a>
+                    {% elif handle.site.name == 'Youtube' %}
+                    <img src="https://img.icons8.com/color/48/000000/youtube-play.png" alt="YouTube Icon" class="platform-icon" />
+                    <a href="https://www.youtube.com/{{ handle.handle }}" target="_blank">{{ handle.handle }}</a>
+                    {% endif %}
+                    <form action="{% url 'delete_handle' handle.handle handle.site.site_id handle.user.user_id %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="row link-social-media section">
+            <h2>Link Social Media</h2>
+            <form method="POST" action="{% url 'handles' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="platform" class="form-label">
+                        <img src="https://img.icons8.com/color/48/000000/share-2.png" alt="Platform Icon" /> Platform
+                    </label>
+                    <select class="form-select" id="platform" name="platform">
+                        <option value="twitter">Twitter</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="github">GitHub</option>
+                        <option value="youtube">YouTube</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username">
+                </div>
+                <button class="btn btn-primary" type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

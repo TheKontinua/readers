@@ -1,26 +1,37 @@
 import SwiftUI
 import PDFKit
 
+struct URLItem: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
 struct PDFView: View {
     // The fileName and the page index depend on the navigation split view.
     @Binding var fileName: String?
     @Binding var currentPageIndex: Int
+    @Binding var covers: [Cover]?
     
     @State private var pdfDocument: PDFDocument? = nil
-
+    
+    //State variables for opening WebView for DRs
+    @State private var selectedLink: URLItem? = nil
+    
     //State variables for zoom
     @State private var resetZoom = false
     @State private var zoomedIn = false
-    
+
+    // Feedback
+    @State private var showingFeedback = false
+
     // Timer class
     @ObservedObject private var timerManager = TimerManager()
     
     // Variables for scribble
     @State private var annotationsEnabled: Bool = false
     @State private var exitNotSelected: Bool = false
-
-    @State private var selectedScribbleTool: String = ""
     
+    @State private var selectedScribbleTool: String = ""
     @State private var pageChangeEnabled: Bool = true
     @State private var pagePaths: [String: [Path]] = [:]
     @State private var highlightPaths: [String: [Path]] = [:]
@@ -28,10 +39,12 @@ struct PDFView: View {
     //Class to save annotations
     @ObservedObject private var annotationManager = AnnotationManager()
     
+    // Bookmark
     @State private var isBookmarked: Bool = false
-
+    
     var body: some View {
         NavigationStack {
+            ZStack {
             VStack {
                 if let pdfDocument = pdfDocument {
                     ZStack {
@@ -132,14 +145,55 @@ struct PDFView: View {
                              }
                             
                             // Digital Resources
-                            Button(action: {
-                                print("Digital Resources button tapped")
-                            }) {
+                            Menu {
+                                if let covers = covers, !covers.isEmpty {
+                                    ForEach(covers) { cover in
+                                        Menu {
+                                            if let videos = cover.videos, !videos.isEmpty {
+                                                Section(header: Text("Videos")) {
+                                                    ForEach(videos) { video in
+                                                        Button(action: {
+                                                            if let url = URL(string: video.link) {
+                                                                selectedLink = URLItem(url: url)
+                                                            }
+                                                        }) {
+                                                            Text(video.title)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if let references = cover.references, !references.isEmpty {
+                                                Section(header: Text("References")) {
+                                                    ForEach(references) { reference in
+                                                        Button(action: {
+                                                            if let url = URL(string: reference.link) {
+                                                                selectedLink = URLItem(url: url)
+                                                            }
+                                                        }) {
+                                                            Text(reference.title)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
+                                                Text("No Videos or References Available")
+                                            }
+                                        } label: {
+                                            Text(cover.desc)
+                                        }
+                                    }
+                                } else {
+                                    Text("No Digital Resources Available")
+                                }
+                            } label: {
                                 Text("Digital Resources")
                                     .padding(5)
                                     .foregroundColor(.purple)
                                     .cornerRadius(8)
                             }
+                            
                             
                             // Bookmark
                             Button(action: {
@@ -161,6 +215,7 @@ struct PDFView: View {
                                 }
                             }
                         }
+                        
                         // Progress Bar as a Toolbar Item
                         ToolbarItem(placement: .bottomBar) {
                             GeometryReader { geometry in
@@ -183,11 +238,42 @@ struct PDFView: View {
                         }
                 }
             }
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showingFeedback = true
+                        }) {
+                            Image(systemName: "message.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.blue)
+                                .padding(16)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                                .shadow(radius: 4)
+                        }
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 20)
+                        }
+                    }
+                }
+                .sheet(isPresented: $showingFeedback) {
+                    FeedbackView()
+                }
+            
+        }
+        .sheet(item: $selectedLink, onDismiss: {
+            print("WebView dismissed. Cleaning up resources.")
+        }) { linkItem in
+            WebView(url: linkItem.url)
         }
         .onChange(of: fileName) {
             loadPDFFromURL()
         }
+        
     }
+    
     private func dragGesture() -> some Gesture {
         if pageChangeEnabled && !zoomedIn {
             return DragGesture().onEnded { value in
@@ -201,19 +287,19 @@ struct PDFView: View {
             return DragGesture().onEnded { _ in }
         }
     }
-
+    
     private func goToNextPage() {
         if let pdfDocument = pdfDocument, currentPageIndex < pdfDocument.pageCount - 1 {
             currentPageIndex += 1
         }
     }
-
+    
     private func goToPreviousPage() {
         if currentPageIndex > 0 {
             currentPageIndex -= 1
         }
     }
-
+    
     private func loadPDFFromURL() {
         guard let fileName = fileName else {
             return;
@@ -225,28 +311,28 @@ struct PDFView: View {
             print("Invalid URL for file: \(fileName)")
             return
         }
-
+        
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
                 print("Error downloading PDF: \(error.localizedDescription)")
                 return
             }
-
+            
             guard let data = data, let document = PDFDocument(data: data) else {
                 print("No data found or invalid PDF from \(url).")
                 return
             }
-
+            
             DispatchQueue.main.async {
                 self.pdfDocument = document
             }
         }.resume()
     }
-
+    
     private func selectScribbleTool(_ tool: String) {
         selectedScribbleTool = tool
     }
-
+    
     private func loadPathsForPage(_ pageIndex: Int) {
         let key = uniqueKey(for: pageIndex)
         if pagePaths[key] == nil {
