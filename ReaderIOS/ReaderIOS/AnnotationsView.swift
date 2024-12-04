@@ -53,19 +53,15 @@ struct AnnotationsView: View {
 
     private func erasePath(at location: CGPoint) {
         if let pagePathsForCurrentPage = pagePaths[key] {
-            for (index, path) in pagePathsForCurrentPage.enumerated() {
-                if path.contains(location) {
-                    pagePaths[key]?.remove(at: index)
-                    break
-                }
+            for (index, path) in pagePathsForCurrentPage.enumerated() where path.contains(location) {
+                pagePaths[key]?.remove(at: index)
+                break
             }
         }
         if let highlightPathsForCurrentPage = highlightPaths[key] {
-            for (index, path) in highlightPathsForCurrentPage.enumerated() {
-                if path.contains(location) {
-                    highlightPaths[key]?.remove(at: index)
-                    break
-                }
+            for (index, path) in highlightPathsForCurrentPage.enumerated() where path.contains(location) {
+                highlightPaths[key]?.remove(at: index)
+                break
             }
         }
     }

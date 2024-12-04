@@ -30,13 +30,13 @@ struct Cover: Identifiable, Codable {
 }
 
 struct Video: Identifiable, Codable {
-    let id = UUID()
+    var id = UUID()
     let link: String
     let title: String
 }
 
 struct Reference: Identifiable, Codable {
-    let id = UUID()
+    var id = UUID()
     let link: String
     let title: String
 }
@@ -88,8 +88,7 @@ struct NavigationPDFSplitView: View {
                     }
                 } else {
                     if let currentPdfFileName = currentPdfFileName,
-                       let bookmarks = bookmarkLookup[currentPdfFileName]
-                    {
+                       let bookmarks = bookmarkLookup[currentPdfFileName] {
                         List(Array(bookmarks).sorted(), id: \.self) { bookmark in
                             HStack {
                                 Text("Page \(bookmark + 1)")
