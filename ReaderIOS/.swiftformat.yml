@@ -1,3 +1,2 @@
---commas inline                # Aligns with SwiftLint's no trailing comma rule
---insertlines preserve         # Keeps existing line breaks, avoids inserting unnecessary lines
+--commas inline                # Aligns with SwiftLint's no trailing comma 
 --swiftversion 16.1            # Matches Swift version
