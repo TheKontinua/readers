@@ -22,4 +22,4 @@ jobs:
 
       - name: Check SwiftFormat
         run: |
-          swiftformat . --lint
+          swiftformat . --lint --swiftversion 16.1 --swiftlint
