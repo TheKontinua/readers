@@ -1,9 +1,3 @@
-//
-//  .swiftformat.yml
-//  ReaderIOS
-//
-//  Created by Jonas Schiessl on 12/3/24.
-//
 
 # Disable trailing commas
 commas: inline
