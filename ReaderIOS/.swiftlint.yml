@@ -15,6 +15,14 @@ excluded:
 # If true, SwiftLint will check for updates after linting or analyzing.
 check_for_updates: true
 
+trailing_comma: # Configures the trailing comma rule
+  required: false # Disable trailing commas in collection literals
+
+opening_brace: # Configures spacing for opening braces
+  severity: warning
+  allow_multiline_func: false # Require braces to be on the same line as declarations
+  space_before_brace: true # Require a single space before the opening brace
+
 type_body_length:
   warning: 400 # Warning threshold
   error: 500 # Error threshold
