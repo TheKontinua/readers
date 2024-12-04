@@ -1,9 +1,3 @@
-
-# Disable trailing commas
-commas: inline
-
-# Enforce no space before opening braces
-brace-spacing: no-space
-
-# Use Swift 16.1 version for compatibility
-swiftversion: 16.1
+--commas inline
+--brace-spacing no-space
+--swiftversion 16.1
