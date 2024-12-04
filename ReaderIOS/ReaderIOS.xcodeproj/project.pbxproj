@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		8BC7F5F02CFFF9B200CB2871 /* SwiftFormat in Frameworks */ = {isa = PBXBuildFile; productRef = 8BC7F5EF2CFFF9B200CB2871 /* SwiftFormat */; };
-		8BC7F62E2D000DEE00CB2871 /* .swiftformat.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BC7F62D2D000DE500CB2871 /* .swiftformat.yml */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -236,7 +235,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8BC7F62E2D000DEE00CB2871 /* .swiftformat.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

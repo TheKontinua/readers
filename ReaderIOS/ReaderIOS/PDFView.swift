@@ -167,7 +167,8 @@ struct PDFView: View {
                                                     })
                                                 }
                                                 if cover.videos?.isEmpty ?? true,
-                                                   cover.references?.isEmpty ?? true {
+                                                   cover.references?.isEmpty ?? true
+                                                {
                                                     Text("No Videos or References Available")
                                                 }
                                             }, label: {
@@ -264,7 +265,7 @@ struct PDFView: View {
     }
 
     private func dragGesture() -> some Gesture {
-        if pageChangeEnabled && !zoomedIn {
+        if pageChangeEnabled, !zoomedIn {
             return DragGesture().onEnded { value in
                 if value.translation.width < 0 {
                     goToNextPage()
@@ -309,7 +310,7 @@ struct PDFView: View {
                 return
             }
             DispatchQueue.main.async {
-                self.pdfDocument = document
+                pdfDocument = document
             }
         }.resume()
     }

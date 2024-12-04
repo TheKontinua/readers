@@ -12,15 +12,8 @@ disabled_rules:
   - comma
   - control_statement
   - todo
-  - redundant_optional_binding
-  - trailing_commas
-
-trailing_comma: # Configures the trailing comma rule
-  mandatory_comma: false
-
-opening_brace: # Configures spacing for opening braces
-  severity: warning
-  ignore_multiline_function_signatures: true # Ignore multiline function signatures for brace placement
+  - trailing_comma
+  - opening_brace
 
 type_body_length:
   warning: 400 # Warning threshold

@@ -88,7 +88,8 @@ struct NavigationPDFSplitView: View {
                     }
                 } else {
                     if let currentPdfFileName = currentPdfFileName,
-                       let bookmarks = bookmarkLookup[currentPdfFileName] {
+                       let bookmarks = bookmarkLookup[currentPdfFileName]
+                    {
                         List(Array(bookmarks).sorted(), id: \.self) { bookmark in
                             HStack {
                                 Text("Page \(bookmark + 1)")
@@ -144,7 +145,7 @@ struct NavigationPDFSplitView: View {
             if let chapter = selectedChapter {
                 currentPage = chapter.startPage - 1
                 covers = chapter.covers
-                print("Updated covers: \(covers?.map { $0.desc } ?? [])")
+                print("Updated covers: \(covers?.map(\.desc) ?? [])")
             }
         }
     }

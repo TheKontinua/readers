@@ -49,8 +49,8 @@ struct DocumentView: UIViewRepresentable {
             uiView.scaleFactor = uiView.scaleFactorForSizeToFit // Reset scale factor
 
             DispatchQueue.main.async {
-                self.resetZoom = false // Reset the binding to avoid repeated resets
-                self.zoomedIn = false
+                resetZoom = false // Reset the binding to avoid repeated resets
+                zoomedIn = false
             }
         }
 
