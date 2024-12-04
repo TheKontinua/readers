@@ -1,2 +1,5 @@
 --commas inline                # Aligns with SwiftLint's no trailing comma 
+--self remove             # Remove unnecessary self usage
+--braceplacement same-line
+--redundantoptionalbinding enabled # Remove redundant optional bindings
 --swiftversion 16.1            # Matches Swift version

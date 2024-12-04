@@ -167,8 +167,7 @@ struct PDFView: View {
                                                     })
                                                 }
                                                 if cover.videos?.isEmpty ?? true,
-                                                   cover.references?.isEmpty ?? true
-                                                {
+                                                   cover.references?.isEmpty ?? true {
                                                     Text("No Videos or References Available")
                                                 }
                                             }, label: {

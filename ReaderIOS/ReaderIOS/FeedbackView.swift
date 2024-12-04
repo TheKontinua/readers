@@ -55,7 +55,7 @@ struct FeedbackView: View {
 
         let feedbackData = [
             "email": email,
-            "feedback": feedback,
+            "feedback": feedback
         ]
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: feedbackData) else {
@@ -87,8 +87,7 @@ struct FeedbackView: View {
                 } else {
                     if let data = data,
                        let errorResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let message = errorResponse["message"] as? String
-                    {
+                       let message = errorResponse["message"] as? String {
                         showError(message: message)
                     } else {
                         showError(message: "Error submitting feedback. Status: \(httpResponse.statusCode)")
