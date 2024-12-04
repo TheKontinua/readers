@@ -11,8 +11,7 @@
 # Commas
 --commas inline
 
-# Braces
---wrapbraces inline
+--allman false 
 
 # Remove redundant self
 --self remove
