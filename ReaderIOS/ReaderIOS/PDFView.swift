@@ -1,5 +1,5 @@
-import SwiftUI
 import PDFKit
+import SwiftUI
 
 struct URLItem: Identifiable {
     let id = UUID()
@@ -43,207 +43,205 @@ struct PDFView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-            VStack {
-                if let pdfDocument = pdfDocument {
-
-                    ZStack {
-                        DocumentView(
-                            pdfDocument: pdfDocument,
-                            currentPageIndex: $currentPage,
-                            resetZoom: $resetZoom,
-                            zoomedIn: $zoomedIn)
+                VStack {
+                    if let pdfDocument = pdfDocument {
+                        ZStack {
+                            DocumentView(
+                                pdfDocument: pdfDocument,
+                                currentPageIndex: $currentPage,
+                                resetZoom: $resetZoom,
+                                zoomedIn: $zoomedIn
+                            )
                             .edgesIgnoringSafeArea(.all)
                             .gesture(dragGesture())
                             .onChange(of: currentPage) {
                                 loadPathsForPage(currentPage)
                             }
 
-                        if annotationsEnabled {
-                            AnnotationsView(pagePaths: $pagePaths,
-                                            highlightPaths: $highlightPaths,
-                                            key: uniqueKey(for: currentPage),
-                                            selectedScribbleTool: $selectedScribbleTool,
-                                            nextPage: {goToNextPage()},
-                                            previousPage: {goToPreviousPage()})
-                        }
-                    }
-                    .toolbar {
-                        // Timer Controls
-                        ToolbarItemGroup(placement: .navigationBarTrailing) {
-                            if timerManager.isTimerRunning {
-                                Button(action: timerManager.pauseTimer) {
-                                    Image(systemName: "pause.circle")
-                                        .foregroundColor(.yellow)
-                                }
-                                Button(action: timerManager.restartTimer) {
-                                    Image(systemName: "arrow.clockwise.circle")
-                                        .foregroundColor(.blue)
-                                }
-                                Button(action: timerManager.cancelTimer) {
-                                    Image(systemName: "xmark.circle")
-                                        .foregroundColor(.red)
-                                }
-                            } else if timerManager.isPaused {
-                                Button(action: timerManager.unpauseTimer) {
-                                    Image(systemName: "play.circle")
-                                        .foregroundColor(.green)
-                                }
-                                Button(action: timerManager.restartTimer) {
-                                    Image(systemName: "arrow.clockwise.circle")
-                                        .foregroundColor(.blue)
-                                }
-                                Button(action: timerManager.cancelTimer) {
-                                    Image(systemName: "xmark.circle")
-                                        .foregroundColor(.red)
-                                }
-                            } else {
-                                Menu {
-                                    Button("15 Minutes") { timerManager.startTimer(duration: 15 * 1) }
-                                    Button("20 Minutes") { timerManager.startTimer(duration: 20 * 60) }
-                                    Button("25 Minutes") { timerManager.startTimer(duration: 25 * 60) }
-                                    Button("Clear Timer") { timerManager.cancelTimer() }
-                                } label: {
-                                    Text("Timer")
-                                        .padding(5)
-                                        .foregroundColor(.blue)
-                                        .cornerRadius(8)
-                                }
+                            if annotationsEnabled {
+                                AnnotationsView(pagePaths: $pagePaths,
+                                                highlightPaths: $highlightPaths,
+                                                key: uniqueKey(for: currentPage),
+                                                selectedScribbleTool: $selectedScribbleTool,
+                                                nextPage: { goToNextPage() },
+                                                previousPage: { goToPreviousPage() })
                             }
                         }
-
-                        // Markup Tools
-                        ToolbarItemGroup(placement: .navigationBarTrailing) {
-                            // Markup Tools
-                            Menu {
-                              Button("Pen") {
-                                selectScribbleTool("Pen")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Highlight") {
-                                selectScribbleTool("Highlight")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Erase") {
-                                selectScribbleTool("Erase")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Text") {
-                                selectScribbleTool("Text")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Exit") {
-                                selectScribbleTool("")
-                                exitNotSelected = false
-                                annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
-                              }
-                             } label: {
-                               Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
-                               .padding(5)
-                               .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
-                               .cornerRadius(8)
-                             }
-
-                            // Digital Resources
-                            Menu {
-                                if let covers = covers, !covers.isEmpty {
-                                    ForEach(covers) { cover in
-                                        Menu {
-                                            if let videos = cover.videos, !videos.isEmpty {
-                                                Section(header: Text("Videos")) {
-                                                    ForEach(videos) { video in
-                                                        Button(action: {
-                                                            if let url = URL(string: video.link) {
-                                                                selectedLink = URLItem(url: url)
-                                                            }
-                                                        })
-                                                        {
-                                                            Text(video.title)
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            if let references = cover.references, !references.isEmpty {
-                                                Section(header: Text("References")) {
-                                                    ForEach(references) { reference in
-                                                        Button(action: {
-                                                            if let url = URL(string: reference.link) {
-                                                                selectedLink = URLItem(url: url)
-                                                            }
-                                                        }) {
-                                                            Text(reference.title)
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
-                                                Text("No Videos or References Available")
-                                            }
-                                        } label: {
-                                            Text(cover.desc)
-                                        }
+                        .toolbar {
+                            // Timer Controls
+                            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                                if timerManager.isTimerRunning {
+                                    Button(action: timerManager.pauseTimer) {
+                                        Image(systemName: "pause.circle")
+                                            .foregroundColor(.yellow)
+                                    }
+                                    Button(action: timerManager.restartTimer) {
+                                        Image(systemName: "arrow.clockwise.circle")
+                                            .foregroundColor(.blue)
+                                    }
+                                    Button(action: timerManager.cancelTimer) {
+                                        Image(systemName: "xmark.circle")
+                                            .foregroundColor(.red)
+                                    }
+                                } else if timerManager.isPaused {
+                                    Button(action: timerManager.unpauseTimer) {
+                                        Image(systemName: "play.circle")
+                                            .foregroundColor(.green)
+                                    }
+                                    Button(action: timerManager.restartTimer) {
+                                        Image(systemName: "arrow.clockwise.circle")
+                                            .foregroundColor(.blue)
+                                    }
+                                    Button(action: timerManager.cancelTimer) {
+                                        Image(systemName: "xmark.circle")
+                                            .foregroundColor(.red)
                                     }
                                 } else {
-                                    Text("No Digital Resources Available")
+                                    Menu {
+                                        Button("15 Minutes") { timerManager.startTimer(duration: 15 * 1) }
+                                        Button("20 Minutes") { timerManager.startTimer(duration: 20 * 60) }
+                                        Button("25 Minutes") { timerManager.startTimer(duration: 25 * 60) }
+                                        Button("Clear Timer") { timerManager.cancelTimer() }
+                                    } label: {
+                                        Text("Timer")
+                                            .padding(5)
+                                            .foregroundColor(.blue)
+                                            .cornerRadius(8)
+                                    }
                                 }
-                            } label: {
-                                Text("Digital Resources")
-                                    .padding(5)
-                                    .foregroundColor(.purple)
-                                    .cornerRadius(8)
                             }
 
-                            // Bookmark
-                            Button(
-                                action: {
-                                toggleCurrentPageInBookmarks()
-                            })
-                            {
-                                Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
-                                    .foregroundColor(.yellow)
+                            // Markup Tools
+                            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                                // Markup Tools
+                                Menu {
+                                    Button("Pen") {
+                                        selectScribbleTool("Pen")
+                                        annotationsEnabled = true
+                                        exitNotSelected = true
+                                    }
+                                    Button("Highlight") {
+                                        selectScribbleTool("Highlight")
+                                        annotationsEnabled = true
+                                        exitNotSelected = true
+                                    }
+                                    Button("Erase") {
+                                        selectScribbleTool("Erase")
+                                        annotationsEnabled = true
+                                        exitNotSelected = true
+                                    }
+                                    Button("Text") {
+                                        selectScribbleTool("Text")
+                                        annotationsEnabled = true
+                                        exitNotSelected = true
+                                    }
+                                    Button("Exit") {
+                                        selectScribbleTool("")
+                                        exitNotSelected = false
+                                        annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
+                                    }
+                                } label: {
+                                    Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
+                                        .padding(5)
+                                        .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
+                                        .cornerRadius(8)
+                                }
+
+                                // Digital Resources
+                                Menu {
+                                    if let covers = covers, !covers.isEmpty {
+                                        ForEach(covers) { cover in
+                                            Menu {
+                                                if let videos = cover.videos, !videos.isEmpty {
+                                                    Section(header: Text("Videos")) {
+                                                        ForEach(videos) { video in
+                                                            Button(action: {
+                                                                if let url = URL(string: video.link) {
+                                                                    selectedLink = URLItem(url: url)
+                                                                }
+                                                            }) {
+                                                                Text(video.title)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                if let references = cover.references, !references.isEmpty {
+                                                    Section(header: Text("References")) {
+                                                        ForEach(references) { reference in
+                                                            Button(action: {
+                                                                if let url = URL(string: reference.link) {
+                                                                    selectedLink = URLItem(url: url)
+                                                                }
+                                                            }) {
+                                                                Text(reference.title)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
+                                                    Text("No Videos or References Available")
+                                                }
+                                            } label: {
+                                                Text(cover.desc)
+                                            }
+                                        }
+                                    } else {
+                                        Text("No Digital Resources Available")
+                                    }
+                                } label: {
+                                    Text("Digital Resources")
+                                        .padding(5)
+                                        .foregroundColor(.purple)
+                                        .cornerRadius(8)
+                                }
+
+                                // Bookmark
+                                Button(
+                                    action: {
+                                        toggleCurrentPageInBookmarks()
+                                    }) {
+                                        Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
+                                            .foregroundColor(.yellow)
+                                    }
+
+                                // Reset Zoom
+                                if zoomedIn {
+                                    Button("Reset Zoom") {
+                                        resetZoom = true
+                                    }
+                                }
+                                if annotationsEnabled {
+                                    Button("Clear") {
+                                        clearMarkup()
+                                    }
+                                }
                             }
 
-                            // Reset Zoom
-                            if zoomedIn {
-                                Button("Reset Zoom") {
-                                    resetZoom = true
+                            // Progress Bar as a Toolbar Item
+                            ToolbarItem(placement: .bottomBar) {
+                                GeometryReader { geometry in
+                                    Rectangle()
+                                        .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
+                                        .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
+                                        .animation(.linear(duration: 0.1), value: timerManager.progress)
                                 }
-                            }
-                            if annotationsEnabled {
-                                Button("Clear") {
-                                    clearMarkup()
-                                }
+                                .frame(maxWidth: .infinity, maxHeight: 4)
                             }
                         }
-
-                        // Progress Bar as a Toolbar Item
-                        ToolbarItem(placement: .bottomBar) {
-                            GeometryReader { geometry in
-                                Rectangle()
-                                    .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
-                                    .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
-                                    .animation(.linear(duration: 0.1), value: timerManager.progress)
+                    } else {
+                        ProgressView("Getting Workbook")
+                            .onAppear {
+                                loadPDFFromURL()
+                                annotationManager.loadAnnotations(pagePaths: &pagePaths, highlightPaths: &highlightPaths)
+                                if !pagePaths.isEmpty || !highlightPaths.isEmpty {
+                                    annotationsEnabled = true
+                                }
                             }
-                            .frame(maxWidth: .infinity, maxHeight: 4)
-                        }
                     }
-                } else {
-                    ProgressView("Getting Workbook")
-                        .onAppear {
-                            loadPDFFromURL()
-                            annotationManager.loadAnnotations(pagePaths: &pagePaths, highlightPaths: &highlightPaths)
-                            if !pagePaths.isEmpty || !highlightPaths.isEmpty {
-                                annotationsEnabled = true
-                            }
-                        }
                 }
-            }
-                  VStack {
+                VStack {
                     Spacer()
                     HStack {
                         Spacer()
@@ -260,13 +258,12 @@ struct PDFView: View {
                         }
                         .padding(.trailing, 70)
                         .padding(.bottom, 30)
-                        }
                     }
                 }
-                .sheet(isPresented: $showingFeedback) {
-                    FeedbackView()
-                }
-
+            }
+            .sheet(isPresented: $showingFeedback) {
+                FeedbackView()
+            }
         }
         .sheet(item: $selectedLink, onDismiss: {
             print("WebView dismissed. Cleaning up resources.")
@@ -357,31 +354,31 @@ struct PDFView: View {
         pagePaths.removeValue(forKey: uniqueKey(for: currentPage))
     }
 
-        var isCurrentPageBookmarked: Bool {
-            // TODO: Use file ID here instead when applicable!
-            if let fileName = fileName {
-                if let valueSet = bookmarkLookup[fileName] {
-                    return valueSet.contains(currentPage)
-                }
-                return false
+    var isCurrentPageBookmarked: Bool {
+        // TODO: Use file ID here instead when applicable!
+        if let fileName = fileName {
+            if let valueSet = bookmarkLookup[fileName] {
+                return valueSet.contains(currentPage)
             }
             return false
         }
+        return false
+    }
 
-        private func toggleCurrentPageInBookmarks() {
-            if let fileName = fileName {
-                if var valueSet = bookmarkLookup[fileName] {
-                    if valueSet.contains(currentPage) {
-                        valueSet.remove(currentPage)
-                    } else {
-                        valueSet.insert(currentPage)
-                    }
-                    bookmarkLookup[fileName] = valueSet
+    private func toggleCurrentPageInBookmarks() {
+        if let fileName = fileName {
+            if var valueSet = bookmarkLookup[fileName] {
+                if valueSet.contains(currentPage) {
+                    valueSet.remove(currentPage)
                 } else {
-                    bookmarkLookup[fileName] = Set([currentPage])
+                    valueSet.insert(currentPage)
                 }
+                bookmarkLookup[fileName] = valueSet
+            } else {
+                bookmarkLookup[fileName] = Set([currentPage])
             }
         }
+    }
 }
 
 #Preview {

@@ -1,5 +1,5 @@
-import SwiftUI
 import PDFKit
+import SwiftUI
 
 struct AnnotationsView: View {
     @Binding var pagePaths: [String: [Path]]
@@ -8,7 +8,7 @@ struct AnnotationsView: View {
     @Binding var selectedScribbleTool: String
     var nextPage: (() -> Void)?
     var previousPage: (() -> Void)?
-    @State private var liveDrawingPath: Path = Path()
+    @State private var liveDrawingPath: Path = .init()
 
     var body: some View {
         Canvas { context, _ in

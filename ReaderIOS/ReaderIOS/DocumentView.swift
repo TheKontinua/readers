@@ -1,5 +1,5 @@
-import SwiftUI
 import PDFKit
+import SwiftUI
 
 struct DocumentView: UIViewRepresentable {
     var pdfDocument: PDFDocument?
@@ -13,29 +13,31 @@ struct DocumentView: UIViewRepresentable {
         configurePDFView(pdfView)
 
         let overlayView = UIView(frame: pdfView.bounds)
-              overlayView.backgroundColor = .clear
-              overlayView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        overlayView.backgroundColor = .clear
+        overlayView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-          // Add a pinch gesture recognizer to the overlay
-          let pinchGesture = UIPinchGestureRecognizer(
+        // Add a pinch gesture recognizer to the overlay
+        let pinchGesture = UIPinchGestureRecognizer(
             target: context.coordinator,
-            action: #selector(context.coordinator.handlePinch(_:)))
-          overlayView.addGestureRecognizer(pinchGesture)
+            action: #selector(context.coordinator.handlePinch(_:))
+        )
+        overlayView.addGestureRecognizer(pinchGesture)
 
         // Add double-tap gesture recognizer
-               let doubleTapGesture = UITapGestureRecognizer(
-                target: context.coordinator,
-                action: #selector(context.coordinator.handleDoubleTap(_:)))
-               doubleTapGesture.numberOfTapsRequired = 2
-               overlayView.addGestureRecognizer(doubleTapGesture)
+        let doubleTapGesture = UITapGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(context.coordinator.handleDoubleTap(_:))
+        )
+        doubleTapGesture.numberOfTapsRequired = 2
+        overlayView.addGestureRecognizer(doubleTapGesture)
 
-          // Add the overlay on top of the PDFView
-          pdfView.addSubview(overlayView)
+        // Add the overlay on top of the PDFView
+        pdfView.addSubview(overlayView)
 
         return pdfView
     }
 
-    func updateUIView(_ uiView: PDFKit.PDFView, context: Context) {
+    func updateUIView(_ uiView: PDFKit.PDFView, context _: Context) {
         guard let pdfDocument = pdfDocument else { return }
 
         if uiView.document != pdfDocument {
@@ -44,10 +46,10 @@ struct DocumentView: UIViewRepresentable {
 
         // Check if resetZoom is triggered
         if resetZoom {
-            uiView.scaleFactor = uiView.scaleFactorForSizeToFit  // Reset scale factor
+            uiView.scaleFactor = uiView.scaleFactorForSizeToFit // Reset scale factor
 
             DispatchQueue.main.async {
-                self.resetZoom = false  // Reset the binding to avoid repeated resets
+                self.resetZoom = false // Reset the binding to avoid repeated resets
                 self.zoomedIn = false
             }
         }
@@ -96,20 +98,19 @@ struct DocumentView: UIViewRepresentable {
         }
 
         @objc func handleDoubleTap(_ sender: UITapGestureRecognizer) {
-             guard let pdfView = sender.view?.superview as? PDFKit.PDFView else { return }
+            guard let pdfView = sender.view?.superview as? PDFKit.PDFView else { return }
 
-             // Toggle zoom level between a zoomed-in scale and the default scale
-             if pdfView.scaleFactor == pdfView.scaleFactorForSizeToFit {
-                 /*
+            // Toggle zoom level between a zoomed-in scale and the default scale
+            if pdfView.scaleFactor == pdfView.scaleFactorForSizeToFit {
+                /*
                   disabling zoom in for now, needs location of tap detection
                   pdfView.scaleFactor = min(pdfView.maxScaleFactor, pdfView.scaleFactor * 2)  // Zoom in
                  parent.zoomedIn = true
                   */
-             } else {
-                 pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit  // Reset zoom
-                 parent.zoomedIn = false
-             }
-         }
+            } else {
+                pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit // Reset zoom
+                parent.zoomedIn = false
+            }
+        }
     }
-
 }

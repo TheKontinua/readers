@@ -48,7 +48,6 @@ struct Workbook: Codable, Hashable, Identifiable {
 }
 
 struct NavigationPDFSplitView: View {
-
     @State private var workbooks: [Workbook]?
     @State private var chapters: [Chapter]?
     @State private var covers: [Cover]?
@@ -74,7 +73,6 @@ struct NavigationPDFSplitView: View {
                         fetchWorkbooks()
                     }
             }
-
         }
         content: {
             Group {
@@ -89,12 +87,12 @@ struct NavigationPDFSplitView: View {
                             .onAppear(perform: fetchChapters)
                     }
                 } else {
-
                     if let currentPdfFileName = currentPdfFileName,
-                       let bookmarks = bookmarkLookup[currentPdfFileName] {
+                       let bookmarks = bookmarkLookup[currentPdfFileName]
+                    {
                         List(Array(bookmarks).sorted(), id: \.self) { bookmark in
                             HStack {
-                                Text("Page \(bookmark+1)")
+                                Text("Page \(bookmark + 1)")
                                 Spacer()
                             }
                             .contentShape(Rectangle())
@@ -107,20 +105,19 @@ struct NavigationPDFSplitView: View {
                             .font(.callout)
                             .foregroundColor(.gray)
                     }
-
                 }
             }
-                .toolbar {
-                    ToolbarItem(placement: .automatic) {
-                        Toggle(isOn: $isShowingBookmarks) {
-                            Image(systemName: isShowingBookmarks ? "bookmark.fill" : "bookmark")
-                                .foregroundColor(.accentColor)
-                        }
-                        .toggleStyle(.button)
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(isShowingBookmarks ? "Show All Chapters" : "Show Bookmarked Chapters")
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Toggle(isOn: $isShowingBookmarks) {
+                        Image(systemName: isShowingBookmarks ? "bookmark.fill" : "bookmark")
+                            .foregroundColor(.accentColor)
                     }
+                    .toggleStyle(.button)
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(isShowingBookmarks ? "Show All Chapters" : "Show Bookmarked Chapters")
                 }
+            }
 
         } detail: {
             if currentPdfFileName != nil {
@@ -129,7 +126,8 @@ struct NavigationPDFSplitView: View {
                     fileName: $currentPdfFileName,
                     currentPage: $currentPage,
                     bookmarkLookup: $bookmarkLookup,
-                    covers: $covers)
+                    covers: $covers
+                )
             } else {
                 ProgressView("Getting the latest workbook.")
             }
@@ -251,7 +249,6 @@ struct NavigationPDFSplitView: View {
 
         task.resume()
     }
-
 }
 
 #Preview {

@@ -76,7 +76,7 @@ class AnnotationManager: ObservableObject {
 extension Path {
     func toPoints() -> [CGPoint] {
         var points: [CGPoint] = []
-        self.cgPath.applyWithBlock { element in
+        cgPath.applyWithBlock { element in
             let pointsPointer = element.pointee.points
             if element.pointee.type == .addLineToPoint || element.pointee.type == .moveToPoint {
                 points.append(pointsPointer[0])
@@ -88,9 +88,9 @@ extension Path {
     init(points: [CGPoint]) {
         self.init()
         guard let firstPoint = points.first else { return }
-        self.move(to: firstPoint)
+        move(to: firstPoint)
         for point in points.dropFirst() {
-            self.addLine(to: point)
+            addLine(to: point)
         }
     }
 }
