@@ -31,7 +31,7 @@ jobs:
           platform: ${{ 'iOS Simulator' }}
         run: |
           cd ReaderIOS
-          device="iPad Pro"
+          device="iPad Pro 13-inch (M4)"
           if [ $scheme = default ]; then scheme=$(cat default); fi
           if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then 
             filetype_parameter="workspace" 
