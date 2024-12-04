@@ -1,15 +1,19 @@
-disabled_rules: # Rule identifiers turned on by default to exclude from running
+# Excluded directories
+excluded:
+  - Pods
+  - Carthage
+  - Generated
+  - ReaderIOSTests
+  - ReaderIOSUITests
+
+# Disabled rules
+disabled_rules:
   - colon
   - comma
   - control_statement
   - todo
-
-excluded:
-  - ReaderIOSTests
-  - ReaderIOSUITests
-
-# If true, SwiftLint will check for updates after linting or analyzing.
-check_for_updates: true
+  - redundant_optional_binding
+  - trailing_commas
 
 trailing_comma: # Configures the trailing comma rule
   mandatory_comma: false
@@ -26,16 +30,11 @@ file_length:
   warning: 600 # Warning threshold
   error: 1200 # Error threshold
 
-# Naming rules can set warnings/errors for min_length and max_length
-# Additionally, they can set excluded names
 type_name:
   min_length: 3 # Only warning for minimum length
   max_length:
     warning: 40 # Warning threshold
     error: 50 # Error threshold
-  excluded: # Names to exclude
-    - iPad
-  allowed_symbols: ["_"] # Allowed symbols in type names
 
 identifier_name:
   min_length: # Only minimum length

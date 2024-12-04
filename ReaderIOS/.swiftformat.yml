@@ -1,5 +1,27 @@
---commas inline                # Aligns with SwiftLint's no trailing comma 
---self remove             # Remove unnecessary self usage
---wrapbraces inline 
---redundantoptionalbinding enabled # Remove redundant optional bindings
---swiftversion 16.1            # Matches Swift version
+--swiftversion 16.1
+
+# Indentation
+--indent 4
+--tabwidth 4
+--maxwidth 120
+
+# Line breaks
+--linebreaks lf
+
+# Commas
+--commas inline
+
+# Braces
+--wrapbraces inline
+
+# Remove redundant self
+--self remove
+
+# Disable rules that conflict with SwiftLint
+--disable redundantOptionalBinding
+--disable trailingCommas
+
+# Use SwiftLint's rules where possible
+--swiftlint
+
+# Other options ...
