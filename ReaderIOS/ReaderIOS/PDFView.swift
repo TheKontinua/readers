@@ -166,8 +166,8 @@ struct PDFView: View {
                                                         }
                                                     })
                                                 }
-                                                if (cover.videos?.isEmpty ?? true)
-                                                    && (cover.references?.isEmpty ?? true) {
+                                                if cover.videos?.isEmpty ?? true,
+                                                   cover.references?.isEmpty ?? true {
                                                     Text("No Videos or References Available")
                                                 }
                                             }, label: {
@@ -265,15 +265,15 @@ struct PDFView: View {
 
     private func dragGesture() -> some Gesture {
         if pageChangeEnabled && !zoomedIn {
-            return DragGesture().onEnded({ value in
+            return DragGesture().onEnded { value in
                 if value.translation.width < 0 {
                     goToNextPage()
                 } else if value.translation.width > 0 {
                     goToPreviousPage()
                 }
-            })
+            }
         } else {
-            return DragGesture().onEnded({ _ in })
+            return DragGesture().onEnded { _ in }
         }
     }
 
