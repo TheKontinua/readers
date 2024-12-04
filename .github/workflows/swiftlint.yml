@@ -20,7 +20,7 @@ jobs:
       # Step 2: Install SwiftLint
       - name: Install SwiftLint
         run: |
-          brew install swiftlint
+          brew install swiftlint brew upgrade swiftlint
       # Step 3: Run SwiftLint
       - name: Run SwiftLint
         run: |
