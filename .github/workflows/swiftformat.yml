@@ -22,4 +22,4 @@ jobs:
 
       - name: Check SwiftFormat
         run: |
-          swiftformat . --lint --swiftversion 16.1 --swiftlint
+          swiftformat . --lint --swiftversion 16.1 --config ./ReaderIOS/.swiftformat.yml

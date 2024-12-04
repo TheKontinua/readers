@@ -7,3 +7,4 @@
 
 --commas inline
 --brace-spacing no-space
+--swiftversion 16.1
