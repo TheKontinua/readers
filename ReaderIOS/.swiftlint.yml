@@ -1,0 +1,34 @@
+# .swiftlint.yml
+# ReaderIOS
+# Created by Jonas Schiessl on 12/3/24.
+
+disabled_rules:  # Rule identifiers turned on by default to exclude from running
+  - colon
+  - comma
+  - control_statement
+
+# If true, SwiftLint will check for updates after linting or analyzing.
+check_for_updates: true
+
+type_body_length:
+  warning: 400  # Warning threshold
+  error: 500    # Error threshold
+
+file_length:
+  warning: 600  # Warning threshold
+  error: 1200   # Error threshold
+
+# Naming rules can set warnings/errors for min_length and max_length
+# Additionally, they can set excluded names
+type_name:
+  min_length: 3  # Only warning for minimum length
+  max_length:
+    warning: 40  # Warning threshold
+    error: 50    # Error threshold
+  excluded:  # Names to exclude
+    - iPad
+  allowed_symbols: ["_"]  # Allowed symbols in type names
+
+identifier_name:
+  min_length:  # Only minimum length
+    warning: 3  # Only error threshold

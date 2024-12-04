@@ -24,6 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8BA9E1682CFFEA5700F722E3 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		FE19153D2CC7FC37009C2AA1 /* ReaderIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReaderIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE19154D2CC7FC39009C2AA1 /* ReaderIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReaderIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE1915572CC7FC39009C2AA1 /* ReaderIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReaderIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,6 +76,7 @@
 		FE1915342CC7FC37009C2AA1 = {
 			isa = PBXGroup;
 			children = (
+				8BA9E1682CFFEA5700F722E3 /* .swiftlint.yml */,
 				FE19153F2CC7FC37009C2AA1 /* ReaderIOS */,
 				FE1915502CC7FC39009C2AA1 /* ReaderIOSTests */,
 				FE19155A2CC7FC39009C2AA1 /* ReaderIOSUITests */,
@@ -195,6 +197,9 @@
 			);
 			mainGroup = FE1915342CC7FC37009C2AA1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8BA9E0ED2CFF69D300F722E3 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FE19153E2CC7FC37009C2AA1 /* Products */;
 			projectDirPath = "";
@@ -562,6 +567,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8BA9E0ED2CFF69D300F722E3 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.57.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = FE1915352CC7FC37009C2AA1 /* Project object */;
 }

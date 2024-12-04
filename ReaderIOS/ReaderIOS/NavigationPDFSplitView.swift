@@ -14,7 +14,7 @@ struct Chapter: Identifiable, Codable {
     let covers: [Cover]
     let startPage: Int
     let requires: [String]?
-    
+
     enum CodingKeys: String, CodingKey {
         case id, title, book, covers, requires
         case chapNum = "chap_num"
@@ -48,19 +48,19 @@ struct Workbook: Codable, Hashable, Identifiable {
 }
 
 struct NavigationPDFSplitView: View {
-    
-    @State private var workbooks: [Workbook]? = nil
-    @State private var chapters: [Chapter]? = nil
-    @State private var covers: [Cover]? = nil
+
+    @State private var workbooks: [Workbook]?
+    @State private var chapters: [Chapter]?
+    @State private var covers: [Cover]?
     @State private var selectedWorkbookID: String?
     @State private var selectedChapterID: String?
-    
+
     @State private var currentPage: Int = 0
-    @State private var currentPdfFileName: String? = nil
+    @State private var currentPdfFileName: String?
     @State private var isShowingBookmarks: Bool = false
-    
-    @State private var bookmarkLookup = Dictionary<String, Set<Int>>()
-    
+
+    @State private var bookmarkLookup = [String: Set<Int>]()
+
     var body: some View {
         NavigationSplitView {
             if let workbooks = workbooks {
@@ -74,12 +74,11 @@ struct NavigationPDFSplitView: View {
                         fetchWorkbooks()
                     }
             }
-            
-            
+
         }
         content: {
             Group {
-                if (!isShowingBookmarks) {
+                if !isShowingBookmarks {
                     if let chapters = chapters {
                         List(chapters, selection: $selectedChapterID) { chapter in
                             Text(chapter.title)
@@ -90,7 +89,7 @@ struct NavigationPDFSplitView: View {
                             .onAppear(perform: fetchChapters)
                     }
                 } else {
-                    
+
                     if let currentPdfFileName = currentPdfFileName,
                        let bookmarks = bookmarkLookup[currentPdfFileName] {
                         List(Array(bookmarks).sorted(), id: \.self) { bookmark in
@@ -126,18 +125,22 @@ struct NavigationPDFSplitView: View {
         } detail: {
             if currentPdfFileName != nil {
                 // TODO: Only give access to bookmarks for current file.
-                PDFView(fileName: $currentPdfFileName, currentPage: $currentPage, bookmarkLookup: $bookmarkLookup, covers: $covers)
+                PDFView(
+                    fileName: $currentPdfFileName,
+                    currentPage: $currentPage,
+                    bookmarkLookup: $bookmarkLookup,
+                    covers: $covers)
             } else {
                 ProgressView("Getting the latest workbook.")
             }
         }
         .onChange(of: selectedWorkbookID) {
             guard let selectedWorkbook = selectedWorkbook else { return }
-            
+
             if currentPdfFileName != selectedWorkbook.pdfName {
                 currentPdfFileName = selectedWorkbook.pdfName
             }
-            
+
             fetchChapters()
         }
         .onChange(of: selectedChapterID) {
@@ -148,93 +151,93 @@ struct NavigationPDFSplitView: View {
             }
         }
     }
-    
+
     var selectedWorkbook: Workbook? {
         workbooks?.first(where: { $0.id == selectedWorkbookID })
     }
-    
+
     // TODO: Selected chapter should be based on the current page number.
     var selectedChapter: Chapter? {
         chapters?.first(where: { $0.id == selectedChapterID })
     }
-    
+
     func fetchChapters() {
         guard let fileName = selectedWorkbook?.metaName else {
             return
         }
-        
+
         guard let url = URL(string: "http://localhost:8000/meta/\(fileName)") else {
             print("Invalid chapter meta URL.")
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
-        
+
         let config = URLSessionConfiguration.default
         config.urlCache = nil
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        
+
         let session = URLSession(configuration: config)
-        
-        let task = session.dataTask(with: request) { data, response, error in
+
+        let task = session.dataTask(with: request) { data, _, error in
             if let error = error {
                 print("Error fetching chapters: \(error)")
                 return
             }
-            
+
             guard let data = data else {
                 print("No data received from URL.")
                 return
             }
-            
+
             do {
                 let decoder = JSONDecoder()
                 let chapterResponse = try decoder.decode([Chapter].self, from: data)
-                
+
                 DispatchQueue.main.async {
                     chapters = chapterResponse
                     selectedChapterID = chapters?.first?.id
                 }
-                
+
             } catch {
                 print("Error decoding chapters: \(error)")
             }
         }
-        
+
         task.resume()
     }
-    
+
     func fetchWorkbooks() {
         guard let url = URL(string: "http://localhost:8000/workbooks.json") else {
             print("Invalid workbooks URL.")
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
-        
+
         let config = URLSessionConfiguration.default
         config.urlCache = nil
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        
+
         let session = URLSession(configuration: config)
-        
-        let task = session.dataTask(with: request) { data, response, error in
+
+        let task = session.dataTask(with: request) { data, _, error in
             if let error = error {
                 print("Error fetching workbooks: \(error)")
                 return
             }
-            
+
             guard let data = data else {
                 print("No data received from URL.")
                 return
             }
-            
+
             do {
                 let decoder = JSONDecoder()
                 let workbookResponse = try decoder.decode([Workbook].self, from: data)
-                
+
                 DispatchQueue.main.async {
                     workbooks = workbookResponse
                     if let id = workbooks?.first?.id {
@@ -245,10 +248,10 @@ struct NavigationPDFSplitView: View {
                 print("Error decoding workbooks: \(error)")
             }
         }
-        
+
         task.resume()
     }
-    
+
 }
 
 #Preview {

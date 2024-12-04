@@ -7,7 +7,7 @@
 import PDFKit
 import SwiftUI
 
-class AnnotationManager: ObservableObject{
+class AnnotationManager: ObservableObject {
     struct AnnotationData: Codable {
         let key: String
         let paths: [[CGPoint]]
@@ -16,19 +16,19 @@ class AnnotationManager: ObservableObject{
 
     func saveAnnotations(pagePaths: [String: [Path]], highlightPaths: [String: [Path]]) {
         var annotationData: [AnnotationData] = []
-        
+
         // Serialize paths
         for (key, paths) in pagePaths {
             let pathPoints = paths.map { $0.toPoints() }
             annotationData.append(AnnotationData(key: key, paths: pathPoints, isHighlight: false))
         }
-        
+
         // Serialize highlight paths
         for (key, paths) in highlightPaths {
             let pathPoints = paths.map { $0.toPoints() }
             annotationData.append(AnnotationData(key: key, paths: pathPoints, isHighlight: true))
         }
-        
+
         // Convert to JSON
         do {
             let jsonData = try JSONEncoder().encode(annotationData)
@@ -48,15 +48,15 @@ class AnnotationManager: ObservableObject{
 
     func loadAnnotations(pagePaths: inout [String: [Path]], highlightPaths: inout [String: [Path]]) {
         let url = getAnnotationsFileURL()
-        
+
         do {
             let data = try Data(contentsOf: url)
             let annotationData = try JSONDecoder().decode([AnnotationData].self, from: data)
-            
+
             // Clear current paths
             pagePaths.removeAll()
             highlightPaths.removeAll()
-            
+
             // Restore paths
             for annotation in annotationData {
                 let paths = annotation.paths.map { Path(points: $0) }
