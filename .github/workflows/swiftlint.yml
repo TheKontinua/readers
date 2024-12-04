@@ -25,4 +25,4 @@ jobs:
     # Step 3: Run SwiftLint
     - name: Run SwiftLint
       run: |
-        swiftlint --strict --config ./ReaderIOS/swiftlint.yml
+        swiftlint --strict --config ./ReaderIOS/.swiftlint.yml
