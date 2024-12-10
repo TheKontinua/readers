@@ -137,20 +137,8 @@ struct PDFView: View {
                                 }
                                 Button("Clear Screen") {
                                     showClearAlert = true
-                                    clearMarkup()
                                 }
                                 
-//                                .alert("Clear Screen", isPresented: $showClearAlert) {
-//                                    Button("Cancel", role: .cancel) {
-//                                        print("Cancelled")
-//                                    }
-//                                    Button("Clear", role: .destructive) {
-//                                        selectScribbleTool("")
-//                                        clearMarkup()
-//                                    }
-//                                } message: {
-//                                    Text("Are you sure you want to clear all markup on this page?")
-//                                }
                                     
                         Button("Exit Markup") {
                             selectScribbleTool("")
@@ -164,6 +152,13 @@ struct PDFView: View {
                             .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
                             .cornerRadius(8)
                     }
+                    //Alert and sheet modifiers should be placed outside of the menu
+                            .alert("Are you sure you want to clear  your screen?", isPresented: $showClearAlert) {
+                                Button("Clear", role: .destructive) {
+                                    clearMarkup()
+                                }
+                                Button("Cancel", role: .cancel) {}
+                            }
                             
                             // Digital Resources
                             Menu {
@@ -266,7 +261,6 @@ struct PDFView: View {
                                 }
                             }
                             .padding(.leading, 25)
-//                            .padding(.trailing, 16)  // Increased right padding
                         }
                         }
                         .sheet(isPresented: $showingFeedback) {
@@ -283,28 +277,6 @@ struct PDFView: View {
                         }
                 }
             }
-//                  VStack {
-//                    Spacer()
-//                    HStack {
-//                        Spacer()
-//                        Button(action: {
-//                            showingFeedback = true
-//                        }) {
-//                            Image(systemName: "message.fill")
-//                                .font(.system(size: 24))
-//                                .foregroundColor(.white)
-//                                .padding(15)
-//                                .background(Color.blue)
-//                                .clipShape(Circle())
-//                                .shadow(radius: 4)
-//                        }
-//                        .padding(.trailing, 70)
-//                        .padding(.bottom, 30)
-//                        }
-//                    }
-//                }
-//                .sheet(isPresented: $showingFeedback) {
-//                    FeedbackView()
                 }
             
         }
