@@ -234,22 +234,44 @@ struct PDFView: View {
                         
                         // Progress Bar as a Toolbar Item
                         ToolbarItem(placement: .bottomBar) {
-                            GeometryReader { geometry in
-                                ZStack(alignment: .leading) {
-                                    if timerManager.isTimerRunning || timerManager.isPaused{
+                            HStack(spacing: 0) {
+                                // Progress bar with GeometryReader
+                                GeometryReader { geometry in
+                                    ZStack(alignment: .leading) {
+                                        if timerManager.isTimerRunning || timerManager.isPaused {
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.3))
+                                                .frame(width: geometry.size.width, height: 4)
+                                        }
+                                        
                                         Rectangle()
-                                            .fill(Color.gray.opacity(0.3))
-                                            .frame(width: geometry.size.width, height: 4)
+                                            .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
+                                            .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
+                                            .animation(.linear(duration: 0.1), value: timerManager.progress)
                                     }
-                                    Rectangle()
-                                        .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
-                                        .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
-                                        .animation(.linear(duration: 0.1), value: timerManager.progress)
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: 4)
+                                
+                                // Feedback button
+                                Button(action: {
+                                    showingFeedback = true
+                                }) {
+                                    Image(systemName: "message.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white)
+                                        .padding(8)
+                                        .background(Color.blue)
+                                        .clipShape(Circle())
+                                        .shadow(radius: 2)
                                 }
                             }
-                            .frame(maxWidth: .infinity, maxHeight: 4)
+                            .padding(.leading, 25)
+//                            .padding(.trailing, 16)  // Increased right padding
                         }
-                    }
+                        }
+                        .sheet(isPresented: $showingFeedback) {
+                            FeedbackView()
+                        }
                 } else {
                     ProgressView("Getting Workbook")
                         .onAppear {
@@ -261,28 +283,28 @@ struct PDFView: View {
                         }
                 }
             }
-                  VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            showingFeedback = true
-                        }) {
-                            Image(systemName: "message.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(.white)
-                                .padding(15)
-                                .background(Color.blue)
-                                .clipShape(Circle())
-                                .shadow(radius: 4)
-                        }
-                        .padding(.trailing, 70)
-                        .padding(.bottom, 30)
-                        }
-                    }
-                }
-                .sheet(isPresented: $showingFeedback) {
-                    FeedbackView()
+//                  VStack {
+//                    Spacer()
+//                    HStack {
+//                        Spacer()
+//                        Button(action: {
+//                            showingFeedback = true
+//                        }) {
+//                            Image(systemName: "message.fill")
+//                                .font(.system(size: 24))
+//                                .foregroundColor(.white)
+//                                .padding(15)
+//                                .background(Color.blue)
+//                                .clipShape(Circle())
+//                                .shadow(radius: 4)
+//                        }
+//                        .padding(.trailing, 70)
+//                        .padding(.bottom, 30)
+//                        }
+//                    }
+//                }
+//                .sheet(isPresented: $showingFeedback) {
+//                    FeedbackView()
                 }
             
         }
