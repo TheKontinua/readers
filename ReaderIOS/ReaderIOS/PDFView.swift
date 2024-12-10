@@ -236,10 +236,11 @@ struct PDFView: View {
                         ToolbarItem(placement: .bottomBar) {
                             GeometryReader { geometry in
                                 ZStack(alignment: .leading) {
-                                    Rectangle()
-                                        .fill(Color.gray.opacity(0.3))
-                                        .frame(width: geometry.size.width, height: 4)
-                                    
+                                    if timerManager.isTimerRunning || timerManager.isPaused{
+                                        Rectangle()
+                                            .fill(Color.gray.opacity(0.3))
+                                            .frame(width: geometry.size.width, height: 4)
+                                    }
                                     Rectangle()
                                         .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
                                         .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
