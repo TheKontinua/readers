@@ -37,6 +37,10 @@ struct PDFView: View {
     @State private var pagePaths: [String: [Path]] = [:]
     @State private var highlightPaths: [String: [Path]] = [:]
     
+    //alert for clearing the entire page
+    @State private var showClearAlert = false
+
+    
     //Class to save annotations
     @ObservedObject private var annotationManager = AnnotationManager()
     
@@ -111,37 +115,55 @@ struct PDFView: View {
                         ToolbarItemGroup(placement: .navigationBarTrailing) {
                             // Markup Tools
                             Menu {
-                              Button("Pen") {
-                                selectScribbleTool("Pen")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Highlight") {
-                                selectScribbleTool("Highlight")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Erase") {
-                                selectScribbleTool("Erase")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Text") {
-                                selectScribbleTool("Text")
-                                annotationsEnabled = true
-                                exitNotSelected = true
-                              }
-                              Button("Exit") {
-                                selectScribbleTool("")
-                                exitNotSelected = false
-                                  annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
-                              }
-                             } label: {
-                               Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
-                               .padding(5)
-                               .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
-                               .cornerRadius(8)
-                             }
+                                Button("Pen") {
+                                    selectScribbleTool("Pen")
+                                    annotationsEnabled = true
+                                    exitNotSelected = true
+                                }
+                                Button("Highlight") {
+                                    selectScribbleTool("Highlight")
+                                    annotationsEnabled = true
+                                    exitNotSelected = true
+                                }
+                                Button("Erase") {
+                                    selectScribbleTool("Erase")
+                                    annotationsEnabled = true
+                                    exitNotSelected = true
+                                }
+                                Button("Text") {
+                                    selectScribbleTool("Text")
+                                    annotationsEnabled = true
+                                    exitNotSelected = true
+                                }
+                                Button("Clear Screen") {
+                                    showClearAlert = true
+                                    clearMarkup()
+                                }
+                                
+//                                .alert("Clear Screen", isPresented: $showClearAlert) {
+//                                    Button("Cancel", role: .cancel) {
+//                                        print("Cancelled")
+//                                    }
+//                                    Button("Clear", role: .destructive) {
+//                                        selectScribbleTool("")
+//                                        clearMarkup()
+//                                    }
+//                                } message: {
+//                                    Text("Are you sure you want to clear all markup on this page?")
+//                                }
+                                    
+                        Button("Exit Markup") {
+                            selectScribbleTool("")
+                            exitNotSelected = false
+                            annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
+                        }
+                    
+                    } label: {
+                        Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
+                            .padding(5)
+                            .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
+                            .cornerRadius(8)
+                    }
                             
                             // Digital Resources
                             Menu {
@@ -208,20 +230,21 @@ struct PDFView: View {
                                     resetZoom = true
                                 }
                             }
-                            if annotationsEnabled{
-                                Button("Clear"){
-                                    clearMarkup()
-                                }
-                            }
                         }
                         
                         // Progress Bar as a Toolbar Item
                         ToolbarItem(placement: .bottomBar) {
                             GeometryReader { geometry in
-                                Rectangle()
-                                    .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
-                                    .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
-                                    .animation(.linear(duration: 0.1), value: timerManager.progress)
+                                ZStack(alignment: .leading) {
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(width: geometry.size.width, height: 4)
+                                    
+                                    Rectangle()
+                                        .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
+                                        .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
+                                        .animation(.linear(duration: 0.1), value: timerManager.progress)
+                                }
                             }
                             .frame(maxWidth: .infinity, maxHeight: 4)
                         }
