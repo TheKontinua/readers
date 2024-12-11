@@ -28,12 +28,12 @@ struct WebView: UIViewRepresentable {
         return webView
     }
 
-    func updateUIView(_ uiView: WKWebView, context: Context) {
+    func updateUIView(_ uiView: WKWebView, context _: Context) {
         let request = URLRequest(url: url)
         uiView.load(request)
     }
 
-    static func dismantleUIView(_ uiView: WKWebView, coordinator: Coordinator) {
+    static func dismantleUIView(_ uiView: WKWebView, coordinator _: Coordinator) {
         uiView.stopLoading()
         uiView.navigationDelegate = nil
         print("WebView dismantled and cleaned up.")
