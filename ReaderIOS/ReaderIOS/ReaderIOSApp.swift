@@ -11,9 +11,7 @@ import SwiftUI
 struct ReaderIOSApp: App {
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                NavigationPDFSplitView()
-            }
+            NavigationPDFSplitView()
         }
     }
 }
