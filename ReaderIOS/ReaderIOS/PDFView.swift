@@ -13,7 +13,11 @@ struct PDFView: View {
     @Binding var covers: [Cover]?
 
     @State private var pdfDocument: PDFDocument?
+    
+    //Digital resources state vars
+    @State private var showDigitalResources = false
     @State private var selectedLink: URLItem?
+    
     @State private var resetZoom = false
     @State private var zoomedIn = false
     @State private var showingFeedback = false
@@ -136,55 +140,18 @@ struct PDFView: View {
                                         .cornerRadius(8)
                                 })
 
-                                Menu(content: {
-                                    if let covers = covers, !covers.isEmpty {
-                                        ForEach(covers) { cover in
-                                            Menu(content: {
-                                                if let videos = cover.videos, !videos.isEmpty {
-                                                    Section(header: Text("Videos"), content: {
-                                                        ForEach(videos) { video in
-                                                            Button(action: {
-                                                                if let url = URL(string: video.link) {
-                                                                    selectedLink = URLItem(url: url)
-                                                                }
-                                                            }, label: {
-                                                                Text(video.title)
-                                                            })
-                                                        }
-                                                    })
-                                                }
-                                                if let references = cover.references, !references.isEmpty {
-                                                    Section(header: Text("References"), content: {
-                                                        ForEach(references) { reference in
-                                                            Button(action: {
-                                                                if let url = URL(string: reference.link) {
-                                                                    selectedLink = URLItem(url: url)
-                                                                }
-                                                            }, label: {
-                                                                Text(reference.title)
-                                                            })
-                                                        }
-                                                    })
-                                                }
-                                                if cover.videos?.isEmpty ?? true,
-                                                   cover.references?.isEmpty ?? true
-                                                {
-                                                    Text("No Videos or References Available")
-                                                }
-                                            }, label: {
-                                                Text(cover.desc)
-                                            })
-                                        }
-                                    } else {
-                                        Text("No Digital Resources Available")
-                                    }
-                                }, label: {
+                                Button(action: {
+                                    showDigitalResources = true
+                                }) {
                                     Text("Digital Resources")
                                         .padding(5)
                                         .foregroundColor((covers?.isEmpty ?? true) ? .gray : .purple)
                                         .cornerRadius(8)
-                                })
+                                }
                                 .disabled(covers?.isEmpty ?? true)
+                                .fullScreenCover(isPresented: $showDigitalResources) {
+                                    DigitalResourcesView(covers: covers, selectedLink: $selectedLink)
+                                }
 
                                 Button(action: {
                                     toggleCurrentPageInBookmarks()
@@ -255,11 +222,6 @@ struct PDFView: View {
                 FeedbackView()
             })
         }
-        .sheet(item: $selectedLink, onDismiss: {
-            print("WebView dismissed. Cleaning up resources.")
-        }, content: { linkItem in
-            WebView(url: linkItem.url)
-        })
         .onChange(of: fileName) {
             loadPDFFromURL()
         }
