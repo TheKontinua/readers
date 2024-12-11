@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DigitalResourcesView: View {
     var covers: [Cover]?
-    @Binding var selectedLink: URLItem?
+    @State private var selectedLink: URLItem?
     @State private var showWebView = false
     @Environment(\.dismiss) private var dismiss // iOS 15+ environment dismiss action
     
@@ -70,11 +70,13 @@ struct DigitalResourcesView: View {
                         }
                     }
                 }
-                .sheet(item: $selectedLink, onDismiss: {
+                .fullScreenCover(item: $selectedLink, onDismiss: {
                     print("WebView dismissed. Cleaning up resources.")
+                    print("showWebView: \(showWebView)") // Debugging
                 }, content: { linkItem in
-                    WebView(url: linkItem.url)
+                    FullScreenWebView(url: linkItem.url)
                 })
+
             } else {
                 VStack {
                     Text("No Digital Resources Available")

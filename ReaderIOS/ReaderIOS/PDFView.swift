@@ -16,7 +16,6 @@ struct PDFView: View {
     
     //Digital resources state vars
     @State private var showDigitalResources = false
-    @State private var selectedLink: URLItem?
     
     @State private var resetZoom = false
     @State private var zoomedIn = false
@@ -150,7 +149,7 @@ struct PDFView: View {
                                 }
                                 .disabled(covers?.isEmpty ?? true)
                                 .fullScreenCover(isPresented: $showDigitalResources) {
-                                    DigitalResourcesView(covers: covers, selectedLink: $selectedLink)
+                                    DigitalResourcesView(covers: covers)
                                 }
 
                                 Button(action: {
