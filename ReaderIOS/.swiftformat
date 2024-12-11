@@ -1,0 +1,10 @@
+--swiftversion 16.1
+--indent 4
+--tabwidth 4
+--maxwidth 120
+--linebreaks lf
+--commas inline
+--allman false
+--self remove
+--disable redundantOptionalBinding
+--disable trailingCommas
