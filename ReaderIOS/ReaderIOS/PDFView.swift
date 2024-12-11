@@ -181,9 +181,10 @@ struct PDFView: View {
                                 }, label: {
                                     Text("Digital Resources")
                                         .padding(5)
-                                        .foregroundColor(.purple)
+                                        .foregroundColor((covers?.isEmpty ?? true) ? .gray : .purple)
                                         .cornerRadius(8)
                                 })
+                                .disabled(covers?.isEmpty ?? true)
 
                                 Button(action: {
                                     toggleCurrentPageInBookmarks()
