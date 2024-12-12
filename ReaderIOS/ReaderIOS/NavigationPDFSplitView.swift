@@ -61,22 +61,20 @@ struct NavigationPDFSplitView: View {
     @State private var covers: [Cover]?
     @State private var selectedWorkbookID: String?
     @State private var selectedChapterID: String?
-    
-
 
     @State private var currentPage: Int = 0
     @State private var currentPdfFileName: String?
     @State private var isShowingBookmarks: Bool = false
 
     @State private var bookmarkLookup = [String: Set<Int>]()
-    
-    //State vars for search
+
+    // State vars for search
     @State private var searchText = ""
-    
+
     var filteredChapters: [SearchResult<Chapter>] {
         ChapterSearch.filter(chapters, by: searchText)
     }
-    
+
     var body: some View {
         NavigationSplitView {
             if let workbooks = workbooks {
@@ -98,10 +96,10 @@ struct NavigationPDFSplitView: View {
                         // Add search bar
                         SearchBar(text: $searchText)
                             .padding(.horizontal)
-                        
+
                         if let chapters = chapters {
                             if filteredChapters.isEmpty {
-                                List(){
+                                List {
                                     Text("No chapters found")
                                         .foregroundColor(.gray)
                                 }
