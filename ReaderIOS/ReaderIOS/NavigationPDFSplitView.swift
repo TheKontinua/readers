@@ -4,8 +4,8 @@
 //
 //  Created by Devin Hadley on 11/10/24.
 //
-import SwiftUI
 import PDFKit
+import SwiftUI
 
 struct Chapter: Identifiable, Codable {
     let id: String
@@ -68,7 +68,6 @@ struct NavigationPDFSplitView: View {
     @State private var isShowingBookmarks: Bool = false
 
     @State private var bookmarkLookup = [String: Set<Int>]()
-    
 
     // State vars for search
     @State private var pdfDocument: PDFDocument?
@@ -78,7 +77,7 @@ struct NavigationPDFSplitView: View {
     var filteredChapters: [SearchResult<Chapter>] {
         ChapterSearch.filter(chapters, by: searchText)
     }
-    
+
     // Compute word search results from wordsIndex
     // Returns pages that contain the searched terms
     var wordSearchResults: [(page: Int, snippet: String)] {
@@ -87,7 +86,6 @@ struct NavigationPDFSplitView: View {
         // Sort by page number
         return pageResults.sorted { $0.key < $1.key }.map { (page: $0.key, snippet: $0.value) }
     }
-
 
     var body: some View {
         NavigationSplitView {
@@ -111,52 +109,51 @@ struct NavigationPDFSplitView: View {
                         SearchBar(text: $searchText)
                             .padding(.horizontal)
 
+                        // Combine chapters and word matches into one list
                         if let chapters = chapters {
-                            if filteredChapters.isEmpty {
-                                List {
-                                    Text("No chapters found")
-                                        .foregroundColor(.gray)
+                            List(selection: $selectedChapterID) {
+                                // Chapter search results
+                                Section(header: Text("Chapters: ")) {
+                                    if filteredChapters.isEmpty, !searchText.isEmpty {
+                                        Text("No chapters found")
+                                            .foregroundColor(.gray)
+                                    } else {
+                                        ForEach(filteredChapters, id: \.item.id) { searchResult in
+                                            searchResult.highlightedTitleView()
+                                                .tag(searchResult.item.id)
+                                        }
+                                    }
                                 }
-                            } else {
-                                List(filteredChapters, id: \.item.id, selection: $selectedChapterID) { searchResult in
-                                    searchResult.highlightedTitleView()
-                                        .tag(searchResult.item.id)
+
+                                // Word matches (appear directly after chapter results)
+                                if !searchText.isEmpty {
+                                    Section(header: Text("Word Matches:")) {
+                                        if wordSearchResults.isEmpty {
+                                            Text("No word matches found")
+                                                .foregroundColor(.gray)
+                                        } else {
+                                            ForEach(wordSearchResults, id: \.page) { result in
+                                                VStack(alignment: .leading) {
+                                                    Text(result.snippet)
+                                                    Text("Page \(result.page + 1)")
+                                                        .font(.caption)
+                                                        .foregroundColor(.secondary)
+                                                }
+                                                .onTapGesture {
+                                                    currentPage = result.page
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         } else {
                             ProgressView()
                                 .onAppear(perform: fetchChapters)
                         }
-                        
-                        
-                        // Word search results
-                        if !searchText.isEmpty {
-                            if wordSearchResults.isEmpty {
-                                Text("No word matches found")
-                                    .foregroundColor(.gray)
-                            } else {
-                                Text("Word Matches:")
-                                    .font(.headline)
-                                    .padding(.top)
-                                List(wordSearchResults, id: \.page) { result in
-                                    VStack(alignment: .leading) {
-                                        Text(result.snippet)
-                                            //.font(.caption)
-                                            //.foregroundColor(.secondary)
-                                        Text("Page \(result.page + 1)")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                        
-                                    }
-                                    .onTapGesture {
-                                        currentPage = result.page
-                                    }
-                                }
-                            }
-                        }
-
                     }
                 } else {
+                    // Bookmarks view
                     if let currentPdfFileName = currentPdfFileName,
                        let bookmarks = bookmarkLookup[currentPdfFileName]
                     {
@@ -336,7 +333,7 @@ struct SearchBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.gray)
 
-            TextField("Search chapters", text: $text)
+            TextField("Search chapters and words", text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .disableAutocorrection(true)
 
