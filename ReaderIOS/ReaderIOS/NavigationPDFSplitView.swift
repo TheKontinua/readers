@@ -68,6 +68,13 @@ struct NavigationPDFSplitView: View {
 
     @State private var bookmarkLookup = [String: Set<Int>]()
 
+    // State vars for search
+    @State private var searchText = ""
+
+    var filteredChapters: [SearchResult<Chapter>] {
+        ChapterSearch.filter(chapters, by: searchText)
+    }
+
     var body: some View {
         NavigationSplitView {
             if let workbooks = workbooks {
@@ -85,14 +92,27 @@ struct NavigationPDFSplitView: View {
         content: {
             Group {
                 if !isShowingBookmarks {
-                    if let chapters = chapters {
-                        List(chapters, selection: $selectedChapterID) { chapter in
-                            Text(chapter.title)
-                                .tag(chapter.id)
+                    VStack {
+                        // Add search bar
+                        SearchBar(text: $searchText)
+                            .padding(.horizontal)
+
+                        if let chapters = chapters {
+                            if filteredChapters.isEmpty {
+                                List {
+                                    Text("No chapters found")
+                                        .foregroundColor(.gray)
+                                }
+                            } else {
+                                List(filteredChapters, id: \.item.id, selection: $selectedChapterID) { searchResult in
+                                    searchResult.highlightedTitleView()
+                                        .tag(searchResult.item.id)
+                                }
+                            }
+                        } else {
+                            ProgressView()
+                                .onAppear(perform: fetchChapters)
                         }
-                    } else {
-                        ProgressView()
-                            .onAppear(perform: fetchChapters)
                     }
                 } else {
                     if let currentPdfFileName = currentPdfFileName,
@@ -255,6 +275,33 @@ struct NavigationPDFSplitView: View {
         }
 
         task.resume()
+    }
+}
+
+struct SearchBar: View {
+    @Binding var text: String
+
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+
+            TextField("Search chapters", text: $text)
+                .textFieldStyle(PlainTextFieldStyle())
+                .disableAutocorrection(true)
+
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+        .padding(8)
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
     }
 }
 

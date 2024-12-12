@@ -109,7 +109,7 @@ struct PDFView: View {
                                 } else {
                                     Menu {
                                         Button("15 Minutes") {
-                                            timerManager.startTimer(duration: 15 * 1)
+                                            timerManager.startTimer(duration: 15 * 60)
                                         }
                                         Button("20 Minutes") {
                                             timerManager.startTimer(duration: 20 * 60)
