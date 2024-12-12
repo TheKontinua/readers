@@ -162,7 +162,7 @@ struct PDFView: View {
                                         .padding(5)
                                         .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
                                         .cornerRadius(8)
-                                })
+                                }
 
                                 Button(action: {
                                     showDigitalResources = true
@@ -263,11 +263,6 @@ struct PDFView: View {
                 clearMarkup()
             }
             Button("Cancel", role: .cancel) {}
-        }
-        .sheet(item: $selectedLink) {
-            print("WebView dismissed. Cleaning up resources.")
-        } content: { linkItem in
-            WebView(url: linkItem.url)
         }
         .sheet(isPresented: $showingFeedback) {
             FeedbackView()
