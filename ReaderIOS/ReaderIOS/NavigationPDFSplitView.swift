@@ -61,12 +61,29 @@ struct NavigationPDFSplitView: View {
     @State private var covers: [Cover]?
     @State private var selectedWorkbookID: String?
     @State private var selectedChapterID: String?
+    
+
 
     @State private var currentPage: Int = 0
     @State private var currentPdfFileName: String?
     @State private var isShowingBookmarks: Bool = false
 
     @State private var bookmarkLookup = [String: Set<Int>]()
+    
+    //State vars for search
+    @State private var searchText = ""
+    
+    var filteredChapters: [Chapter] {
+        guard let chapters = chapters else { return [] }
+        
+        if searchText.isEmpty {
+            return chapters
+        } else {
+            return chapters.filter { chapter in
+                chapter.title.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -85,14 +102,27 @@ struct NavigationPDFSplitView: View {
         content: {
             Group {
                 if !isShowingBookmarks {
-                    if let chapters = chapters {
-                        List(chapters, selection: $selectedChapterID) { chapter in
-                            Text(chapter.title)
-                                .tag(chapter.id)
+                    VStack {
+                        // Add search bar
+                        SearchBar(text: $searchText)
+                            .padding(.horizontal)
+                        
+                        if let chapters = chapters {
+                            if filteredChapters.isEmpty {
+                                List(){
+                                    Text("No chapters found")
+                                        .foregroundColor(.gray)
+                                }
+                            } else {
+                                List(filteredChapters, selection: $selectedChapterID) { chapter in
+                                    Text(chapter.title)
+                                        .tag(chapter.id)
+                                }
+                            }
+                        } else {
+                            ProgressView()
+                                .onAppear(perform: fetchChapters)
                         }
-                    } else {
-                        ProgressView()
-                            .onAppear(perform: fetchChapters)
                     }
                 } else {
                     if let currentPdfFileName = currentPdfFileName,
@@ -255,6 +285,33 @@ struct NavigationPDFSplitView: View {
         }
 
         task.resume()
+    }
+}
+
+struct SearchBar: View {
+    @Binding var text: String
+
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+
+            TextField("Search chapters", text: $text)
+                .textFieldStyle(PlainTextFieldStyle())
+                .disableAutocorrection(true)
+
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+        .padding(8)
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
     }
 }
 
