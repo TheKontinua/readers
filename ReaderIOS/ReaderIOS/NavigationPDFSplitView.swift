@@ -73,18 +73,10 @@ struct NavigationPDFSplitView: View {
     //State vars for search
     @State private var searchText = ""
     
-    var filteredChapters: [Chapter] {
-        guard let chapters = chapters else { return [] }
-        
-        if searchText.isEmpty {
-            return chapters
-        } else {
-            return chapters.filter { chapter in
-                chapter.title.localizedCaseInsensitiveContains(searchText)
-            }
-        }
+    var filteredChapters: [SearchResult<Chapter>] {
+        ChapterSearch.filter(chapters, by: searchText)
     }
-
+    
     var body: some View {
         NavigationSplitView {
             if let workbooks = workbooks {
@@ -114,9 +106,9 @@ struct NavigationPDFSplitView: View {
                                         .foregroundColor(.gray)
                                 }
                             } else {
-                                List(filteredChapters, selection: $selectedChapterID) { chapter in
-                                    Text(chapter.title)
-                                        .tag(chapter.id)
+                                List(filteredChapters, id: \.item.id, selection: $selectedChapterID) { searchResult in
+                                    searchResult.highlightedTitleView()
+                                        .tag(searchResult.item.id)
                                 }
                             }
                         } else {
