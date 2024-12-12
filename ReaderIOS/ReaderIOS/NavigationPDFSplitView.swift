@@ -5,6 +5,7 @@
 //  Created by Devin Hadley on 11/10/24.
 //
 import SwiftUI
+import PDFKit
 
 struct Chapter: Identifiable, Codable {
     let id: String
@@ -67,13 +68,26 @@ struct NavigationPDFSplitView: View {
     @State private var isShowingBookmarks: Bool = false
 
     @State private var bookmarkLookup = [String: Set<Int>]()
+    
 
     // State vars for search
+    @State private var pdfDocument: PDFDocument?
     @State private var searchText = ""
+    @State private var wordsIndex = PDFWordsIndex()
 
     var filteredChapters: [SearchResult<Chapter>] {
         ChapterSearch.filter(chapters, by: searchText)
     }
+    
+    // Compute word search results from wordsIndex
+    // Returns pages that contain the searched terms
+    var wordSearchResults: [(page: Int, snippet: String)] {
+        guard !searchText.isEmpty else { return [] }
+        let pageResults = wordsIndex.search(for: searchText) // Now returns [Int: String]
+        // Sort by page number
+        return pageResults.sorted { $0.key < $1.key }.map { (page: $0.key, snippet: $0.value) }
+    }
+
 
     var body: some View {
         NavigationSplitView {
@@ -113,6 +127,34 @@ struct NavigationPDFSplitView: View {
                             ProgressView()
                                 .onAppear(perform: fetchChapters)
                         }
+                        
+                        
+                        // Word search results
+                        if !searchText.isEmpty {
+                            if wordSearchResults.isEmpty {
+                                Text("No word matches found")
+                                    .foregroundColor(.gray)
+                            } else {
+                                Text("Word Matches:")
+                                    .font(.headline)
+                                    .padding(.top)
+                                List(wordSearchResults, id: \.page) { result in
+                                    VStack(alignment: .leading) {
+                                        Text(result.snippet)
+                                            //.font(.caption)
+                                            //.foregroundColor(.secondary)
+                                        Text("Page \(result.page + 1)")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        
+                                    }
+                                    .onTapGesture {
+                                        currentPage = result.page
+                                    }
+                                }
+                            }
+                        }
+
                     }
                 } else {
                     if let currentPdfFileName = currentPdfFileName,
@@ -154,7 +196,8 @@ struct NavigationPDFSplitView: View {
                     fileName: $currentPdfFileName,
                     currentPage: $currentPage,
                     bookmarkLookup: $bookmarkLookup,
-                    covers: $covers
+                    covers: $covers,
+                    pdfDocument: $pdfDocument
                 )
             } else {
                 ProgressView("Getting the latest workbook.")
@@ -174,6 +217,13 @@ struct NavigationPDFSplitView: View {
                 currentPage = chapter.startPage - 1
                 covers = chapter.covers
                 print("Updated covers: \(covers?.map(\.desc) ?? [])")
+            }
+        }
+        .onChange(of: pdfDocument) { newPDFDocument in
+            // Move indexing code here
+            if let currentPDF = newPDFDocument {
+                wordsIndex.indexPDF(from: currentPDF)
+                print(wordsIndex.getAllPageTexts())
             }
         }
     }
