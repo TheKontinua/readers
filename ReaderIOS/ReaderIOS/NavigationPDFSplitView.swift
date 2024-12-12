@@ -4,6 +4,7 @@
 //
 //  Created by Devin Hadley on 11/10/24.
 //
+import PDFKit
 import SwiftUI
 
 struct Chapter: Identifiable, Codable {
@@ -69,10 +70,21 @@ struct NavigationPDFSplitView: View {
     @State private var bookmarkLookup = [String: Set<Int>]()
 
     // State vars for search
+    @State private var pdfDocument: PDFDocument?
     @State private var searchText = ""
+    @State private var wordsIndex = PDFWordsIndex()
 
     var filteredChapters: [SearchResult<Chapter>] {
         ChapterSearch.filter(chapters, by: searchText)
+    }
+
+    // Compute word search results from wordsIndex
+    // Returns pages that contain the searched terms
+    var wordSearchResults: [(page: Int, snippet: String)] {
+        guard !searchText.isEmpty else { return [] }
+        let pageResults = wordsIndex.search(for: searchText) // Now returns [Int: String]
+        // Sort by page number
+        return pageResults.sorted { $0.key < $1.key }.map { (page: $0.key, snippet: $0.value) }
     }
 
     var body: some View {
@@ -97,16 +109,42 @@ struct NavigationPDFSplitView: View {
                         SearchBar(text: $searchText)
                             .padding(.horizontal)
 
+                        // Combine chapters and word matches into one list
                         if let chapters = chapters {
-                            if filteredChapters.isEmpty {
-                                List {
-                                    Text("No chapters found")
-                                        .foregroundColor(.gray)
+                            List(selection: $selectedChapterID) {
+                                // Chapter search results
+                                Section(header: Text("Chapters: ")) {
+                                    if filteredChapters.isEmpty, !searchText.isEmpty {
+                                        Text("No chapters found")
+                                            .foregroundColor(.gray)
+                                    } else {
+                                        ForEach(filteredChapters, id: \.item.id) { searchResult in
+                                            searchResult.highlightedTitleView()
+                                                .tag(searchResult.item.id)
+                                        }
+                                    }
                                 }
-                            } else {
-                                List(filteredChapters, id: \.item.id, selection: $selectedChapterID) { searchResult in
-                                    searchResult.highlightedTitleView()
-                                        .tag(searchResult.item.id)
+
+                                // Word matches (appear directly after chapter results)
+                                if !searchText.isEmpty {
+                                    Section(header: Text("Word Matches:")) {
+                                        if wordSearchResults.isEmpty {
+                                            Text("No word matches found")
+                                                .foregroundColor(.gray)
+                                        } else {
+                                            ForEach(wordSearchResults, id: \.page) { result in
+                                                VStack(alignment: .leading) {
+                                                    Text(result.snippet)
+                                                    Text("Page \(result.page + 1)")
+                                                        .font(.caption)
+                                                        .foregroundColor(.secondary)
+                                                }
+                                                .onTapGesture {
+                                                    currentPage = result.page
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         } else {
@@ -115,6 +153,7 @@ struct NavigationPDFSplitView: View {
                         }
                     }
                 } else {
+                    // Bookmarks view
                     if let currentPdfFileName = currentPdfFileName,
                        let bookmarks = bookmarkLookup[currentPdfFileName]
                     {
@@ -154,7 +193,8 @@ struct NavigationPDFSplitView: View {
                     fileName: $currentPdfFileName,
                     currentPage: $currentPage,
                     bookmarkLookup: $bookmarkLookup,
-                    covers: $covers
+                    covers: $covers,
+                    pdfDocument: $pdfDocument
                 )
             } else {
                 ProgressView("Getting the latest workbook.")
@@ -174,6 +214,13 @@ struct NavigationPDFSplitView: View {
                 currentPage = chapter.startPage - 1
                 covers = chapter.covers
                 print("Updated covers: \(covers?.map(\.desc) ?? [])")
+            }
+        }
+        .onChange(of: pdfDocument) { newPDFDocument in
+            // Move indexing code here
+            if let currentPDF = newPDFDocument {
+                wordsIndex.indexPDF(from: currentPDF)
+                print(wordsIndex.getAllPageTexts())
             }
         }
     }
@@ -286,7 +333,7 @@ struct SearchBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.gray)
 
-            TextField("Search chapters", text: $text)
+            TextField("Search chapters and words", text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .disableAutocorrection(true)
 

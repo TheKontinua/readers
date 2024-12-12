@@ -11,8 +11,7 @@ struct PDFView: View {
     @Binding var currentPage: Int
     @Binding var bookmarkLookup: [String: Set<Int>]
     @Binding var covers: [Cover]?
-
-    @State private var pdfDocument: PDFDocument?
+    @Binding var pdfDocument: PDFDocument?
 
     // Digital resources state vars
     @State private var showDigitalResources = false
