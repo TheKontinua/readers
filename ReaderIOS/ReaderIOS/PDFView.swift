@@ -13,7 +13,10 @@ struct PDFView: View {
     @Binding var covers: [Cover]?
 
     @State private var pdfDocument: PDFDocument?
-    @State private var selectedLink: URLItem?
+
+    // Digital resources state vars
+    @State private var showDigitalResources = false
+
     @State private var resetZoom = false
     @State private var zoomedIn = false
     @State private var showingFeedback = false
@@ -25,7 +28,7 @@ struct PDFView: View {
     @State private var pageChangeEnabled: Bool = true
     @State private var pagePaths: [String: [Path]] = [:]
     @State private var highlightPaths: [String: [Path]] = [:]
-    
+
     @State private var showClearAlert = false
     @ObservedObject private var annotationManager = AnnotationManager()
 
@@ -46,7 +49,7 @@ struct PDFView: View {
                             .onChange(of: currentPage) { _ in
                                 loadPathsForPage(currentPage)
                             }
-                            
+
                             if annotationsEnabled {
                                 AnnotationsView(
                                     pagePaths: $pagePaths,
@@ -60,71 +63,70 @@ struct PDFView: View {
                         }
                         .toolbar {
                             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                                
-                                                                // Timer Controls
-                                                                if timerManager.isTimerRunning {
-                                                                    Button {
-                                                                        timerManager.pauseTimer()
-                                                                    } label: {
-                                                                        Image(systemName: "pause.circle")
-                                                                            .foregroundColor(.yellow)
-                                                                    }
-                                                                    
-                                                                    Button {
-                                                                        timerManager.restartTimer()
-                                                                    } label: {
-                                                                        Image(systemName: "arrow.clockwise.circle")
-                                                                            .foregroundColor(.blue)
-                                                                    }
-                                                                    
-                                                                    Button {
-                                                                        timerManager.cancelTimer()
-                                                                    } label: {
-                                                                        Image(systemName: "xmark.circle")
-                                                                            .foregroundColor(.red)
-                                                                    }
-                                                                } else if timerManager.isPaused {
-                                                                    Button {
-                                                                        timerManager.unpauseTimer()
-                                                                    } label: {
-                                                                        Image(systemName: "play.circle")
-                                                                            .foregroundColor(.green)
-                                                                    }
-                                                                    
-                                                                    Button {
-                                                                        timerManager.restartTimer()
-                                                                    } label: {
-                                                                        Image(systemName: "arrow.clockwise.circle")
-                                                                            .foregroundColor(.blue)
-                                                                    }
-                                                                    
-                                                                    Button {
-                                                                        timerManager.cancelTimer()
-                                                                    } label: {
-                                                                        Image(systemName: "xmark.circle")
-                                                                            .foregroundColor(.red)
-                                                                    }
-                                                                } else {
-                                                                    Menu {
-                                                                        Button("15 Minutes") {
-                                                                            timerManager.startTimer(duration: 15 * 1)
-                                                                        }
-                                                                        Button("20 Minutes") {
-                                                                            timerManager.startTimer(duration: 20 * 60)
-                                                                        }
-                                                                        Button("25 Minutes") {
-                                                                            timerManager.startTimer(duration: 25 * 60)
-                                                                        }
-                                                                        Button("Clear Timer") {
-                                                                            timerManager.cancelTimer()
-                                                                        }
-                                                                    } label: {
-                                                                        Text("Timer")
-                                                                            .padding(5)
-                                                                            .foregroundColor(.blue)
-                                                                            .cornerRadius(8)
-                                                                    }
-                                                                }
+                                // Timer Controls
+                                if timerManager.isTimerRunning {
+                                    Button {
+                                        timerManager.pauseTimer()
+                                    } label: {
+                                        Image(systemName: "pause.circle")
+                                            .foregroundColor(.yellow)
+                                    }
+
+                                    Button {
+                                        timerManager.restartTimer()
+                                    } label: {
+                                        Image(systemName: "arrow.clockwise.circle")
+                                            .foregroundColor(.blue)
+                                    }
+
+                                    Button {
+                                        timerManager.cancelTimer()
+                                    } label: {
+                                        Image(systemName: "xmark.circle")
+                                            .foregroundColor(.red)
+                                    }
+                                } else if timerManager.isPaused {
+                                    Button {
+                                        timerManager.unpauseTimer()
+                                    } label: {
+                                        Image(systemName: "play.circle")
+                                            .foregroundColor(.green)
+                                    }
+
+                                    Button {
+                                        timerManager.restartTimer()
+                                    } label: {
+                                        Image(systemName: "arrow.clockwise.circle")
+                                            .foregroundColor(.blue)
+                                    }
+
+                                    Button {
+                                        timerManager.cancelTimer()
+                                    } label: {
+                                        Image(systemName: "xmark.circle")
+                                            .foregroundColor(.red)
+                                    }
+                                } else {
+                                    Menu {
+                                        Button("15 Minutes") {
+                                            timerManager.startTimer(duration: 15 * 1)
+                                        }
+                                        Button("20 Minutes") {
+                                            timerManager.startTimer(duration: 20 * 60)
+                                        }
+                                        Button("25 Minutes") {
+                                            timerManager.startTimer(duration: 25 * 60)
+                                        }
+                                        Button("Clear Timer") {
+                                            timerManager.cancelTimer()
+                                        }
+                                    } label: {
+                                        Text("Timer")
+                                            .padding(5)
+                                            .foregroundColor(.blue)
+                                            .cornerRadius(8)
+                                    }
+                                }
                                 Menu {
                                     Button("Pen") {
                                         selectScribbleTool("Pen")
@@ -152,7 +154,10 @@ struct PDFView: View {
                                     Button("Exit Markup") {
                                         selectScribbleTool("")
                                         exitNotSelected = false
-                                        annotationManager.saveAnnotations(pagePaths: pagePaths, highlightPaths: highlightPaths)
+                                        annotationManager.saveAnnotations(
+                                            pagePaths: pagePaths,
+                                            highlightPaths: highlightPaths
+                                        )
                                     }
                                 } label: {
                                     Text(selectedScribbleTool.isEmpty ? "Markup" : "Markup: " + selectedScribbleTool)
@@ -160,70 +165,34 @@ struct PDFView: View {
                                         .foregroundColor(exitNotSelected ? Color.pink : Color.gray)
                                         .cornerRadius(8)
                                 }
-                                
-                                Menu {
-                                    if let covers = covers, !covers.isEmpty {
-                                        ForEach(covers) { cover in
-                                            Menu {
-                                                if let videos = cover.videos, !videos.isEmpty {
-                                                    Section("Videos") {
-                                                        ForEach(videos) { video in
-                                                            Button {
-                                                                if let url = URL(string: video.link) {
-                                                                    selectedLink = URLItem(url: url)
-                                                                }
-                                                            } label: {
-                                                                Text(video.title)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                if let references = cover.references, !references.isEmpty {
-                                                    Section("References") {
-                                                        ForEach(references) { reference in
-                                                            Button {
-                                                                if let url = URL(string: reference.link) {
-                                                                    selectedLink = URLItem(url: url)
-                                                                }
-                                                            } label: {
-                                                                Text(reference.title)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
-                                                    Text("No Videos or References Available")
-                                                }
-                                            } label: {
-                                                Text(cover.desc)
-                                            }
-                                        }
-                                    } else {
-                                        Text("No Digital Resources Available")
-                                    }
-                                } label: {
+
+                                Button(action: {
+                                    showDigitalResources = true
+                                }) {
                                     Text("Digital Resources")
                                         .padding(5)
-                                        .foregroundColor(.purple)
+                                        .foregroundColor((covers?.isEmpty ?? true) ? .gray : .purple)
                                         .cornerRadius(8)
                                 }
-                                
+                                .disabled(covers?.isEmpty ?? true)
+                                .fullScreenCover(isPresented: $showDigitalResources) {
+                                    DigitalResourcesView(covers: covers)
+                                }
+
                                 Button {
                                     toggleCurrentPageInBookmarks()
                                 } label: {
                                     Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
                                         .foregroundColor(.yellow)
                                 }
-                                
+
                                 if zoomedIn {
                                     Button("Reset Zoom") {
                                         resetZoom = true
                                     }
                                 }
                             }
-                            
+
                             ToolbarItem(placement: .bottomBar) {
                                 HStack(spacing: 0) {
                                     GeometryReader { geometry in
@@ -233,15 +202,19 @@ struct PDFView: View {
                                                     .fill(Color.gray.opacity(0.3))
                                                     .frame(width: geometry.size.width, height: 4)
                                             }
-                                            
+
                                             Rectangle()
-                                                .fill(timerManager.isPaused ? Color.yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
-                                                .frame(width: geometry.size.width * CGFloat(timerManager.progress), height: 4)
+                                                .fill(timerManager.isPaused ? Color
+                                                    .yellow : (timerManager.progress >= 1 ? Color.green : Color.red))
+                                                .frame(
+                                                    width: geometry.size.width * CGFloat(timerManager.progress),
+                                                    height: 4
+                                                )
                                                 .animation(.linear(duration: 0.1), value: timerManager.progress)
                                         }
                                     }
                                     .frame(maxWidth: .infinity, maxHeight: 4)
-                                    
+
                                     Button {
                                         showingFeedback = true
                                     } label: {
@@ -261,33 +234,36 @@ struct PDFView: View {
                         ProgressView("Getting Workbook")
                             .onAppear {
                                 loadPDFFromURL()
-                                annotationManager.loadAnnotations(pagePaths: &pagePaths, highlightPaths: &highlightPaths)
+                                annotationManager.loadAnnotations(
+                                    pagePaths: &pagePaths,
+                                    highlightPaths: &highlightPaths
+                                )
                                 if !pagePaths.isEmpty || !highlightPaths.isEmpty {
                                     annotationsEnabled = true
                                 }
                             }
                     }
                 }
-                
-//                VStack {
-//                    Spacer()
-//                    HStack {
-//                        Spacer()
-//                        Button {
-//                            showingFeedback = true
-//                        } label: {
-//                            Image(systemName: "message.fill")
-//                                .font(.system(size: 24))
-//                                .foregroundColor(.white)
-//                                .padding(15)
-//                                .background(Color.blue)
-//                                .clipShape(Circle())
-//                                .shadow(radius: 4)
-//                        }
-//                        .padding(.trailing, 70)
-//                        .padding(.bottom, 30)
-//                    }
-//                }
+
+                //                VStack {
+                //                    Spacer()
+                //                    HStack {
+                //                        Spacer()
+                //                        Button {
+                //                            showingFeedback = true
+                //                        } label: {
+                //                            Image(systemName: "message.fill")
+                //                                .font(.system(size: 24))
+                //                                .foregroundColor(.white)
+                //                                .padding(15)
+                //                                .background(Color.blue)
+                //                                .clipShape(Circle())
+                //                                .shadow(radius: 4)
+                //                        }
+                //                        .padding(.trailing, 70)
+                //                        .padding(.bottom, 30)
+                //                    }
+                //                }
             }
         }
         .alert("Are you sure you want to clear your screen?", isPresented: $showClearAlert) {
@@ -295,11 +271,6 @@ struct PDFView: View {
                 clearMarkup()
             }
             Button("Cancel", role: .cancel) {}
-        }
-        .sheet(item: $selectedLink) {
-            print("WebView dismissed. Cleaning up resources.")
-        } content: { linkItem in
-            WebView(url: linkItem.url)
         }
         .sheet(isPresented: $showingFeedback) {
             FeedbackView()

@@ -33,12 +33,20 @@ struct Video: Identifiable, Codable {
     var id = UUID()
     let link: String
     let title: String
+
+    enum CodingKeys: String, CodingKey {
+        case link, title
+    }
 }
 
 struct Reference: Identifiable, Codable {
     var id = UUID()
     let link: String
     let title: String
+
+    enum CodingKeys: String, CodingKey {
+        case link, title
+    }
 }
 
 struct Workbook: Codable, Hashable, Identifiable {
@@ -183,7 +191,6 @@ struct NavigationPDFSplitView: View {
                 print("Error fetching chapters: \(error)")
                 return
             }
-
             guard let data = data else {
                 print("No data received from URL.")
                 return

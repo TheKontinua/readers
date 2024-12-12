@@ -39,3 +39,23 @@ struct WebView: UIViewRepresentable {
         print("WebView dismantled and cleaned up.")
     }
 }
+
+struct FullScreenWebView: View {
+    let url: URL
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationView {
+            WebView(url: url)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") {
+                            dismiss()
+                        }
+                    }
+                }
+        }
+        .ignoresSafeArea(edges: .all)
+    }
+}
