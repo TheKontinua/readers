@@ -213,14 +213,12 @@ struct NavigationPDFSplitView: View {
             if let chapter = selectedChapter {
                 currentPage = chapter.startPage - 1
                 covers = chapter.covers
-                print("Updated covers: \(covers?.map(\.desc) ?? [])")
             }
         }
         .onChange(of: pdfDocument) { newPDFDocument in
             // Move indexing code here
             if let currentPDF = newPDFDocument {
                 wordsIndex.indexPDF(from: currentPDF)
-                print(wordsIndex.getAllPageTexts())
             }
         }
     }
