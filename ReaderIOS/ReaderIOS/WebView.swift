@@ -43,7 +43,7 @@ struct WebView: UIViewRepresentable {
 struct FullScreenWebView: View {
     let url: URL
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         NavigationView {
             WebView(url: url)

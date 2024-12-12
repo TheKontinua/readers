@@ -12,7 +12,7 @@ struct DigitalResourcesView: View {
     @State private var selectedLink: URLItem?
     @State private var showWebView = false
     @Environment(\.dismiss) private var dismiss // iOS 15+ environment dismiss action
-    
+
     var body: some View {
         NavigationView {
             if let covers = covers, !covers.isEmpty {
@@ -20,45 +20,48 @@ struct DigitalResourcesView: View {
                     ForEach(covers) { cover in
                         Section(header: Text(cover.desc)
                             .font(.title3)
-                                //.fontWeight(.bold)
+                            // .fontWeight(.bold)
                             .foregroundColor(.black)
-                            .textCase(nil)) {
-                                if let videos = cover.videos, !videos.isEmpty {
-                                    Section(header: Text("Videos")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.gray)
-                                        .textCase(.uppercase)) {
-                                            ForEach(videos) { video in
-                                                Button(video.title) {
-                                                    if let url = URL(string: video.link) {
-                                                        selectedLink = URLItem(url: url)
-                                                        showWebView = true
-                                                    }
-                                                }
+                            .textCase(nil))
+                        {
+                            if let videos = cover.videos, !videos.isEmpty {
+                                Section(header: Text("Videos")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.gray)
+                                    .textCase(.uppercase))
+                                {
+                                    ForEach(videos) { video in
+                                        Button(video.title) {
+                                            if let url = URL(string: video.link) {
+                                                selectedLink = URLItem(url: url)
+                                                showWebView = true
                                             }
                                         }
-                                }
-                                
-                                if let references = cover.references, !references.isEmpty {
-                                    Section(header: Text("References")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.gray)
-                                        .textCase(.uppercase)) {
-                                            ForEach(references) { reference in
-                                                Button(reference.title) {
-                                                    if let url = URL(string: reference.link) {
-                                                        selectedLink = URLItem(url: url)
-                                                        showWebView = true
-                                                    }
-                                                }
-                                            }
-                                        }
-                                }
-                                
-                                if (cover.videos?.isEmpty ?? true) && (cover.references?.isEmpty ?? true) {
-                                    Text("No Videos or References Available")
+                                    }
                                 }
                             }
+
+                            if let references = cover.references, !references.isEmpty {
+                                Section(header: Text("References")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.gray)
+                                    .textCase(.uppercase))
+                                {
+                                    ForEach(references) { reference in
+                                        Button(reference.title) {
+                                            if let url = URL(string: reference.link) {
+                                                selectedLink = URLItem(url: url)
+                                                showWebView = true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if cover.videos?.isEmpty ?? true, cover.references?.isEmpty ?? true {
+                                Text("No Videos or References Available")
+                            }
+                        }
                     }
                 }
                 .navigationTitle("Digital Resources")
@@ -82,7 +85,7 @@ struct DigitalResourcesView: View {
                     Text("No Digital Resources Available")
                         .foregroundColor(.gray)
                         .padding()
-                    
+
                     Button("Close") {
                         dismiss()
                     }
@@ -92,4 +95,3 @@ struct DigitalResourcesView: View {
         }
     }
 }
-
