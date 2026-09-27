@@ -10,20 +10,16 @@ struct FeedbackButton: View {
         Button(action: {
             feedbackManager.currentWorkbook = workbook
             feedbackManager.currentPage = currentPage
-
-            let effectiveCollection = collection ?? InitializationManager().latestCollection
-            feedbackManager.collection = effectiveCollection
-
-            feedbackManager.showFeedback()
+            feedbackManager.collection = collection
+            feedbackManager.isShowingFeedback = true
         }, label: {
+            // Styled as an unobtrusive text link rather than a prominent button
             Text("Submit Feedback")
-                .foregroundColor(.white)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color.blue)
-                .cornerRadius(12)
-                .shadow(radius: 2)
+                .font(.footnote)
+                .underline()
+                .foregroundStyle(.secondary)
         })
+        .buttonStyle(.plain)
     }
 }
 
@@ -53,20 +49,6 @@ struct FeedbackView: View {
             isEmailValid &&
             !email.trimmingCharacters(in: .whitespaces).isEmpty &&
             !feedback.trimmingCharacters(in: .whitespaces).isEmpty
-    }
-
-    static func button(
-        feedbackManager: FeedbackManager,
-        workbook: Workbook?,
-        currentPage: Int,
-        collection: Collection?
-    ) -> some View {
-        FeedbackButton(
-            feedbackManager: feedbackManager,
-            workbook: workbook,
-            currentPage: currentPage,
-            collection: collection
-        )
     }
 
     var body: some View {

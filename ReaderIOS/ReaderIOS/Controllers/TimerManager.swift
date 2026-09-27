@@ -20,20 +20,7 @@ class TimerManager: ObservableObject {
         selectedDuration = duration
         progress = 0
         remainingDuration = duration
-        timer?.invalidate()
-        isTimerRunning = true
-        isPaused = false
-
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            self.progress += 1 / duration
-            self.remainingDuration -= 1
-            if self.remainingDuration <= 0 {
-                self.timer?.invalidate()
-                self.timer = nil
-                self.isTimerRunning = false
-                self.progress = 1
-            }
-        }
+        scheduleTimer()
     }
 
     func pauseTimer() {
@@ -45,7 +32,12 @@ class TimerManager: ObservableObject {
 
     func unpauseTimer() {
         guard !isTimerRunning else { return }
+        scheduleTimer()
+    }
 
+    /// Starts (or resumes) ticking once per second until the remaining duration runs out.
+    private func scheduleTimer() {
+        timer?.invalidate()
         isTimerRunning = true
         isPaused = false
 
@@ -56,6 +48,7 @@ class TimerManager: ObservableObject {
                 self.timer?.invalidate()
                 self.timer = nil
                 self.isTimerRunning = false
+                self.progress = 1
             }
         }
     }

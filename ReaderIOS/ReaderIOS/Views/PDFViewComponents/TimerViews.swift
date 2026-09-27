@@ -67,7 +67,7 @@ struct TimerControlsView: View {
                     step: TimerConstants.customStep
                 )
                 .padding(.horizontal)
-                .onChange(of: customMinutes) { newValue in
+                .onChange(of: customMinutes) { _, newValue in
                     let delta = newValue - previousCustomMinutes
                     if abs(delta) == TimerConstants.customMax {
                         deltaSymbol = "clock.arrow.trianglehead.2.counterclockwise.rotate.90"
@@ -110,33 +110,21 @@ struct TimerProgressView: View {
     @ObservedObject var timerManager: TimerManager
     var body: some View {
         HStack(spacing: 0) {
-            if timerManager.isTimerRunning {
-                Button {
-                    timerManager.pauseTimer()
-                } label: {
-                    Image(systemName: "pause.circle")
-                        .foregroundColor(.yellow)
-                }
-
-                Button {
-                    timerManager.restartTimer()
-                } label: {
-                    Image(systemName: "arrow.clockwise.circle")
-                        .foregroundColor(.blue)
-                }
-
-                Button {
-                    timerManager.cancelTimer()
-                } label: {
-                    Image(systemName: "xmark.circle")
-                        .foregroundColor(.red)
-                }
-            } else if timerManager.isPaused {
-                Button {
-                    timerManager.unpauseTimer()
-                } label: {
-                    Image(systemName: "play.circle")
-                        .foregroundColor(.green)
+            if timerManager.isTimerRunning || timerManager.isPaused {
+                if timerManager.isTimerRunning {
+                    Button {
+                        timerManager.pauseTimer()
+                    } label: {
+                        Image(systemName: "pause.circle")
+                            .foregroundColor(.yellow)
+                    }
+                } else {
+                    Button {
+                        timerManager.unpauseTimer()
+                    } label: {
+                        Image(systemName: "play.circle")
+                            .foregroundColor(.green)
+                    }
                 }
 
                 Button {

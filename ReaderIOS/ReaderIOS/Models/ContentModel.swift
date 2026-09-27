@@ -65,19 +65,18 @@ class ContentResource: ObservableObject {
 
     private func convertToYouTubeEmbed(_ url: URL) -> URL {
         let urlString = url.absoluteString
+        let videoID: String
 
-        // Handle youtu.be links
-        if urlString.contains("youtu.be/") {
-            let id = urlString.components(separatedBy: "youtu.be/")[1].components(separatedBy: "?")[0]
-            return URL(string: "https://www.youtube.com/embed/\(id)")!
-        }
-
-        // Handle regular youtube.com links
         if urlString.contains("watch?v=") {
-            let id = urlString.components(separatedBy: "watch?v=")[1].components(separatedBy: "&")[0]
-            return URL(string: "https://www.youtube.com/embed/\(id)")!
+            // Regular youtube.com links
+            videoID = urlString.components(separatedBy: "watch?v=")[1].components(separatedBy: "&")[0]
+        } else if urlString.contains("youtu.be/") {
+            // Short youtu.be links
+            videoID = urlString.components(separatedBy: "youtu.be/")[1].components(separatedBy: "?")[0]
+        } else {
+            return url
         }
 
-        return url
+        return URL(string: "https://www.youtube.com/embed/\(videoID)") ?? url
     }
 }

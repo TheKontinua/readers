@@ -50,7 +50,7 @@ struct PageControlView: View {
                     .submitLabel(.go)
                     .focused($isTextFieldFocused)
                     // When focus is lost (for example, user taps outside), commit the text.
-                    .onChange(of: isTextFieldFocused) { focused in
+                    .onChange(of: isTextFieldFocused) { _, focused in
                         if !focused {
                             commitTextField()
                         }
@@ -70,7 +70,7 @@ struct PageControlView: View {
             textFieldValue = "\(currentPage + 1)"
         }
         // When the external currentPage changes, update the text field to match.
-        .onChange(of: currentPage) { newValue in
+        .onChange(of: currentPage) { _, newValue in
             textFieldValue = "\(newValue + 1)"
         }
     }
@@ -90,8 +90,16 @@ struct PageControlView: View {
     /// Called when the user commits an edit in the text field.
     private func commitTextField() {
         // Try to convert the entered text to an integer.
-        if let newPage = Int(textFieldValue), newPage >= 1, newPage <= totalPages {
-            currentPage = newPage - 1
+        if let newPage = Int(textFieldValue), totalPages > 0 {
+            // Clamp out-of-range numbers: zero or negative goes to the first page,
+            // past the end goes to the last page.
+            let clampedPage = min(max(newPage, 1), totalPages)
+            currentPage = clampedPage - 1
+            // Update the text field explicitly, since onChange won't fire if the
+            // clamped page is the one we're already on.
+            DispatchQueue.main.async {
+                textFieldValue = "\(clampedPage)"
+            }
         } else {
             // If the input is invalid, reset the text field to the current page.
             print("invalid page number")

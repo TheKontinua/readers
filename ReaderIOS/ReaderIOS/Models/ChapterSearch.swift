@@ -46,33 +46,17 @@ enum ChapterSearch {
         }
 
         return chapters.compactMap { chapter in
-            // Find all case-insensitive matches
-            let lowercaseText = chapter.searchableText.lowercased()
-            let lowercaseSearch = searchText.lowercased()
-
-            // Check if search text is contained
-            guard lowercaseText.contains(lowercaseSearch) else {
-                return nil
-            }
-
-            // Find all matching ranges
+            // Find all case-insensitive matches; searchText is non-empty, so each match advances the search.
+            let text = chapter.searchableText
             var ranges: [Range<String.Index>] = []
-            var searchStart = chapter.searchableText.startIndex
+            var searchStart = text.startIndex
 
-            while let range = chapter.searchableText[searchStart...].range(of: searchText, options: .caseInsensitive) {
+            while let range = text[searchStart...].range(of: searchText, options: .caseInsensitive) {
                 ranges.append(range)
                 searchStart = range.upperBound
-
-                // Prevent infinite loop
-                if searchStart >= chapter.searchableText.endIndex {
-                    break
-                }
             }
 
-            return SearchResult(
-                item: chapter,
-                highlightRanges: ranges
-            )
+            return ranges.isEmpty ? nil : SearchResult(item: chapter, highlightRanges: ranges)
         }
     }
 }
@@ -85,9 +69,7 @@ extension SearchResult where T == Chapter {
             Text("Chapter \(item.chapNum)")
                 .font(.caption)
 
-            Text(highlightRanges.isEmpty
-                ? highlightAttributedString()
-                : AttributedString(item.title))
+            Text(highlightAttributedString())
         }
     }
 
@@ -95,14 +77,9 @@ extension SearchResult where T == Chapter {
     private func highlightAttributedString() -> AttributedString {
         var attributedString = AttributedString(item.title)
 
-        // Apply bold to matching ranges
         for range in highlightRanges {
-            // Convert String.Index to String
-            let matchedSubstring = String(item.title[range])
-
-            // Find the range in the AttributedString
-            if let foundRange = attributedString.range(of: matchedSubstring) {
-                attributedString[foundRange].font = .body.bold()
+            if let attributedRange = Range(range, in: attributedString) {
+                attributedString[attributedRange].font = .body.bold()
             }
         }
 

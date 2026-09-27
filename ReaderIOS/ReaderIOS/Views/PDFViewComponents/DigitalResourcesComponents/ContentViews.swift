@@ -97,18 +97,14 @@ struct VideoPlayerView: UIViewRepresentable {
     }
 
     func updateUIView(_ webView: WKWebView, context _: Context) {
-        if isYouTube {
-            let urlString = url.absoluteString
-            let updatedURLString =
-                "\(urlString)?autoplay=1&rel=0&showinfo=0&modestbranding=1&playsinline=1&fs=0&iv_load_policy=3"
-            if let finalURL = URL(string: updatedURLString) {
-                let request = URLRequest(url: finalURL)
-                webView.load(request)
-            }
-        } else {
-            let request = URLRequest(url: url)
-            webView.load(request)
-        }
+        // YouTube embeds get player options appended to the URL.
+        let playerOptions = "?autoplay=1&rel=0&showinfo=0&modestbranding=1&playsinline=1&fs=0&iv_load_policy=3"
+        guard let loadURL = isYouTube ? URL(string: url.absoluteString + playerOptions) : url else { return }
+
+        var request = URLRequest(url: loadURL)
+        request.addValue("strict-origin-when-cross-origin", forHTTPHeaderField: "Referrer-Policy")
+        request.addValue("https://www.kontinua.org/", forHTTPHeaderField: "Referer")
+        webView.load(request)
     }
 
     class Coordinator: NSObject, WKNavigationDelegate {

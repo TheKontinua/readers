@@ -15,22 +15,6 @@ class FeedbackManager: ObservableObject {
     var currentWorkbook: Workbook?
     var collection: Collection?
 
-    private var chapterManager: ChapterManager?
-    private let initializationManager: InitializationManager
-
-    init(initializationManager: InitializationManager = InitializationManager()) {
-        self.initializationManager = initializationManager
-    }
-
-    func showFeedback() {
-        isShowingFeedback = true
-    }
-
-    func setWorkbook(_ workbook: Workbook) {
-        currentWorkbook = workbook
-        chapterManager = ChapterManager(chapters: workbook.chapters)
-    }
-
     func submitFeedback(
         email: String,
         feedbackBody: String,
@@ -121,9 +105,6 @@ class FeedbackManager: ObservableObject {
             "localization": collectionValues.localization
         ]
 
-        if let workbookId = currentWorkbook?.id {
-            submissionData["workbook_id"] = workbookId
-        }
         submissionData["workbook_id"] = currentWorkbook?.id ?? NSNull()
 
         if let logs = applicationLogs {
@@ -141,23 +122,13 @@ class FeedbackManager: ObservableObject {
             return defaultChapterNumber
         }
 
-        return determineCurrentChapter(workbook: workbook, page: currentPage)?.chapNum ?? defaultChapterNumber
-    }
-
-    private func determineCurrentChapter(workbook: Workbook, page: Int) -> Chapter? {
-        if chapterManager == nil {
-            chapterManager = ChapterManager(chapters: workbook.chapters)
-        }
-        return chapterManager?.getChapter(forPage: page)
+        return ChapterManager(chapters: workbook.chapters).getChapter(forPage: currentPage)?.chapNum
+            ?? defaultChapterNumber
     }
 
     private func getRequiredCollectionValues() -> (majorVersion: Int, minorVersion: Int, localization: String) {
         if let collection = collection {
             return (collection.majorVersion, collection.minorVersion, collection.localization)
-        }
-
-        if let latestCollection = initializationManager.latestCollection {
-            return (latestCollection.majorVersion, latestCollection.minorVersion, latestCollection.localization)
         }
 
         Logger.warning("No collection found, using default values", category: "Feedback")

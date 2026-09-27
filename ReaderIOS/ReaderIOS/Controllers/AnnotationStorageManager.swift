@@ -43,19 +43,21 @@ class AnnotationStorageManager: ObservableObject {
         pagePaths: [String: [(path: Path, color: Color)]],
         highlightPaths: [String: [(path: Path, color: Color)]]
     ) {
-        var annotationData: [AnnotationData] = []
-
-        for (key, pathsWithColors) in pagePaths {
-            let pathPoints = pathsWithColors.map { $0.path.toPoints() }
-            let colors = pathsWithColors.map { CodableColor($0.color) }
-            annotationData.append(AnnotationData(key: key, paths: pathPoints, colors: colors, isHighlight: false))
+        func encodable(
+            _ paths: [String: [(path: Path, color: Color)]],
+            isHighlight: Bool
+        ) -> [AnnotationData] {
+            paths.map { key, pathsWithColors in
+                AnnotationData(
+                    key: key,
+                    paths: pathsWithColors.map { $0.path.toPoints() },
+                    colors: pathsWithColors.map { CodableColor($0.color) },
+                    isHighlight: isHighlight
+                )
+            }
         }
 
-        for (key, pathsWithColors) in highlightPaths {
-            let pathPoints = pathsWithColors.map { $0.path.toPoints() }
-            let colors = pathsWithColors.map { CodableColor($0.color) }
-            annotationData.append(AnnotationData(key: key, paths: pathPoints, colors: colors, isHighlight: true))
-        }
+        let annotationData = encodable(pagePaths, isHighlight: false) + encodable(highlightPaths, isHighlight: true)
 
         do {
             let jsonData = try JSONEncoder().encode(annotationData)

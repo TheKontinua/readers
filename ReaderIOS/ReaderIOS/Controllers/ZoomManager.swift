@@ -9,8 +9,8 @@ class ZoomManager: ObservableObject {
     private let minZoom: CGFloat = 1.2
     private let maxZoom: CGFloat = 2.55
 
-    // Used to update zoom point during pinch gesture
-    @Published private var lastPinchLocation: CGPoint?
+    // Track the view size, used to convert gesture locations to a UnitPoint
+    @Published private var lastViewSize: CGSize?
 
     func zoomin() -> some Gesture {
         // We'll use SimultaneousGesture to track both magnification and location
@@ -30,14 +30,9 @@ class ZoomManager: ObservableObject {
                     self.totalZoom = min(self.totalZoom + self.currentZoom, self.maxZoom)
                     self.currentZoom = 0
                     self.zoomedIn = self.totalZoom > self.minZoom
-                    // Clear pinch location when finished
-                    self.lastPinchLocation = nil
                 },
             DragGesture(minimumDistance: 0)
                 .onChanged { value in
-                    // Track the pinch location and update zoom point
-                    self.lastPinchLocation = value.location
-
                     // Only set zoom point at the beginning of zoom
                     if !self.zoomedIn {
                         self.updateZoomPointFromGesture(value.location)
@@ -57,23 +52,16 @@ class ZoomManager: ObservableObject {
         }
     }
 
-    // Track the view size
-    @Published private var lastViewSize: CGSize?
-
     // Update this when view appears or changes size
     func updateViewSize(_ size: CGSize) {
         lastViewSize = size
     }
 
-    // Rest of your existing methods...
     func zoomout() -> some Gesture {
-        var reset: some Gesture {
-            TapGesture(count: 2)
-                .onEnded { _ in
-                    self.resetZoom()
-                }
-        }
-        return reset
+        TapGesture(count: 2)
+            .onEnded { _ in
+                self.resetZoom()
+            }
     }
 
     func newZoomPoint(newPoint: CGPoint, width: CGFloat, height: CGFloat) {
@@ -119,11 +107,8 @@ class ZoomManager: ObservableObject {
         let deltaX = (translation.width / viewSize.width) * adjustedMultiplier
         let deltaY = (translation.height / viewSize.height) * adjustedMultiplier
 
-        var newX = zoomPoint.x - deltaX
-        var newY = zoomPoint.y - deltaY
-
-        newX = min(max(newX, 0), 1)
-        newY = min(max(newY, 0), 1)
+        let newX = min(max(zoomPoint.x - deltaX, 0), 1)
+        let newY = min(max(zoomPoint.y - deltaY, 0), 1)
 
         zoomPoint = UnitPoint(x: newX, y: newY)
     }

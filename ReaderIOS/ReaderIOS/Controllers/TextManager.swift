@@ -32,12 +32,17 @@ class TextManager: ObservableObject {
     func bindingForTextBox(textBoxes: Binding<[String: [TextBoxData]]>, key: String,
                            index: Int) -> Binding<TextBoxData>?
     {
-        guard textBoxes.wrappedValue[key] != nil, index < textBoxes.wrappedValue[key]!.count else { return nil }
+        guard let boxes = textBoxes.wrappedValue[key], boxes.indices.contains(index) else { return nil }
 
+        // Bounds-check on every access: the box may be deleted while this binding is still in use.
         return Binding(
-            get: { textBoxes.wrappedValue[key]![index] },
+            get: {
+                let current = textBoxes.wrappedValue[key] ?? []
+                return current.indices.contains(index) ? current[index] : boxes[index]
+            },
             set: { newValue in
-                textBoxes.wrappedValue[key]![index] = newValue
+                guard textBoxes.wrappedValue[key]?.indices.contains(index) == true else { return }
+                textBoxes.wrappedValue[key]?[index] = newValue
             }
         )
     }

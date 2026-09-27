@@ -29,21 +29,6 @@ enum LogLevel: Int, Comparable, Codable {
         }
     }
 
-    var emoji: String {
-        switch self {
-        case .debug:
-            "🐛"
-        case .info:
-            "ℹ️"
-        case .warning:
-            "⚠️"
-        case .error:
-            "❌"
-        case .critical:
-            "🚨"
-        }
-    }
-
     static func < (lhs: LogLevel, rhs: LogLevel) -> Bool {
         lhs.rawValue < rhs.rawValue
     }

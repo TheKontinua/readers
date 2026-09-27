@@ -10,7 +10,7 @@ import SwiftUI
 @main
 struct ReaderIOSApp: App {
     @StateObject private var initManager = InitializationManager()
-    @Environment(\.scenePhase) var scenePhase
+
     init() {
         // Log app launch
         Logger.AppLifecycle.launched()

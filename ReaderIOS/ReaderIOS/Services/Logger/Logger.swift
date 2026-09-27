@@ -55,15 +55,7 @@ enum Logger {
         logger.log(message, level: .critical, category: category, file: file, function: function, line: line)
     }
 
-    static func getLogsForFeedback() -> String {
-        logger.getLogsForFeedback()
-    }
-
     static func getLogsForFeedbackJSON() -> [String: Any] {
         logger.getLogsForFeedbackJSON()
-    }
-
-    static func clearLogs() {
-        logger.clearLogs()
     }
 }

@@ -37,22 +37,10 @@ extension Logger {
         static func pageChanged(to page: Int, workbook: Int) {
             Logger.debug("Page changed to \(page) for workbook: \(workbook)", category: "PDF")
         }
-
-        static func annotationSaved() {
-            Logger.info("Annotations saved", category: "PDF")
-        }
     }
 
     // User action logging
     enum UserAction {
-        static func buttonTapped(_ button: String) {
-            Logger.debug("Button tapped: \(button)", category: "UserAction")
-        }
-
-        static func viewAppeared(_ view: String) {
-            Logger.debug("View appeared: \(view)", category: "UserAction")
-        }
-
         static func featureUsed(_ feature: String) {
             Logger.info("Feature used: \(feature)", category: "UserAction")
         }
@@ -62,18 +50,6 @@ extension Logger {
     enum AppLifecycle {
         static func launched() {
             Logger.info("Application launched", category: "AppLifecycle")
-        }
-
-        static func willEnterForeground() {
-            Logger.info("App will enter foreground", category: "AppLifecycle")
-        }
-
-        static func didEnterBackground() {
-            Logger.info("App did enter background", category: "AppLifecycle")
-        }
-
-        static func memoryWarning() {
-            Logger.warning("Memory warning received", category: "AppLifecycle")
         }
     }
 }

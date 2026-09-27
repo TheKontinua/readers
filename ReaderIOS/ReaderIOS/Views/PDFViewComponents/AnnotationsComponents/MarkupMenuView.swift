@@ -14,7 +14,6 @@ struct MarkupMenu: View {
     @Binding var showClearAlert: Bool
     @Binding var selectedPenColor: Color
     @Binding var selectedHighlighterColor: Color
-    @Binding var isPenSubmenuVisible: Bool
     @Binding var textBoxes: [String: [TextBoxData]]
 
     // MARK: - Observed Objects
@@ -33,10 +32,10 @@ struct MarkupMenu: View {
         Menu {
             // Pen Color Submenu
             Menu {
-                penColorButton(color: .black, label: "Black")
-                penColorButton(color: .green, label: "Green")
-                penColorButton(color: .red, label: "Red")
-                penColorButton(color: .blue, label: "Blue")
+                colorButton(color: .black, label: "Black", tool: .pen, selection: $selectedPenColor)
+                colorButton(color: .green, label: "Green", tool: .pen, selection: $selectedPenColor)
+                colorButton(color: .red, label: "Red", tool: .pen, selection: $selectedPenColor)
+                colorButton(color: .blue, label: "Blue", tool: .pen, selection: $selectedPenColor)
             } label: {
                 HStack {
                     Text("Pen")
@@ -50,10 +49,10 @@ struct MarkupMenu: View {
 
             // Highlighter Color Submenu
             Menu {
-                highlighterColorButton(color: .yellow, label: "Yellow")
-                highlighterColorButton(color: .pink, label: "Pink")
-                highlighterColorButton(color: .blue, label: "Blue")
-                highlighterColorButton(color: .green, label: "Green")
+                colorButton(color: .yellow, label: "Yellow", tool: .highlight, selection: $selectedHighlighterColor)
+                colorButton(color: .pink, label: "Pink", tool: .highlight, selection: $selectedHighlighterColor)
+                colorButton(color: .blue, label: "Blue", tool: .highlight, selection: $selectedHighlighterColor)
+                colorButton(color: .green, label: "Green", tool: .highlight, selection: $selectedHighlighterColor)
             } label: {
                 HStack {
                     Text("Highlight")
@@ -83,7 +82,7 @@ struct MarkupMenu: View {
                 textManager.saveTextBoxes(textBoxes: textBoxes)
             }
         } label: {
-            Text(selectedScribbleTool == .none ? "Markup" : "Markup: \(selectedScribbleTool)")
+            Text(selectedScribbleTool == .none ? "Markup" : "Markup: \(String(describing: selectedScribbleTool))")
                 .padding(5)
                 .foregroundColor(exitNotSelected ? .pink : .blue)
                 .cornerRadius(8)
@@ -92,43 +91,24 @@ struct MarkupMenu: View {
 
     // MARK: - Private Helpers
 
-    private func penColorButton(color: Color, label: String) -> some View {
+    /// A menu item that selects `tool` and stores `color` in `selection`, showing a checkmark when selected.
+    private func colorButton(
+        color: Color,
+        label: String,
+        tool: AnnotationMode,
+        selection: Binding<Color>
+    ) -> some View {
         Button {
-            selectPenColor(color)
-            selectedScribbleTool = .pen
+            selection.wrappedValue = color
+            selectedScribbleTool = tool
             exitNotSelected = true
-            isPenSubmenuVisible = false
         } label: {
             HStack {
                 Text(label)
-                if selectedPenColor == color {
+                if selection.wrappedValue == color {
                     Image(systemName: "checkmark")
                 }
             }
         }
-    }
-
-    private func highlighterColorButton(color: Color, label: String) -> some View {
-        Button {
-            selectHighlightColor(color)
-            selectedScribbleTool = .highlight
-            exitNotSelected = true
-            isPenSubmenuVisible = false
-        } label: {
-            HStack {
-                Text(label)
-                if selectedHighlighterColor == color {
-                    Image(systemName: "checkmark")
-                }
-            }
-        }
-    }
-
-    private func selectPenColor(_ color: Color) {
-        selectedPenColor = color
-    }
-
-    private func selectHighlightColor(_ color: Color) {
-        selectedHighlighterColor = color
     }
 }

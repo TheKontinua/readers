@@ -28,8 +28,6 @@ struct DocumentView: UIViewRepresentable {
             }
             uiView.go(to: page)
         }
-
-        goToPage(in: uiView)
     }
 
     private func configurePDFView(_ pdfView: PDFKit.PDFView) {
@@ -38,24 +36,8 @@ struct DocumentView: UIViewRepresentable {
         pdfView.document = pdfDocument
         pdfView.autoScales = true
 
-        goToPage(in: pdfView)
-    }
-
-    private func goToPage(in pdfView: PDFKit.PDFView) {
         if let page = pdfDocument?.page(at: currentPageIndex) {
             pdfView.go(to: page)
-        }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    class Coordinator: NSObject {
-        var parent: DocumentView
-
-        init(_ parent: DocumentView) {
-            self.parent = parent
         }
     }
 }

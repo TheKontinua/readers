@@ -16,7 +16,6 @@ struct SplitView: View {
 
     // User selection (what they are viewing) state vars
     @State var selectedWorkbookID: Int?
-    @State private var selectedChapterID: String?
     @State var currentWorkbook: Workbook?
     @State private var currentPage: Int = 0
     @State private var columnVisibility = NavigationSplitViewVisibility.automatic
@@ -128,34 +127,17 @@ struct SplitView: View {
             case let .success(workbookRes):
                 chapters = workbookRes.chapters
                 currentWorkbook = workbookRes
-                setupChapterManager()
+                chapterManager = ChapterManager(chapters: workbookRes.chapters)
             case let .failure(error):
                 print("Error fetching chapters: \(error)")
             }
         }
     }
 
-    func setupChapterManager() {
-        if let chapters = chapters {
-            let chapterManager = ChapterManager(chapters: chapters)
-            // Update selectedChapterID whenever currentPage changes
-            self.chapterManager = chapterManager
-        }
-    }
-
+    /// Updates the digital-resource covers to match the chapter containing the current page.
     func updateSelectedChapter() {
-        if let chapterManager = chapterManager {
-            if let newChapter = chapterManager.getChapter(forPage: currentPage) {
-                selectedChapterID = newChapter.id
-                covers = newChapter.covers
-                print("Updated covers: \(covers?.map(\.desc) ?? [])")
-            }
+        if let newChapter = chapterManager?.getChapter(forPage: currentPage) {
+            covers = newChapter.covers
         }
     }
 }
-
-/*
- #Preview {
- SplitView()
- }
- */

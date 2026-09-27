@@ -59,44 +59,20 @@ final class ApplicationLogger: LoggerProtocol {
         }
     }
 
-    func getLogsForFeedback() -> String {
-        let recentLogs = getRecentLogs(count: 100)
-
-        var logText = "=== Application Logs ===\n"
-        logText += "Total logs: \(recentLogs.count)\n"
-        logText += "Time range: \(formatTimeRange(logs: recentLogs))\n\n"
-
-        // Group by level
-        let groupedLogs = Dictionary(grouping: recentLogs) { $0.level }
-
-        for level in [LogLevel.critical, .error, .warning, .info, .debug] {
-            if let logs = groupedLogs[level], !logs.isEmpty {
-                logText += "\n--- \(level.emoji) \(String(describing: level).uppercased()) (\(logs.count)) ---\n"
-                for log in logs {
-                    logText += log.emailFormattedMessage + "\n"
-                }
-            }
-        }
-
-        return logText
-    }
-
-    // Add new method for JSON output
     func getLogsForFeedbackJSON() -> [String: Any] {
         let recentLogs = getRecentLogs(count: 200)
 
-        // Group logs by level
-        let groupedLogs = Dictionary(grouping: recentLogs) { $0.level }
-
         // Count errors and warnings
+        let groupedLogs = Dictionary(grouping: recentLogs) { $0.level }
         let errorCount = groupedLogs[.error]?.count ?? 0
         let warningCount = groupedLogs[.warning]?.count ?? 0
         let criticalCount = groupedLogs[.critical]?.count ?? 0
 
         // Convert logs to JSON-friendly format
+        let isoFormatter = ISO8601DateFormatter()
         let logEntries = recentLogs.map { log in
             [
-                "timestamp": ISO8601DateFormatter().string(from: log.timestamp),
+                "timestamp": isoFormatter.string(from: log.timestamp),
                 "level": String(describing: log.level),
                 "category": log.category,
                 "message": log.message,
@@ -129,16 +105,10 @@ final class ApplicationLogger: LoggerProtocol {
             ],
             "logs": logEntries,
             "metadata": [
-                "exportDate": ISO8601DateFormatter().string(from: Date()),
+                "exportDate": isoFormatter.string(from: Date()),
                 "subsystem": subsystem
             ]
         ]
-    }
-
-    func clearLogs() {
-        queue.async(flags: .barrier) {
-            self.logBuffer.removeAll()
-        }
     }
 
     private func formatTimeRange(logs: [LogEntry]) -> String {

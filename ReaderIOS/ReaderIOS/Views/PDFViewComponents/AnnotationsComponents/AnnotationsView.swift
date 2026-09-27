@@ -147,9 +147,7 @@ struct AnnotationsView: View {
                         }
                     }
                 }
-                if isHidden || textBoxes[key]?.count ?? 0 > 0 || pagePaths[key]?.count ?? 0 > 0 || highlightPaths[key]?
-                    .count ?? 0 > 0
-                {
+                if showsVisibilityToggle {
                     Image(systemName: isHidden ? "eye.slash" : "eye")
                         .foregroundStyle(Color.blue)
                         .font(.system(size: 25))
@@ -174,10 +172,7 @@ struct AnnotationsView: View {
                 }
         })
         .overlay(alignment: .bottomLeading) {
-            if textBoxes[key]?.count ?? 0 > 0 || isHidden
-                || pagePaths[key]?.count ?? 0 > 0
-                || highlightPaths[key]?.count ?? 0 > 0
-            {
+            if showsVisibilityToggle {
                 Image(systemName: isHidden ? "eye.slash" : "eye")
                     .foregroundStyle(Color.blue)
                     .font(.system(size: 25))
@@ -192,18 +187,21 @@ struct AnnotationsView: View {
 
     // MARK: - Private Helpers
 
+    /// The show/hide-markup eye icon appears when markup is hidden or the page has any markup.
+    private var showsVisibilityToggle: Bool {
+        isHidden
+            || !(textBoxes[key]?.isEmpty ?? true)
+            || !(pagePaths[key]?.isEmpty ?? true)
+            || !(highlightPaths[key]?.isEmpty ?? true)
+    }
+
+    /// Removes the first pen path and the first highlight path under `location`.
     private func erasePath(at location: CGPoint) {
-        if let paths = pagePaths[key] {
-            for (index, pathInfo) in paths.enumerated() where pathInfo.path.contains(location) {
-                pagePaths[key]?.remove(at: index)
-                break
-            }
+        if let index = pagePaths[key]?.firstIndex(where: { $0.path.contains(location) }) {
+            pagePaths[key]?.remove(at: index)
         }
-        if let hPaths = highlightPaths[key] {
-            for (index, pathInfo) in hPaths.enumerated() where pathInfo.path.contains(location) {
-                highlightPaths[key]?.remove(at: index)
-                break
-            }
+        if let index = highlightPaths[key]?.firstIndex(where: { $0.path.contains(location) }) {
+            highlightPaths[key]?.remove(at: index)
         }
     }
 
@@ -216,11 +214,10 @@ struct AnnotationsView: View {
     }
 
     private func finalizeCurrentPath(for paths: inout [String: [(path: Path, color: Color)]],
-                                     using _: Color)
+                                     using color: Color)
     {
         guard !liveDrawingPath.isEmpty else { return }
-        let finalColor = selectedScribbleTool == .highlight ? selectedHighlighterColor : selectedColor
-        paths[key, default: []].append((path: liveDrawingPath, color: finalColor))
+        paths[key, default: []].append((path: liveDrawingPath, color: color))
         liveDrawingPath = Path()
     }
 }

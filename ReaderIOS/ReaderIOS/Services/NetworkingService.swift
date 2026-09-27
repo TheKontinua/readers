@@ -53,158 +53,68 @@ final class NetworkingService: ObservableObject {
     // MARK: - Network Methods
 
     func fetchLatestCollection(completion: @escaping (Result<Collection, Error>) -> Void) {
-        guard let url = URL(string: ApplicationConstants.API.baseURLString + ApplicationConstants.APIEndpoints
-            .collections + "latest" + "?localization=en_US")
-        else {
-            Logger.error("Invalid URL for latest collection", category: "Network")
-            completion(.failure(NetworkError.invalidURL))
-            return
-        }
-        Logger.Network.request(url.absoluteString)
-        startLoading()
-        var request = URLRequest(url: url)
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-
-        let task = session.dataTask(with: request) { data, response, error in
-            // Ensure stopLoading is called when this closure exits.
-            defer { self.stopLoading() }
-
-            if let error = error {
-                Logger.Network.error(error, url: url.absoluteString)
-                DispatchQueue.main.async { completion(.failure(error)) }
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse else {
-                Logger.error("Invalid response type", category: "Network")
-                DispatchQueue.main.async { completion(.failure(NetworkError.noData)) }
-                return
-            }
-
-            Logger.Network.response(url.absoluteString, statusCode: httpResponse.statusCode)
-
-            guard let data = data else {
-                Logger.error("No data received", category: "Network")
-                DispatchQueue.main.async { completion(.failure(NetworkError.noData)) }
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-
-                let collection = try decoder.decode(Collection.self, from: data)
-
-                let latestCollection = collection
-
-                Logger.info("Successfully decoded collection: \(collection.id)", category: "Network")
-
-                DispatchQueue.main.async { completion(.success(latestCollection)) }
-            } catch {
-                Logger.error("Failed to decode collection: \(error)", category: "Network")
-
-                DispatchQueue.main.async { completion(.failure(error)) }
-            }
-        }
-
-        task.resume()
+        fetchJSON(
+            Collection.self,
+            path: ApplicationConstants.APIEndpoints.collections + "latest?localization=en_US",
+            completion: completion
+        )
     }
 
     func fetchWorkbooks(collection: Collection, completion: @escaping (Result<[WorkbookPreview], Error>) -> Void) {
         Logger.info("Fetching workbooks for collection: \(collection.id)", category: "Network")
-
-        guard let url = URL(string: ApplicationConstants.API.baseURLString + ApplicationConstants.APIEndpoints
-            .collections + "\(collection.id)/")
-        else {
-            Logger.error("Invalid URL for collection: \(collection.id)", category: "Network")
-            completion(.failure(NetworkError.invalidURL))
-            return
+        fetchJSON(
+            DetailedCollection.self,
+            path: ApplicationConstants.APIEndpoints.collections + "\(collection.id)/"
+        ) { result in
+            completion(result.map(\.workbooks))
         }
-
-        Logger.Network.request(url.absoluteString)
-        startLoading()
-
-        var request = URLRequest(url: url)
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-
-        let task = session.dataTask(with: request) { data, response, error in
-            defer { self.stopLoading() }
-
-            if let error = error {
-                Logger.Network.error(error, url: url.absoluteString)
-                DispatchQueue.main.async { completion(.failure(error)) }
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse else {
-                Logger.error("Invalid response type", category: "Network")
-                DispatchQueue.main.async { completion(.failure(NetworkError.noData)) }
-                return
-            }
-
-            Logger.Network.response(url.absoluteString, statusCode: httpResponse.statusCode)
-
-            guard let data = data else {
-                Logger.error("No data received", category: "Network")
-                DispatchQueue.main.async { completion(.failure(NetworkError.noData)) }
-                return
-            }
-            do {
-                let decoder = JSONDecoder()
-                let detailedCollection = try decoder.decode(DetailedCollection.self, from: data)
-                Logger.info("Successfully decoded \(detailedCollection.workbooks.count) workbooks", category: "Network")
-                DispatchQueue.main.async { completion(.success(detailedCollection.workbooks)) }
-            } catch {
-                Logger.error("Failed to decode workbooks: \(error)", category: "Network")
-                DispatchQueue.main.async { completion(.failure(error)) }
-            }
-        }
-        task.resume()
     }
 
     func fetchWorkbook(id: Int, completion: @escaping (Result<Workbook, Error>) -> Void) {
         Logger.info("Fetching workbook with ID: \(id)", category: "Network")
+        fetchJSON(
+            Workbook.self,
+            path: ApplicationConstants.APIEndpoints.workbooks + "\(id)/",
+            completion: completion
+        )
+    }
 
-        guard let url = URL(string: ApplicationConstants.API.baseURLString + ApplicationConstants.APIEndpoints
-            .workbooks + "\(id)/")
-        else {
-            Logger.error("Invalid URL for workbook: \(id)", category: "Network")
+    /// Fetches an API endpoint and decodes its JSON body. The completion is always called on the main queue.
+    private func fetchJSON<T: Decodable>(
+        _ type: T.Type,
+        path: String,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        guard let url = URL(string: ApplicationConstants.API.baseURLString + path) else {
+            Logger.error("Invalid URL for path: \(path)", category: "Network")
             completion(.failure(NetworkError.invalidURL))
             return
         }
         Logger.Network.request(url.absoluteString)
         startLoading()
-        var request = URLRequest(url: url)
-        request.cachePolicy = .reloadIgnoringLocalCacheData
 
-        let task = session.dataTask(with: request) { data, response, error in
+        let task = session.dataTask(with: url) { data, response, error in
+            // Ensure stopLoading is called when this closure exits.
             defer { self.stopLoading() }
 
+            let result: Result<T, Error>
             if let error = error {
                 Logger.Network.error(error, url: url.absoluteString)
-                DispatchQueue.main.async { completion(.failure(error)) }
-                return
+                result = .failure(error)
+            } else if let httpResponse = response as? HTTPURLResponse, let data = data {
+                Logger.Network.response(url.absoluteString, statusCode: httpResponse.statusCode)
+                do {
+                    result = try .success(JSONDecoder().decode(T.self, from: data))
+                    Logger.info("Successfully decoded \(T.self)", category: "Network")
+                } catch {
+                    Logger.error("Failed to decode \(T.self): \(error)", category: "Network")
+                    result = .failure(error)
+                }
+            } else {
+                Logger.error("Invalid response or no data received", category: "Network")
+                result = .failure(NetworkError.noData)
             }
-            guard let httpResponse = response as? HTTPURLResponse else {
-                Logger.error("Invalid response type", category: "Network")
-                DispatchQueue.main.async { completion(.failure(NetworkError.noData)) }
-                return
-            }
-            Logger.Network.response(url.absoluteString, statusCode: httpResponse.statusCode)
-
-            guard let data = data else {
-                Logger.error("No data received", category: "Network")
-                DispatchQueue.main.async { completion(.failure(NetworkError.noData)) }
-                return
-            }
-            do {
-                let decoder = JSONDecoder()
-                let workbook = try decoder.decode(Workbook.self, from: data)
-                Logger.info("Successfully decoded workbook: \(workbook.id)", category: "Network")
-                DispatchQueue.main.async { completion(.success(workbook)) }
-            } catch {
-                Logger.error("Failed to decode workbook: \(error)", category: "Network")
-                DispatchQueue.main.async { completion(.failure(error)) }
-            }
+            DispatchQueue.main.async { completion(result) }
         }
         task.resume()
     }

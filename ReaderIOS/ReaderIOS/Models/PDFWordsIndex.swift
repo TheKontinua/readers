@@ -38,31 +38,40 @@ class PDFWordsIndex: ObservableObject {
             var ranges: [Range<String.Index>] = []
             var tokens: [String] = []
 
-            let scanner = Scanner(string: plainText)
-            scanner.charactersToBeSkipped = .whitespacesAndNewlines
+            // Walk the text Character by Character so that both ends of every token
+            // range are valid indices in `plainText`. (Previously a Scanner was used and
+            // the start index was derived from `token.count`, which mixes Unicode-scalar
+            // and grapheme-cluster positions and could yield an inverted range — a crash
+            // on PDFs containing combining marks, ligatures, or other unusual scalars.)
+            let isWordCharacter: (Character) -> Bool = { $0.isLetter || $0.isNumber }
+            var index = plainText.startIndex
 
-            while !scanner.isAtEnd {
-                if let token = scanner.scanCharacters(from: .alphanumerics) {
-                    let endIndex = scanner.currentIndex
-                    let startIndex = plainText.index(endIndex, offsetBy: -token.count)
-                    let strRange = startIndex ..< endIndex
+            while index < plainText.endIndex {
+                guard isWordCharacter(plainText[index]) else {
+                    index = plainText.index(after: index)
+                    continue
+                }
 
-                    // Convert to NSRange so PDFKit can map it
-                    let nsRange = NSRange(strRange, in: plainText)
-                    if let sel = page.selection(for: nsRange) {
-                        let bounds = sel.bounds(for: page)
-                        let midY = bounds.midY
+                let startIndex = index
+                while index < plainText.endIndex, isWordCharacter(plainText[index]) {
+                    index = plainText.index(after: index)
+                }
+                let strRange = startIndex ..< index
+                let token = String(plainText[strRange])
 
-                        // Skip tokens in header/footer regions
-                        guard midY < headerCutoff, midY > footerCutoff else {
-                            continue
-                        }
+                // Convert to NSRange so PDFKit can map it
+                let nsRange = NSRange(strRange, in: plainText)
+                if let sel = page.selection(for: nsRange) {
+                    let bounds = sel.bounds(for: page)
+                    let midY = bounds.midY
 
-                        ranges.append(strRange)
-                        tokens.append(token.lowercased())
+                    // Skip tokens in header/footer regions
+                    guard midY < headerCutoff, midY > footerCutoff else {
+                        continue
                     }
-                } else {
-                    _ = scanner.scanCharacter()
+
+                    ranges.append(strRange)
+                    tokens.append(token.lowercased())
                 }
             }
 
@@ -153,13 +162,5 @@ class PDFWordsIndex: ObservableObject {
         }
 
         return nil
-    }
-
-    func getText(for page: Int) -> String? {
-        pageTexts[page]
-    }
-
-    func getAllPageTexts() -> [Int: String] {
-        pageTexts
     }
 }
