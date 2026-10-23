@@ -66,8 +66,10 @@ extension SearchResult where T == Chapter {
     /// Creates a view with the chapter title, highlighting matching text
     func highlightedTitleView() -> some View {
         VStack(alignment: .leading) {
-            Text("Chapter \(item.chapNum)")
-                .font(.caption)
+            if !item.isBackMatter {
+                Text("Chapter \(item.chapNum)")
+                    .font(.caption)
+            }
 
             Text(highlightAttributedString())
         }

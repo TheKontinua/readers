@@ -34,6 +34,8 @@ final class InitializationManager: ObservableObject {
     }
 
     private func fetchLatestCollection() {
+        let start = DispatchTime.now()
+
         NetworkingService.shared.fetchLatestCollection { [weak self] result in
             switch result {
             case let .success(collection):
@@ -44,6 +46,11 @@ final class InitializationManager: ObservableObject {
             case let .failure(error):
                 print("Failed to fetch latest collection: \(error)")
                 print("Network error details: \(error.localizedDescription)")
+
+                // if delay is set, does not show failure until after delay is elapsed
+                DispatchQueue.main.asyncAfter(deadline: start + .milliseconds(self?.delay ?? 0)) {
+                    self?.loadFailed = true
+                }
             }
         }
     }
@@ -56,20 +63,18 @@ final class InitializationManager: ObservableObject {
             case let .success(workbooks):
                 DispatchQueue.main.async {
                     self?.workbooks = workbooks
-                    if let savedState = StateRestoreManager.shared.loadState() {
-                        if let open = workbooks.first(where: { $0.id == savedState.workbookID }) {
-                            self?.workbookID = savedState.workbookID
-                            self?.fetchWorkbook(for: open.id)
-                        }
+
+                    // Prefer the last-opened workbook, but fall back to the first one if it
+                    // isn't in this collection (e.g. a new version was uploaded with new IDs).
+                    let savedID = StateRestoreManager.shared.loadState()?.workbookID
+                    let restoredID = workbooks.first(where: { $0.id == savedID })?.id
+
+                    if let workbookID = restoredID ?? workbooks.first?.id {
+                        self?.workbookID = workbookID
+                        self?.fetchWorkbook(for: workbookID)
                     } else {
-                        self?.workbookID = workbooks.first?.id
-                        if let workbookID = self?.workbookID {
-                            self?.fetchWorkbook(for: workbookID)
-                            self?.isInitialized = true
-                        } else {
-                            print("workbook list returned empty list, this should never happen.")
-                            self?.loadFailed = true
-                        }
+                        print("workbook list returned empty list, this should never happen.")
+                        self?.loadFailed = true
                     }
                 }
             case let .failure(error):

@@ -19,9 +19,10 @@ struct SplitView: View {
     @State var currentWorkbook: Workbook?
     @State private var currentPage: Int = 0
     @State private var columnVisibility = NavigationSplitViewVisibility.automatic
+    /// Just wide enough for "Workbook 99" plus list insets; scales with Dynamic Type.
+    @ScaledMetric(relativeTo: .body) private var workbookListWidth: CGFloat = 200
 
     // Bookmark state vars
-    @State private var isShowingBookmarks: Bool = false
     @State private var bookmarkManager = BookmarkManager()
 
     // PDFDocument loaded by PDFView
@@ -35,51 +36,41 @@ struct SplitView: View {
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
-            if let workbooks = workbooks {
-                List(workbooks, selection: $selectedWorkbookID) { workbook in
-                    HStack {
-                        Text("Workbook \(workbook.number)")
-                            .tag(workbook.id)
+            Group {
+                if let workbooks = workbooks {
+                    List(workbooks, selection: $selectedWorkbookID) { workbook in
+                        HStack {
+                            Text("Workbook \(workbook.number)")
+                                .tag(workbook.id)
+                        }
                     }
+                } else {
+                    ProgressView("Fetching workbooks...")
                 }
-            } else {
-                ProgressView("Fetching workbooks...")
             }
+            .navigationSplitViewColumnWidth(workbookListWidth)
         }
         content: {
-            Group {
-                if !isShowingBookmarks {
-                    // Search view
-                    SearchView(
-                        currentPage: $currentPage,
-                        columnVisibility: $columnVisibility,
-                        chapters: chapters,
-                        fetchWorkbookAndChapters: fetchWorkbookAndChapters,
-                        pdfDocument: pdfDocument
-                    )
-                } else {
-                    // Bookmarks view
-                    BookmarkSearchView(
-                        currentPage: $currentPage,
-                        currentWorkbook: currentWorkbook,
-                        bookmarkManager: bookmarkManager
-                    )
-                    .blur(radius: networkingSingleton.isContentLoading ? 10 : 0)
-                }
-            }
+            // Bookmarks are listed in the page picker, opened from the page number in the PDF toolbar.
+            SearchView(
+                currentPage: $currentPage,
+                columnVisibility: $columnVisibility,
+                chapters: chapters,
+                fetchWorkbookAndChapters: fetchWorkbookAndChapters,
+                pdfDocument: pdfDocument
+            )
             .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Toggle(isOn: $isShowingBookmarks) {
-                        Image(systemName: isShowingBookmarks ? "bookmark.fill" : "bookmark")
-                            .foregroundColor(.accentColor)
+                ToolbarItem(placement: .topBarTrailing) {
+                    // Closes the drawer without choosing a chapter, the same way choosing one does.
+                    Button {
+                        columnVisibility = .detailOnly
+                    } label: {
+                        Image(systemName: "xmark")
                     }
-                    .toggleStyle(.button)
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(isShowingBookmarks ? "Show All Chapters" : "Show Bookmarked Chapters")
+                    .accessibilityLabel("Close")
                 }
             }
         } detail: {
-            // TODO: Only give access to bookmarks for current file.
             PDFView(
                 currentWorkbook: $currentWorkbook,
                 currentPage: $currentPage,

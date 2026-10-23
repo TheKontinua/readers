@@ -2,7 +2,10 @@ import PDFKit
 import SwiftUI
 
 enum TapConstants {
-    static let prevPageTapRatio = 0.25
+    /// Fraction of the window width at each edge that turns the page when tapped.
+    static let pageTurnTapRatio = 0.25
+    /// A touch that moves less than this many points is treated as a tap rather than a swipe.
+    static let maxTapMovement: CGFloat = 10
 }
 
 struct AnnotationsView: View {
@@ -18,6 +21,9 @@ struct AnnotationsView: View {
     let key: String
     let nextPage: (() -> Void)?
     let previousPage: (() -> Void)?
+    /// The PDF page currently displayed, used to follow links inside the document.
+    let pdfPage: PDFPage?
+    let goToPage: ((Int) -> Void)?
     @Binding var selectedColor: Color
     @Binding var selectedHighlighterColor: Color
     let zoomedIn: Bool
@@ -44,6 +50,17 @@ struct AnnotationsView: View {
 
     var body: some View {
         GeometryReader { geometry in
+            // Catches taps in the margins beside the page, which the page-sized canvas doesn't cover.
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture(count: 1, coordinateSpace: .local) { location in
+                    if textOpened {
+                        textOpened = false
+                        return
+                    }
+                    handlePageTurnTap(atWindowX: location.x, windowWidth: geometry.size.width)
+                }
+
             ZStack(alignment: .bottomLeading) {
                 Canvas { context, _ in
                     if !isHidden {
@@ -95,6 +112,13 @@ struct AnnotationsView: View {
                             // Reset the incremental drag offset
                             lastDragValue = .zero
 
+                            // A touch that barely moved is a tap, handled by the tap gesture below.
+                            let isTap = abs(value.translation.width) < TapConstants.maxTapMovement
+                                && abs(value.translation.height) < TapConstants.maxTapMovement
+                            if isTap, selectedScribbleTool == .none || selectedScribbleTool == .text {
+                                return
+                            }
+
                             if !zoomManager.getZoomedIn() || selectedScribbleTool != .none {
                                 if selectedScribbleTool == .none || selectedScribbleTool == .text || isHidden {
                                     // Page change logic (swipe left/right) only when not zoomed in.
@@ -117,36 +141,13 @@ struct AnnotationsView: View {
                 // Use the updated zoomManager gestures
                 .simultaneousGesture(zoomManager.zoomin())
                 .simultaneousGesture(zoomManager.zoomout())
-                .onTapGesture(count: 1, coordinateSpace: .local) { location in
-                    zoomManager.newZoomPoint(newPoint: location,
-                                             width: geometry.size.width,
-                                             height: geometry.size.height)
-
-                    if !textOpened, selectedScribbleTool == .text {
-                        textOpened = true
-                        textManager.addText(textBoxes: $textBoxes,
-                                            key: key,
-                                            width: geometry.size.width,
-                                            height: geometry.size.height)
-                        textManager.saveTextBoxes(textBoxes: textBoxes)
-                        return
-                    }
-                    // else
-                    if textOpened {
-                        textOpened = false
-                        return
-                    }
-
-                    // ——— PAGE TURNS ———
-                    guard selectedScribbleTool == .none else { return }
-                    if !zoomManager.getZoomedIn() {
-                        if location.x > geometry.size.width * TapConstants.prevPageTapRatio {
-                            nextPage?()
-                        } else {
-                            previousPage?()
+                // Runs alongside the drag so taps are recognized even though the drag claims every touch.
+                .simultaneousGesture(
+                    SpatialTapGesture()
+                        .onEnded { value in
+                            handleTap(at: value.location, in: geometry.size)
                         }
-                    }
-                }
+                )
                 if showsVisibilityToggle {
                     Image(systemName: isHidden ? "eye.slash" : "eye")
                         .foregroundStyle(Color.blue)
@@ -193,6 +194,65 @@ struct AnnotationsView: View {
             || !(textBoxes[key]?.isEmpty ?? true)
             || !(pagePaths[key]?.isEmpty ?? true)
             || !(highlightPaths[key]?.isEmpty ?? true)
+    }
+
+    /// Handles a tap on the page canvas. `location` is in canvas coordinates.
+    private func handleTap(at location: CGPoint, in size: CGSize) {
+        zoomManager.newZoomPoint(newPoint: location, width: size.width, height: size.height)
+
+        if !textOpened, selectedScribbleTool == .text {
+            textOpened = true
+            textManager.addText(textBoxes: $textBoxes, key: key, width: size.width, height: size.height)
+            textManager.saveTextBoxes(textBoxes: textBoxes)
+            return
+        }
+        if textOpened {
+            textOpened = false
+            return
+        }
+
+        // This canvas covers the PDF and takes its touches, so follow PDF links here.
+        if selectedScribbleTool == .none, let destination = linkDestination(at: location) {
+            goToPage?(destination)
+            return
+        }
+
+        // The canvas is offset to the page frame, so convert to window coordinates.
+        handlePageTurnTap(atWindowX: location.x + pageFrame.origin.x, windowWidth: size.width)
+    }
+
+    /// Returns the destination page index of an internal link under `location` (canvas coordinates), if any.
+    private func linkDestination(at location: CGPoint) -> Int? {
+        guard let page = pdfPage, let document = page.document,
+              pageFrame.width > 0, pageFrame.height > 0 else { return nil }
+
+        // The canvas exactly covers the page's crop box; PDF page space has its origin at the bottom left.
+        let bounds = page.bounds(for: .cropBox)
+        let pagePoint = CGPoint(
+            x: bounds.minX + location.x / pageFrame.width * bounds.width,
+            y: bounds.maxY - location.y / pageFrame.height * bounds.height
+        )
+
+        // Don't compare `annotation.type` to `PDFAnnotationSubtype.link.rawValue`: one is "Link", the other "/Link".
+        guard let annotation = page.annotation(at: pagePoint) else { return nil }
+
+        let destination = annotation.destination ?? (annotation.action as? PDFActionGoTo)?.destination
+        guard let destinationPage = destination?.page else { return nil }
+
+        let index = document.index(for: destinationPage)
+        return index == NSNotFound ? nil : index
+    }
+
+    /// Turns the page when a tap lands in the left or right quarter of the window.
+    /// Taps in the middle half, in a markup mode, or while zoomed in are ignored.
+    private func handlePageTurnTap(atWindowX windowX: CGFloat, windowWidth: CGFloat) {
+        guard selectedScribbleTool == .none, !zoomManager.getZoomedIn() else { return }
+
+        if windowX < windowWidth * TapConstants.pageTurnTapRatio {
+            previousPage?()
+        } else if windowX > windowWidth * (1 - TapConstants.pageTurnTapRatio) {
+            nextPage?()
+        }
     }
 
     /// Removes the first pen path and the first highlight path under `location`.

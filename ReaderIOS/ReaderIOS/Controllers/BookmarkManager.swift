@@ -21,6 +21,12 @@ final class BookmarkManager: ObservableObject {
         return bookmarkLookup[id]?.contains(currentPage) ?? false
     }
 
+    /// The bookmarked page indexes for the given workbook, in page order.
+    func bookmarkedPages(for workbook: Workbook?) -> [Int] {
+        guard let id = workbook?.id else { return [] }
+        return bookmarkLookup[id]?.sorted() ?? []
+    }
+
     /// Toggles the bookmark status for the given file and page.
     func toggleBookmark(for workbook: Workbook?, currentPage: Int) {
         guard let id = workbook?.id else { return }

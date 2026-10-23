@@ -82,6 +82,8 @@ struct PDFView: View {
                                     key: uniqueKey(for: currentPage),
                                     nextPage: { goToNextPage() },
                                     previousPage: { goToPreviousPage() },
+                                    pdfPage: pdfDoc.page(at: currentPage),
+                                    goToPage: { currentPage = $0 },
                                     selectedColor: $selectedPenColor,
                                     selectedHighlighterColor: $selectedHighlighterColor,
                                     zoomedIn: zoomManager.getZoomedIn(),
@@ -155,8 +157,13 @@ struct PDFView: View {
                         .ignoresSafeArea(.keyboard)
                         .toolbar {
                             ToolbarItemGroup(placement: .navigationBarLeading) {
-                                PageControlView(currentPage: $currentPage, totalPages: pdfDoc.pageCount)
-                                    .padding(.leading, 10)
+                                PageControlView(
+                                    currentPage: $currentPage,
+                                    totalPages: pdfDoc.pageCount,
+                                    chapters: (currentWorkbook?.chapters ?? []).sorted { $0.startPage < $1.startPage },
+                                    bookmarkedPages: bookmarkManager.bookmarkedPages(for: currentWorkbook)
+                                )
+                                .padding(.leading, 10)
                             }
 
                             ToolbarItemGroup(placement: .navigationBarTrailing) {

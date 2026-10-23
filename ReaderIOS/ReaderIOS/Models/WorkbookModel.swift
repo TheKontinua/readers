@@ -20,6 +20,24 @@ struct Chapter: Identifiable, Codable, Hashable {
         case chapNum = "chap_num"
         case startPage = "start_page"
     }
+
+    /// True for back matter such as the answers and index, which cover no topics.
+    var isBackMatter: Bool {
+        covers.isEmpty
+    }
+}
+
+extension Chapter {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        chapNum = try container.decode(Int.self, forKey: .chapNum)
+        startPage = try container.decode(Int.self, forKey: .startPage)
+        // Back-matter entries (answers, index) have no covers.
+        covers = try container.decodeIfPresent([Cover].self, forKey: .covers) ?? []
+        requires = try container.decodeIfPresent([String].self, forKey: .requires)
+    }
 }
 
 struct Cover: Identifiable, Codable, Hashable {

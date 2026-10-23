@@ -5,6 +5,8 @@
 //  Created by Ethan Handelman on 1/22/25.
 //
 
+import PDFKit
+
 class ChapterManager {
     // Store chapters sorted by start page for efficient lookup
     private var sortedChapters: [Chapter]
